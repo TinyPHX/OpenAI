@@ -115,7 +115,7 @@ namespace OpenAi
             LARGE
         }
         
-        private Dictionary<Model, string> modelToString = new Dictionary<Model, string>()
+        public static readonly Dictionary<Model, string> ModelToString = new Dictionary<Model, string>()
         {
             { Model.CHAT_GPT, "text-davinci-003" },
             { Model.ADA, "ada" },
@@ -186,7 +186,7 @@ namespace OpenAi
             { Model.TEXT_SIMILARITY_DAVINCI_001, "text-similarity-davinci-001" }
         };
             
-        private Dictionary<Size, string> sizeToString = new Dictionary<Size, string>()
+        public static readonly Dictionary<Size, string> SizeToString = new Dictionary<Size, string>()
         {
             { Size.SMALL, "256x256" },
             { Size.MEDIUM, "512x512" },
@@ -250,9 +250,14 @@ namespace OpenAi
 
         #region Completions
 
+        public Task<Completion> CreateCompletion(string prompt, Callback<Completion> callback=null)
+        {
+            return CreateCompletion(prompt, Model.TEXT_DAVINCI_003, callback);
+        }
+
         public Task<Completion> CreateCompletion(string prompt, Model model, Callback<Completion> callback=null)
         {
-            string modelString = modelToString[model];
+            string modelString = ModelToString[model];
             return CreateCompletion(prompt, modelString, callback);
         }
 
@@ -274,7 +279,7 @@ namespace OpenAi
 
         public Task<Image> CreateImage(string prompt, Size size, Callback<Image> callback=null)
         {
-            string sizeString = sizeToString[size];
+            string sizeString = SizeToString[size];
             return CreateImage(prompt, sizeString, callback);
         }
 
@@ -407,7 +412,7 @@ namespace OpenAi
                 Debug.LogError(
                     "Method: " + request.method + "\n" + 
                     "URL: " + request.uri + ": \n" +
-                    "body: " + body + ": \n\n" +
+                    "body: " + body.Take(10000) + "..." + ": \n\n" +
                     "result: " + request.result + ": \n\n" +
                     "response: " + request.downloadHandler.text);
             }
@@ -438,6 +443,15 @@ namespace OpenAi
             {
                 this.prompt = prompt;
                 this.model = model;
+                this.temperature = temperature;
+                this.n = n;
+                this.max_tokens = max_tokens;
+            }
+
+            public Request(string prompt, OpenAiApi.Model model, int n=1, float temperature=.8f, int max_tokens=100)
+            {
+                this.prompt = prompt;
+                this.model = OpenAiApi.ModelToString[model];
                 this.temperature = temperature;
                 this.n = n;
                 this.max_tokens = max_tokens;
@@ -496,6 +510,13 @@ namespace OpenAi
             {
                 this.prompt = prompt;
                 this.size = size;
+                this.n = n;
+            }
+        
+            public Request(string prompt, OpenAiApi.Size size=OpenAiApi.Size.SMALL, int n=1)
+            {
+                this.prompt = prompt;
+                this.size = OpenAiApi.SizeToString[size];
                 this.n = n;
             }
         }
