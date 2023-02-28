@@ -9,10 +9,10 @@ namespace OpenAi
     public class OpenAiTextReplace : MonoBehaviour
     {
         public TextMeshProUGUI textMesh;
-        [Multiline]
+        [TextAreaAttribute(1,20)]
         public string prompt;
         public OpenAiApi.Model model;
-        [Multiline]
+        [TextAreaAttribute(1,20)]
         public string response;
         
         public async void ReplaceText()
