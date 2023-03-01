@@ -15,22 +15,22 @@ namespace OpenAi
         [TextAreaAttribute(1,20)]
         public string response;
         
-        public async void ReplaceText()
+        public  void ReplaceText()
         {
             OpenAiApi openai = new OpenAiApi(this);
-            Completion completion = await openai.CreateCompletion(prompt, model);
-            if (textMesh != null)
-            {
-                textMesh.text = completion.choices[0].text;
-            }
-            
-            // openai.CreateCompletion(prompt, model, completion =>
+            // Completion completion = await openai.CreateCompletion(prompt, model);
+            // if (textMesh != null)
             // {
-            //     if (textMesh != null)
-            //     {
-            //         textMesh.text = completion.choices[0].text;
-            //     }
-            // });
+            //     textMesh.text = completion.choices[0].text;
+            // }
+            
+            openai.CreateCompletion(prompt, model, completion =>
+            {
+                if (textMesh != null)
+                {
+                    textMesh.text = completion.choices[0].text;
+                }
+            });
         }
     }
 }

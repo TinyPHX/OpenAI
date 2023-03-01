@@ -228,7 +228,7 @@ namespace OpenAi
             }
         }
 
-        private Configuration ReadConfigFromUserDirectory()
+        public static Configuration ReadConfigFromUserDirectory()
         {
             string configFilePath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + OpenAi.Configuration.AuthFilePath;
             string jsonConfig = File.ReadAllText(configFilePath);

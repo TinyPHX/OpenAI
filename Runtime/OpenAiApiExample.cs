@@ -32,5 +32,10 @@ namespace OpenAi
 
             // openai.CreateImage(imageRequest, image => { imageResponse = image; });
         }
+
+        public void ReloadAuth()
+        {
+            Configuration.GlobalConfig = OpenAiApi.ReadConfigFromUserDirectory();
+        }
     }
 }

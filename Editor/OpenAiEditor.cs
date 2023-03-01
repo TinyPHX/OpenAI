@@ -24,6 +24,11 @@ namespace OpenAi
             {
                 openai.SendImageRequest();
             }
+
+            if (GUILayout.Button("Reload Auth"))
+            {
+                openai.ReloadAuth();
+            }
         }
     }
 }
