@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Networking;
+using Object = System.Object;
 
 namespace OpenAi
 {
@@ -15,6 +16,7 @@ namespace OpenAi
     {
         public static string AuthFilePath => "/.openai/auth.json";
         public static Configuration GlobalConfig;
+        public static bool SaveTempImages => true;
         public class GlobalConfigFormat
         {
             public string private_api_key;
@@ -110,11 +112,11 @@ namespace OpenAi
 
         public enum Size
         {
-            SMALL, 
-            MEDIUM, 
+            SMALL,
+            MEDIUM,
             LARGE
         }
-        
+
         public static readonly Dictionary<Model, string> ModelToString = new Dictionary<Model, string>()
         {
             { Model.CHAT_GPT, "text-davinci-003" },
@@ -185,21 +187,46 @@ namespace OpenAi
             { Model.TEXT_SIMILARITY_CURIE_001, "text-similarity-curie-001" },
             { Model.TEXT_SIMILARITY_DAVINCI_001, "text-similarity-davinci-001" }
         };
-            
+
         public static readonly Dictionary<Size, string> SizeToString = new Dictionary<Size, string>()
         {
             { Size.SMALL, "256x256" },
             { Size.MEDIUM, "512x512" },
-            { Size.LARGE, "1024x1024" } 
+            { Size.LARGE, "1024x1024" }
         };
-       
-        private Configuration config;
-        private MonoBehaviour monoBehaviour;
 
-        public OpenAiApi(Configuration config, MonoBehaviour monoBehaviour)
+        private Configuration config;
+
+        class CoroutineRunner : MonoBehaviour { }
+        private static CoroutineRunner runner;
+        private static CoroutineRunner Runner {
+            get
+            {
+                if (!runner)
+                {
+                    GameObject gameObject = new GameObject("Open AI Request Runner");
+                    gameObject.AddComponent<CoroutineRunner>();
+                    gameObject.hideFlags = HideFlags.HideInHierarchy;
+                    runner = gameObject.GetComponent<CoroutineRunner>();
+                }
+
+                if (Application.isPlaying && runner)
+                {
+                    UnityEngine.Object.DontDestroyOnLoad(runner.gameObject);
+                }
+
+                return runner;
+            }
+        }
+        
+        public OpenAiApi()
+        {
+            config = null;
+        }
+
+        public OpenAiApi(Configuration config)
         {
             this.config = config;
-            this.monoBehaviour = monoBehaviour;
         }
 
         public Configuration ActiveConfig => config ?? OpenAi.Configuration.GlobalConfig;
@@ -240,35 +267,30 @@ namespace OpenAi
         {
             OpenAi.Configuration.GlobalConfig = new Configuration(globalApiKey, globalOrganization);
         }
-        public OpenAiApi(MonoBehaviour monoBehaviour)
-        {
-            config = null;
-            this.monoBehaviour = monoBehaviour;
-        }
         
         public delegate void Callback<T>(T response=default);
 
         #region Completions
 
-        public Task<Completion> CreateCompletion(string prompt, Callback<Completion> callback=null)
+        public Task<AiText> CreateCompletion(string prompt, Callback<AiText> callback=null)
         {
             return CreateCompletion(prompt, Model.TEXT_DAVINCI_003, callback);
         }
 
-        public Task<Completion> CreateCompletion(string prompt, Model model, Callback<Completion> callback=null)
+        public Task<AiText> CreateCompletion(string prompt, Model model, Callback<AiText> callback=null)
         {
             string modelString = ModelToString[model];
             return CreateCompletion(prompt, modelString, callback);
         }
 
-        public Task<Completion> CreateCompletion(string prompt, string model, Callback<Completion> callback=null)
+        public Task<AiText> CreateCompletion(string prompt, string model, Callback<AiText> callback=null)
         {
             
-            Completion.Request request = new Completion.Request(prompt, model);
+            AiText.Request request = new AiText.Request(prompt, model);
             return CreateCompletion(request, callback);
         }
 
-        public Task<Completion> CreateCompletion(Completion.Request request, Callback<Completion> callback=null)
+        public Task<AiText> CreateCompletion(AiText.Request request, Callback<AiText> callback=null)
         {
             return Post(request, callback);
         }
@@ -277,30 +299,43 @@ namespace OpenAi
 
         #region Images
 
-        public Task<Image> CreateImage(string prompt, Size size, Callback<Image> callback=null)
+        public Task<AiImage> CreateImage(string prompt, Callback<AiImage> callback=null)
+        {
+            return CreateImage(prompt, Size.SMALL, callback);
+        }
+
+        public Task<AiImage> CreateImage(string prompt, Size size, Callback<AiImage> callback=null)
         {
             string sizeString = SizeToString[size];
             return CreateImage(prompt, sizeString, callback);
         }
 
-        public Task<Image> CreateImage(string prompt, string size, Callback<Image> callback=null)
+        public Task<AiImage> CreateImage(string prompt, string size, Callback<AiImage> callback=null)
         {
             
-            Image.Request request = new Image.Request(prompt, size);
+            AiImage.Request request = new AiImage.Request(prompt, size);
             return CreateImage(request, callback);
         }
 
-        public Task<Image> CreateImage(Image.Request request, Callback<Image> callback=null)
+        public Task<AiImage> CreateImage(AiImage.Request request, Callback<AiImage> callback=null)
         {
             callback ??= value => {  };
-            var taskCompletion = new TaskCompletionSource<Image>();
-            Callback<Image> callbackIntercept = async image =>
+            var taskCompletion = new TaskCompletionSource<AiImage>();
+            Callback<AiImage> callbackIntercept = async image =>
             {
                 Texture[] textures = await GetAllImages(image);
                 for (int i = 0; i < textures.Length; i++)
                 {
-                    Image.Data data = image.data[i];
-                    data.texture = textures[i];
+                    AiImage.Data data = image.data[i];
+
+                    Texture texture = textures[i];
+                    if (OpenAi.Configuration.SaveTempImages)
+                    {
+                        string num = i > 0 ? (" " + i) : "";
+                        texture = Utils.Image.SaveToFile(request.prompt + num, (Texture2D)texture, false, Utils.Image.TempDirectory);
+                    }
+                    
+                    data.texture = texture;
                 }
                 callback(image);
                 taskCompletion.SetResult(image);
@@ -311,34 +346,34 @@ namespace OpenAi
         
         #endregion
         
-        Task<Texture[]> GetAllImages(Image image)
+        private Task<Texture[]> GetAllImages(AiImage aiImage)
         {
-            Task<Texture>[] getImageTasks = new Task<Texture>[image.data.Length];
+            Task<Texture>[] getImageTasks = new Task<Texture>[aiImage.data.Length];
             
-            for (int i = 0; i < image.data.Length; i++)
+            for (int i = 0; i < aiImage.data.Length; i++)
             {
-                Image.Data data = image.data[i];
-                getImageTasks[i] = GetImage(data.url);
+                AiImage.Data data = aiImage.data[i];
+                getImageTasks[i] = GetImageFromUrl(data.url);
             }
 
             return Task.WhenAll(getImageTasks);
         }
 
-        private Task<Texture> GetImage(string url)
+        private Task<Texture> GetImageFromUrl(string url)
         {
             (Task<Texture> task, Callback<Texture> callback) = CallbackToTask<Texture>();
-            monoBehaviour.StartCoroutine(GetImage(url, callback));
+            Runner.StartCoroutine(GetImageFromUrl(url, callback));
             return task;
         }
 
-        IEnumerator GetImage(string url, Callback<Texture> callback) {
+        static IEnumerator GetImageFromUrl(string url, Callback<Texture> callback) {
             UnityWebRequest webRequest = UnityWebRequestTexture.GetTexture(url);
             yield return webRequest.SendWebRequest();
             Texture texture = DownloadHandlerTexture.GetContent(webRequest);
             callback(texture);
         }
 
-        private Tuple<Task<T>, Callback<T>> CallbackToTask<T>(Callback<T> callback=null)
+        private static Tuple<Task<T>, Callback<T>> CallbackToTask<T>(Callback<T> callback=null)
         {
             var taskCompletion = new TaskCompletionSource<T>();
             callback ??= value => {  };
@@ -358,7 +393,7 @@ namespace OpenAi
             completionCallback ??= value => {  };
 
             (Task<T> task, Callback<T> taskCallback) = CallbackToTask(completionCallback);
-            monoBehaviour.StartCoroutine(Post(url, bodyString, taskCallback));
+            Runner.StartCoroutine(Post(url, bodyString, taskCallback));
 
             return task;
         }
@@ -426,9 +461,11 @@ namespace OpenAi
     }
     
     [Serializable]
-    public class Completion : IRequestable<Completion>
+    public class AiText : IRequestable<AiText>
     {
         public string URL => "https://api.openai.com/v1/completions";
+
+        public string Text => choices.Length > 0 ? choices[0].text : default;
             
         [Serializable]
         public class Request
@@ -482,24 +519,27 @@ namespace OpenAi
         public Choice[] choices;
         public Usage usage;
             
-        public Completion FromJson(string jsonString)
+        public AiText FromJson(string jsonString)
         {
             jsonString = jsonString.Replace("\"object\":", "\"obj\":"); //Have to replace object since it's a reserved word. 
-            Completion completion = JsonUtility.FromJson<Completion>(jsonString);
-            foreach (var choice in completion.choices)
+            AiText aiText = JsonUtility.FromJson<AiText>(jsonString);
+            foreach (var choice in aiText.choices)
             {
                 choice.text = choice.text.Trim();
             }
-            return completion;
+            return aiText;
         }
     }
     
     [Serializable]
-    public class Image : IRequestable<Image>
+    public class AiImage : IRequestable<AiImage>
     {
         public string URL => "https://api.openai.com/v1/images/generations";
-            
-        [Serializable]
+
+        public Texture Texture => data.Length > 0 ? data[0].texture : default;
+        public Texture2D Texture2d => (Texture2D)Texture;
+
+            [Serializable]
         public class Request
         {
             public string prompt;
@@ -531,9 +571,9 @@ namespace OpenAi
         public int created;
         public Data[] data;
             
-        public Image FromJson(string jsonString)
+        public AiImage FromJson(string jsonString)
         {
-            return JsonUtility.FromJson<Image>(jsonString);
+            return JsonUtility.FromJson<AiImage>(jsonString);
         }
     }
 }

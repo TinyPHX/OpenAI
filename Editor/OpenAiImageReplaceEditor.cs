@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using NUnit.Framework.Constraints;
 using UnityEditor;
 using UnityEditor.PackageManager.UI;
 using UnityEngine;
@@ -10,9 +11,13 @@ namespace OpenAi
     {
         private bool previousRemoveBackgroud = false;
         private SamplePoint[] previousSamplePoints = new SamplePoint[] { };
-        float previousColorSensitivity = 0;
-        float previousFeatherAmount = 0;
-        float previousFeatherSize = 0;
+        private float previousColorSensitivity = 0;
+        private float previousFeatherSize = 0;
+        private float previousFeatherAmount = 0;
+
+        private bool previousWrap = false;
+        private int previousWrapSize = 0;
+        private int previousWrapAmount = 0;
         
         public override void OnInspectorGUI()
         {
@@ -22,48 +27,102 @@ namespace OpenAi
             
             OpenAiImageReplace openAiImageReplace = target as OpenAiImageReplace;
 
+            EditorGUI.BeginDisabledGroup(openAiImageReplace.requestPending);
             if (GUILayout.Button("Generate Image"))
             {
-                openAiImageReplace.ReplaceImage();
+                string assetPath = AssetDatabase.GetAssetPath(openAiImageReplace.gameObject);
+                bool isPrefab = assetPath != "";
+
+                if (isPrefab)
+                {
+                    GameObject prefabRoot = PrefabUtility.LoadPrefabContents(assetPath);
+                    OpenAiImageReplace prefabTarget = prefabRoot.GetComponent<OpenAiImageReplace>();
+                    prefabTarget.ReplaceImage(() =>
+                    {
+                        // PrefabUtility.SaveAsPrefabAsset(openAiImageReplace.gameObject, assetPath);
+
+                        PrefabUtility.SaveAsPrefabAsset(prefabRoot, assetPath, out bool success);
+                        PrefabUtility.UnloadPrefabContents(prefabRoot);
+                        
+                        Debug.Log("Prefab update: " + (success ? "successful" : "failed"));
+                    });
+                }
+                else
+                {
+                    openAiImageReplace.ReplaceImage();
+                }
             }
+            EditorGUI.EndDisabledGroup();
             
             if (openAiImageReplace.texture != null)
             {
                 Rect rect = GUILayoutUtility.GetRect(Screen.width, Screen.width);
-                bool useNoBackground = openAiImageReplace.textureNoBackground != null && openAiImageReplace.removeBackground;
-                Texture previewTexture = useNoBackground ? openAiImageReplace.textureNoBackground : openAiImageReplace.texture;
-                EditorGUI.DrawPreviewTexture(rect, previewTexture, new Material(Shader.Find("Sprites/Default")));
+                Texture textureToDisplay = openAiImageReplace.texture;
+
+                if (openAiImageReplace.textureNoBackground != null && openAiImageReplace.removeBackground)
+                {
+                    textureToDisplay = openAiImageReplace.textureNoBackground;
+                }
+                
+                if (openAiImageReplace.textureWrapped != null && openAiImageReplace.wrap)
+                {
+                    textureToDisplay = openAiImageReplace.textureWrapped;
+                }
+                
+                EditorGUI.DrawPreviewTexture(rect, textureToDisplay, new Material(Shader.Find("Sprites/Default")));
             }
 
-            bool settingChanged = 
-                previousRemoveBackgroud != openAiImageReplace.removeBackground || 
-                !previousSamplePoints.SequenceEqual(openAiImageReplace.samplePoints) || 
-                previousColorSensitivity != openAiImageReplace.colorSensitivity ||
-                previousFeatherAmount != openAiImageReplace.featherAmount ||
-                previousFeatherSize != openAiImageReplace.featherSize;
-            if (settingChanged)
+            bool removeBackgroundSettingChanged =
+                openAiImageReplace != null && (
+                    previousRemoveBackgroud != openAiImageReplace.removeBackground ||
+                    !previousSamplePoints.SequenceEqual(openAiImageReplace.samplePoints.points) ||
+                    previousColorSensitivity != openAiImageReplace.colorSensitivity ||
+                    previousFeatherAmount != openAiImageReplace.featherAmount ||
+                    previousFeatherSize != openAiImageReplace.featherSize
+                );
+            
+            if (removeBackgroundSettingChanged)
             {
                 previousRemoveBackgroud = openAiImageReplace.removeBackground;
-                previousSamplePoints = openAiImageReplace.samplePoints.Select(samplePoint =>(SamplePoint)samplePoint.Clone()).ToArray();
+                previousSamplePoints = openAiImageReplace.samplePoints.points.Select(samplePoint =>(SamplePoint)samplePoint.Clone()).ToArray();
                 previousColorSensitivity = openAiImageReplace.colorSensitivity;
                 previousFeatherAmount = openAiImageReplace.featherAmount;
                 previousFeatherSize = openAiImageReplace.featherSize;
 
                 openAiImageReplace.RemoveBackground();
             }
+            
+            bool wrapSettingChanged =
+                openAiImageReplace != null && (
+                    previousWrap != openAiImageReplace.wrap ||
+                    previousWrapSize != openAiImageReplace.wrapSize ||
+                    previousWrapAmount != openAiImageReplace.wrapAmount
+                );
 
-            // if (GUILayout.Button("Remove Background"))
-            // {
-            //     openAiImageReplace.RemoveBackground();
-            // }
+            if (wrapSettingChanged)
+            {
+                previousWrap = openAiImageReplace.wrap;
+                previousWrapSize = openAiImageReplace.wrapSize;
+                previousWrapAmount = openAiImageReplace.wrapAmount;
+
+                openAiImageReplace.WrapTexture();
+            }
 
             if (GUILayout.Button("Save to File"))
             {
-                Texture2D textureToSave = openAiImageReplace.removeBackground ? 
-                    openAiImageReplace.textureNoBackground : 
-                    (Texture2D)openAiImageReplace.texture;
+                Texture textureToSave = openAiImageReplace.texture;
+
+                if (openAiImageReplace.textureNoBackground != null && openAiImageReplace.removeBackground)
+                {
+                    textureToSave = openAiImageReplace.textureNoBackground;
+                }
                 
-                Utils.Image.SaveToFile("Save Generated Image", openAiImageReplace.prompt, textureToSave);
+                if (openAiImageReplace.textureWrapped != null && openAiImageReplace.wrap)
+                {
+                    textureToSave = openAiImageReplace.textureWrapped;
+                }
+                
+                Utils.Image.SaveToFile(openAiImageReplace.prompt, (Texture2D)textureToSave, true);
             }
         }
     }

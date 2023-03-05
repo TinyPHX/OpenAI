@@ -9,28 +9,22 @@ namespace OpenAi
     {
         public Configuration configuration;
 
-        [Header("Text Completion")] public Completion.Request completionRequest;
-        public Completion completionResponse;
+        [Header("Text Completion")] public AiText.Request completionRequest;
+        public AiText aiTextResponse;
 
-        [Header("Image Generation")] public Image.Request imageRequest;
-        public Image imageResponse;
+        [Header("Image Generation")] public AiImage.Request imageRequest;
+        public AiImage aiImageResponse;
 
         public async void SendCompletionRequest()
         {
-            OpenAiApi openai = new OpenAiApi(this);
-
-            completionResponse = await openai.CreateCompletion(completionRequest);
-            
-            // openai.CreateCompletion(completionRequest, completion => { completionResponse = completion; });
+            OpenAiApi openai = new OpenAiApi();
+            aiTextResponse = await openai.CreateCompletion(completionRequest);
         }
 
         public async void SendImageRequest()
         {
-            OpenAiApi openai = new OpenAiApi(this);
-
-            imageResponse = await openai.CreateImage(imageRequest);
-
-            // openai.CreateImage(imageRequest, image => { imageResponse = image; });
+            OpenAiApi openai = new OpenAiApi();
+            aiImageResponse = await openai.CreateImage(imageRequest);
         }
 
         public void ReloadAuth()

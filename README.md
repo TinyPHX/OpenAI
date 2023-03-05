@@ -3,6 +3,38 @@ OpenAI Unity Integration
 
 Transform your Unity project into an intelligent, language-aware application with OpenAI Unity Integration. With just a few lines of code, you can integrate OpenAI's powerful text completion models directly into your Unity project, allowing you to generate natural language text in real time.
 
+
+Get Started
+-----------
+
+### Requirements
+
+-   Unity 2021.3 or later
+-   [OpenAI API from Unity Asset Store](https://assetstore.unity.com/packages/slug/247238)
+
+### Setup
+
+1. Create an [OpenAI Account](https://platform.openai.com/signup)  
+2. Get your `Organization ID` from the [Settings page](https://beta.openai.com/docs/api-reference/authentication)
+3. Create an `API Key` on the [API Key page](https://platform.openai.com/account/api-keys) 
+4. Copy the `Organization ID` and `API Key` into a file named `auth.js`
+
+
+```json
+{
+  "private_api_key":"YOUR-API-KEY",
+  "organization":"YOUR-ORG-ID"
+}
+```
+
+5. Place the file on you computer in `C:\Users\uname\.openai\auth.json`
+    ![](https://i.imgur.com/VyqUK0r.png)
+
+6. Add one of the built in components to your scene:
+7. Add the `OpenAiImageReplace` or `OpenAiTextReplace` example components to any GameObject in your scene.
+8. Add a prompt and click `Generate Image` or `Generate Text`
+
+
 Out-of-the-Box Components
 -------------------------
 
@@ -12,49 +44,57 @@ OpenAI Unity Asset includes three components for integrating OpenAI APIs into Un
 -   `OpenAiImageReplace` for replacing sprites with AI-generated images
 -   `OpenAiTextReplace` for replacing text objects with AI-generated text.
 
-Get Started
------------
 
-### Requirements
-
--   Unity 2021.1.4f1 or later
--   OpenAI API v1.0
-
-### Installation
-
-1.  Obtain an OpenAI API key by following the instructions in the [OpenAI documentation](https://beta.openai.com/docs/api-reference/authentication).
-2.  Import the `OpenAIUnityIntegration.unitypackage` into your Unity project.
-3.  Add the `OpenAiApi` script to an empty GameObject in your scene.
-4.  Set the `ApiKey` and `Organization` fields in the inspector with your OpenAI API key and organization ID.
-
-### Usage
+Scritping Interface
+-------------------------
 
 Here's an example of how you can create a text completion request and image generation request in Unity using the OpenAI Unity Integration:
 
 #### Generate Text
 
+Simple text generation
 ```csharp
+using UnityEngine;
 using OpenAi;
 
-var configuration = new Configuration(apiKey, organization);
-var openai = new OpenAiApi(configuration, this);
+public class SampleScript : MonoBehaviour {
+    async void Start() {
+        var openai = new OpenAiApi(this);
+        Completion completion = await openai.CreateCompletion("Hello world");
+        Debug.Log("OpenAI Response: " + completion.Text);
+    }
+}
+```
 
-openai.CreateCompletion("Hello world", "text-davinci-003", completion =>
+Using a callback instead async/await
+```csharp
+openai.CreateCompletion("Hello world", completion =>
 {
-Debug.Log(completion.choices[0].text);
+    Debug.Log("OpenAI Response: " + completion.Text);
 });
 ```
 
 #### Generate Images
 
+Simple image generation
 ```csharp
+using UnityEngine;
 using OpenAi;
 
-var configuration = new Configuration(apiKey, organization);
-var openai = new OpenAiApi(configuration, this);
+public class SampleScript : MonoBehaviour {
+    async void Start() {
+        var openai = new OpenAiApi( this);
+        Image image = await openai.CreateImage("Hello cat");
+        Texture2D texture = image.Texture2d;
+    }
+}
+```
 
-openai.CreateImage("pixelated cat for game about evil space cats", image => {
-Texture texture = image.data[0].texture;
+Using a callback instead async/await
+```csharp
+openai.CreateImage("Hello world", completion =>
+{
+    Debug.Log("OpenAI Response: " + image.Text);
 });
 ```
 

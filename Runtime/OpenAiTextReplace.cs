@@ -17,7 +17,7 @@ namespace OpenAi
         
         public  void ReplaceText()
         {
-            OpenAiApi openai = new OpenAiApi(this);
+            OpenAiApi openai = new OpenAiApi();
             // Completion completion = await openai.CreateCompletion(prompt, model);
             // if (textMesh != null)
             // {
