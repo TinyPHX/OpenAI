@@ -17,7 +17,7 @@ namespace OpenAi
 
         private bool previousWrap = false;
         private int previousWrapSize = 0;
-        private int previousWrapAmount = 0;
+        private int previousPreviewGrid = 0;
         
         public override void OnInspectorGUI()
         {
@@ -39,12 +39,8 @@ namespace OpenAi
                     OpenAiImageReplace prefabTarget = prefabRoot.GetComponent<OpenAiImageReplace>();
                     prefabTarget.ReplaceImage(() =>
                     {
-                        // PrefabUtility.SaveAsPrefabAsset(openAiImageReplace.gameObject, assetPath);
-
                         PrefabUtility.SaveAsPrefabAsset(prefabRoot, assetPath, out bool success);
                         PrefabUtility.UnloadPrefabContents(prefabRoot);
-                        
-                        Debug.Log("Prefab update: " + (success ? "successful" : "failed"));
                     });
                 }
                 else
@@ -57,7 +53,7 @@ namespace OpenAi
             if (openAiImageReplace.texture != null)
             {
                 Rect rect = GUILayoutUtility.GetRect(Screen.width, Screen.width);
-                Texture textureToDisplay = openAiImageReplace.texture;
+                Texture2D textureToDisplay = openAiImageReplace.texture;
 
                 if (openAiImageReplace.textureNoBackground != null && openAiImageReplace.removeBackground)
                 {
@@ -68,8 +64,35 @@ namespace OpenAi
                 {
                     textureToDisplay = openAiImageReplace.textureWrapped;
                 }
+
+                if (!openAiImageReplace.wrap || openAiImageReplace.previewGrid == 1)
+                {
+                    EditorGUI.DrawPreviewTexture(rect, textureToDisplay, new Material(Shader.Find("Sprites/Default")));
+                }
+                else
+                {
+                    int rectWidth = Mathf.RoundToInt(rect.size.x / openAiImageReplace.previewGrid);
+                    int rectHeight = Mathf.RoundToInt(rect.size.y / openAiImageReplace.previewGrid);
+                    
+                    for (int xi = 0; xi < openAiImageReplace.previewGrid; xi++)
+                    {
+                        for (int yi = 0; yi < openAiImageReplace.previewGrid; yi++)
+                        {
+                            Rect gridRect = new Rect(rect.x + rectWidth * xi, rect.y + rectHeight * yi, rectWidth, rectHeight);
+                            EditorGUI.DrawPreviewTexture(gridRect, textureToDisplay, new Material(Shader.Find("Sprites/Default")));
+                        }
+                    }
+                    
+                    // Rect rect1 = new Rect(rect.x, rect.y, rectWidth, rectHeight);
+                    // Rect rect2 = new Rect(rect.x + rectWidth, rect.y, rectWidth, rectHeight);
+                    // Rect rect3 = new Rect(rect.x, rect.y + rectHeight, rectWidth, rectHeight);
+                    // Rect rect4 = new Rect(rect.x + rectWidth, rect.y + rectHeight, rectWidth, rectHeight);
                 
-                EditorGUI.DrawPreviewTexture(rect, textureToDisplay, new Material(Shader.Find("Sprites/Default")));
+                    // EditorGUI.DrawPreviewTexture(rect1, textureToDisplay, new Material(Shader.Find("Sprites/Default")));
+                    // EditorGUI.DrawPreviewTexture(rect2, textureToDisplay, new Material(Shader.Find("Sprites/Default")));
+                    // EditorGUI.DrawPreviewTexture(rect3, textureToDisplay, new Material(Shader.Find("Sprites/Default")));
+                    // EditorGUI.DrawPreviewTexture(rect4, textureToDisplay, new Material(Shader.Find("Sprites/Default")));
+                }
             }
 
             bool removeBackgroundSettingChanged =
@@ -96,21 +119,21 @@ namespace OpenAi
                 openAiImageReplace != null && (
                     previousWrap != openAiImageReplace.wrap ||
                     previousWrapSize != openAiImageReplace.wrapSize ||
-                    previousWrapAmount != openAiImageReplace.wrapAmount
+                    previousPreviewGrid != openAiImageReplace.previewGrid
                 );
 
             if (wrapSettingChanged)
             {
                 previousWrap = openAiImageReplace.wrap;
                 previousWrapSize = openAiImageReplace.wrapSize;
-                previousWrapAmount = openAiImageReplace.wrapAmount;
+                previousPreviewGrid = openAiImageReplace.previewGrid;
 
                 openAiImageReplace.WrapTexture();
             }
 
             if (GUILayout.Button("Save to File"))
             {
-                Texture textureToSave = openAiImageReplace.texture;
+                Texture2D textureToSave = openAiImageReplace.texture;
 
                 if (openAiImageReplace.textureNoBackground != null && openAiImageReplace.removeBackground)
                 {

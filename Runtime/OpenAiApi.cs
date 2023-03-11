@@ -323,12 +323,12 @@ namespace OpenAi
             var taskCompletion = new TaskCompletionSource<AiImage>();
             Callback<AiImage> callbackIntercept = async image =>
             {
-                Texture[] textures = await GetAllImages(image);
+                Texture2D[] textures = await GetAllImages(image);
                 for (int i = 0; i < textures.Length; i++)
                 {
                     AiImage.Data data = image.data[i];
 
-                    Texture texture = textures[i];
+                    Texture2D texture = textures[i];
                     if (OpenAi.Configuration.SaveTempImages)
                     {
                         string num = i > 0 ? (" " + i) : "";
@@ -346,9 +346,9 @@ namespace OpenAi
         
         #endregion
         
-        private Task<Texture[]> GetAllImages(AiImage aiImage)
+        private Task<Texture2D[]> GetAllImages(AiImage aiImage)
         {
-            Task<Texture>[] getImageTasks = new Task<Texture>[aiImage.data.Length];
+            Task<Texture2D>[] getImageTasks = new Task<Texture2D>[aiImage.data.Length];
             
             for (int i = 0; i < aiImage.data.Length; i++)
             {
@@ -359,17 +359,17 @@ namespace OpenAi
             return Task.WhenAll(getImageTasks);
         }
 
-        private Task<Texture> GetImageFromUrl(string url)
+        private Task<Texture2D> GetImageFromUrl(string url)
         {
-            (Task<Texture> task, Callback<Texture> callback) = CallbackToTask<Texture>();
+            (Task<Texture2D> task, Callback<Texture2D> callback) = CallbackToTask<Texture2D>();
             Runner.StartCoroutine(GetImageFromUrl(url, callback));
             return task;
         }
 
-        static IEnumerator GetImageFromUrl(string url, Callback<Texture> callback) {
+        static IEnumerator GetImageFromUrl(string url, Callback<Texture2D> callback) {
             UnityWebRequest webRequest = UnityWebRequestTexture.GetTexture(url);
             yield return webRequest.SendWebRequest();
-            Texture texture = DownloadHandlerTexture.GetContent(webRequest);
+            Texture2D texture = DownloadHandlerTexture.GetContent(webRequest);
             callback(texture);
         }
 
@@ -429,7 +429,7 @@ namespace OpenAi
             }
             else
             {
-                completionCallback();
+                completionCallback(default(T));
             }
         }
 
@@ -536,8 +536,7 @@ namespace OpenAi
     {
         public string URL => "https://api.openai.com/v1/images/generations";
 
-        public Texture Texture => data.Length > 0 ? data[0].texture : default;
-        public Texture2D Texture2d => (Texture2D)Texture;
+        public Texture2D Texture => data.Length > 0 ? data[0].texture : default;
 
             [Serializable]
         public class Request
@@ -565,7 +564,7 @@ namespace OpenAi
         public class Data
         {
             public string url;
-            public Texture texture;
+            public Texture2D texture;
         }
         
         public int created;

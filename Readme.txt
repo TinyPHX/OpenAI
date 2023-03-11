@@ -46,7 +46,7 @@ var configuration = new Configuration(apiKey, organization);
 var openai = new OpenAiApi(configuration, this);
 
 openai.CreateImage("pixelated cat for game about evil space cats", image => {
-    Texture texture = image.data[0].texture;
+    Texture2D texture = image.data[0].texture;
 });
 ------------------------------
 

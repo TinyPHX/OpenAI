@@ -98,20 +98,20 @@ MonoBehaviour:
   spriteRenderer: {fileID: 1475262086695594845}
   prompt: cute pixelated robot bird 3d art hero character for a game
   size: 0
-  texture: {fileID: 0}
+  texture: {fileID: 2800000, guid: c7524c5549bf66e4e8d1f39b7aad4e03, type: 3}
   removeBackground: 1
   samplePoints:
   - color: {r: 1, g: 1, b: 1, a: 1}
     point: {x: 25.6, y: 25.6}
-    similarity: 0.16666666
+    similarity: 0.24999999
   - color: {r: 1, g: 1, b: 1, a: 1}
-    point: {x: 25.6, y: 230.4}
-    similarity: 0.16666666
-  - color: {r: 1, g: 1, b: 0.99607843, a: 1}
     point: {x: 230.4, y: 25.6}
-    similarity: 0.16666666
-  colorSensitivity: 121
-  featherSize: 1
+    similarity: 0.24999999
+  - color: {r: 1, g: 1, b: 1, a: 1}
+    point: {x: 230.4, y: 230.4}
+    similarity: 0.24999999
+  colorSensitivity: 27
+  featherSize: 2
   featherAmount: 100
   textureNoBackground: {fileID: 0}
   requestPending: 0

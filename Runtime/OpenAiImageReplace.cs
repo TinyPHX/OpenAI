@@ -12,7 +12,7 @@
             public SpriteRenderer[] spriteRenderers;
             [TextAreaAttribute(1,20)] public string prompt;
             public OpenAiApi.Size size;
-            [ReadOnly] public Texture texture;
+            [ReadOnly] public Texture2D texture;
             
             [Separator("Remove Background")] 
             [OverrideLabel("")] public bool removeBackground;
@@ -26,7 +26,7 @@
             [OverrideLabel("")] public bool wrap;
             [ConditionalField(nameof(wrap)), ReadOnly] public Texture2D textureWrapped;
             [ConditionalField(nameof(wrap)), Range(0, 100)] public int wrapSize = 25;
-            [ConditionalField(nameof(wrap)), Range(0, 100)] public int wrapAmount = 100;
+            [ConditionalField(nameof(wrap)), Range(1, 10)] public int previewGrid = 2;
             [ConditionalField(nameof(wrap)), ReadOnly] public string newTextureSize = "";
             
             [Separator("")] 
@@ -55,15 +55,14 @@
 
             private void SelectSamplePoints()
             {
-                Texture2D texture2d = (Texture2D)texture;
-                float padding = .1f * texture2d.width;
+                float padding = .1f * texture.width;
 
                 samplePoints = new SamplePointArray();
                 samplePoints.points = new SamplePoint[] {
-                    new SamplePoint(texture2d, new Vector2(padding, padding)),
-                    new SamplePoint(texture2d, new Vector2(padding, texture2d.height - padding)),
-                    new SamplePoint(texture2d, new Vector2(texture2d.width - padding, padding)),
-                    new SamplePoint(texture2d, new Vector2(texture2d.width - padding, texture2d.height - padding)),
+                    new SamplePoint(texture, new Vector2(padding, padding)),
+                    new SamplePoint(texture, new Vector2(padding, texture.height - padding)),
+                    new SamplePoint(texture, new Vector2(texture.width - padding, padding)),
+                    new SamplePoint(texture, new Vector2(texture.width - padding, texture.height - padding)),
                 };
 
                 float ColorDiff(Color a, Color b)
@@ -89,12 +88,11 @@
             
             private void UpdateSpriteRenderer()
             {
-                Texture2D texture2d = (Texture2D)texture;
                 if (removeBackground)
                 {
-                    texture2d = textureNoBackground;
+                    texture = textureNoBackground;
                 }
-                Sprite newSprite = Sprite.Create(texture2d, new Rect(0, 0, texture2d.width, texture2d.height), new Vector2(0.5f, 0.5f));
+                Sprite newSprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f));
                 if (spriteRenderer != null)
                 {
                     spriteRenderer.sprite = newSprite;
@@ -127,14 +125,13 @@
 
             public void WrapTexture()
             {
-                Texture textureToWrap = removeBackground ? textureNoBackground : texture;
+                Texture2D textureToWrap = removeBackground ? textureNoBackground : texture;
 
                 if (textureToWrap)
                 {
                     textureWrapped = Utils.Image.WrapTexture(
-                        (Texture2D)textureToWrap,
-                        wrapSize,
-                        wrapAmount
+                        textureToWrap,
+                        wrapSize
                     );
 
                     newTextureSize = textureWrapped.width + "x" + textureWrapped.height;
