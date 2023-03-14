@@ -1,7 +1,5 @@
-﻿using System;
-using System.Net.Mime;
+﻿using System.Linq;
 using UnityEngine;
-using OpenAi;
 using TMPro;
 
 namespace OpenAi
@@ -15,22 +13,22 @@ namespace OpenAi
         [TextAreaAttribute(1,20)]
         public string response;
         
-        public  void ReplaceText()
+        public async void ReplaceText()
         {
+            ShowPlaceholderText();
             OpenAiApi openai = new OpenAiApi();
-            // Completion completion = await openai.CreateCompletion(prompt, model);
-            // if (textMesh != null)
-            // {
-            //     textMesh.text = completion.choices[0].text;
-            // }
-            
-            openai.CreateCompletion(prompt, model, completion =>
+            var completion = await openai.CreateCompletion(prompt, model);
+            response = completion.choices[0].text;
+            if (textMesh != null)
             {
-                if (textMesh != null)
-                {
-                    textMesh.text = completion.choices[0].text;
-                }
-            });
+                textMesh.text = response;
+            }
+        }
+
+        public void ShowPlaceholderText()
+        {
+            int lineReturnCount = response.Count(character => character == '\n');
+            response = "Generating..." + new string(Enumerable.Repeat('\n', lineReturnCount).ToArray());
         }
     }
 }

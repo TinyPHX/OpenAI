@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using MyBox;
+﻿using MyBox;
 using UnityEngine;
 
 namespace OpenAi
@@ -9,10 +7,13 @@ namespace OpenAi
     {
         public Configuration configuration;
 
-        [Header("Text Completion")] public AiText.Request completionRequest;
+        [Separator("Text Completion")] 
+        public AiText.Request completionRequest;
         public AiText aiTextResponse;
 
-        [Header("Image Generation")] public AiImage.Request imageRequest;
+        [Separator("Image Generation")] 
+        public AiImage.Request imageRequest;
+        
         public AiImage aiImageResponse;
 
         public async void SendCompletionRequest()

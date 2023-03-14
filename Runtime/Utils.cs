@@ -6,6 +6,7 @@ using System.Xml.Schema;
 using MyBox;
 using TMPro;
 using Unity.Collections;
+using UnityEditorInternal.Profiling.Memory.Experimental;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -20,60 +21,163 @@ namespace OpenAi.Utils
     {
         static (int, int) IndexToCoords(int index, int size) => (index % size, index / size);
         static int CoordsToIndex(int x, int y, int size) => size * y + x;
-        static float ColorDiff(Color a, Color b) => (Math.Abs(a.r - b.r) + Math.Abs(a.g - b.g) + Math.Abs(a.b - b.b)) * 255 / 3;
-        
-        public static Texture2D RemoveBackground(Texture2D image, int colorSensitivity, int feather, int featherAmount, SamplePoint[] samples)
+        static float ColorDiff(Color a, Color b) => 
+            (
+                Math.Abs(a.r - b.r) + 
+                Math.Abs(a.g - b.g) + 
+                Math.Abs(a.b - b.b) + 
+                Math.Abs(a.a - b.a)
+            ) * 255 / 4;
+
+        private static Tuple<List<int>, List<int>> Fill(Color[] pixels, int size, int colorSensitivity, SamplePoint[] samples)
         {
-            Color[] pixels = image.GetPixels(0, 0, image.width, image.height, 0);
-            List<int> opaquePixelIndexes = new List<int>();
+            List<int> matched = new List<int>();
+            List<int> unmatched = new List<int>();
+            
             for (int pixelIndex = 0; pixelIndex < pixels.Length; pixelIndex++)
             {
                 Color pixel = pixels[pixelIndex];
-                (int x, int y) = IndexToCoords(pixelIndex, image.width);
 
-                bool removePixel = false;
+                bool matches = false;
                 foreach (SamplePoint point in samples)
                 {
                     if (ColorDiff(point.color, pixel) < colorSensitivity)
                     {
-                        removePixel = true;
+                        matches = true;
                     }
                 }
 
-                if (removePixel)
+                if (matches)
                 {
-                    pixels[pixelIndex] = new Color(0, 0, 0, 0); //transparent
+                    matched.Add(pixelIndex);
                 }
                 else
                 {
-                    opaquePixelIndexes.Add(pixelIndex);
+                    unmatched.Add(pixelIndex);
                 }
             }
+
+            return new Tuple<List<int>, List<int>>(matched, unmatched);
+        }
+
+        private static Color[] FloodFill(Color[] pixels, int size, int colorSensitivity, Color[] target, Vector2 origin, Color fillColor)
+        {
+            Stack<int> stack = new Stack<int>();
             
+            Color Get(int x, int y)
+            {
+                return pixels[CoordsToIndex(x, y, size)];
+            }
+
+            void Set(int x, int y)
+            {
+                pixels[CoordsToIndex(x, y, size)] = fillColor;
+            }
+
+            (int, int) Position(int i)
+            {
+                return IndexToCoords(i, size);
+            }
+
+            bool IsMatch(Color color)
+            {
+                return target.Any(targetColor => ColorDiff(color, targetColor) < colorSensitivity);
+            }
+
+            bool IsTargetColor(Color color)
+            {
+                return target.Any(targetColor => ColorDiff(color, Color.clear) < colorSensitivity);
+            }
+
+            void Push(int x, int y)
+            {
+                stack.Push(CoordsToIndex(x, y, size));
+            }
+
+            int i = CoordsToIndex((int)origin.x, (int)origin.y, size);
+
+            var (x1, y1) = Position(i);
+            if (IsTargetColor(Get(x1, y1)))
+            {
+                return pixels;
+            }
+
+            stack.Push(i);
+ 
+            while (stack.Count > 0)
+            {
+                (x1, y1) = Position(stack.Pop());
+                if (x1 < size && x1 >= 0 && y1 < size && y1 >= 0)
+                {
+                    if (IsMatch(Get(x1, y1)))
+                    {
+                        Set(x1, y1);
+                        Push(x1 - 1, y1);
+                        Push(x1 + 1, y1);
+                        Push(x1, y1 - 1);
+                        Push(x1, y1 + 1);
+                    }
+                }
+            }
+
+            return pixels;
+        }
+
+
+        public static Texture2D RemoveBackground(Texture2D image, int colorSensitivity, int feather, int featherAmount, SamplePoint[] samples, bool continuous = true)
+        {
+            Color[] sourcePixels = image.GetPixels(0, 0, image.width, image.height, 0);
+            Color[] pixels = new Color[sourcePixels.Length];
+            Array.Copy(sourcePixels, pixels, sourcePixels.Length);
+
             Texture2D modifiedTexture = new Texture2D(image.width, image.height);
+
+            List<int> opaquePixelIndexes;
+            if (continuous)
+            {
+                Color[] colorSamples = samples.Select(sample => sample.color).ToArray();
+                foreach (var sample in samples)
+                {
+                    pixels = FloodFill(pixels, image.width, colorSensitivity, colorSamples, sample.position, Color.clear);
+                }
+                opaquePixelIndexes = pixels.Select((value, index) => index).Where(i => pixels[i].a > 0).ToList();
+            }
+            else
+            {
+                List<int> clearPixels;
+                (clearPixels, opaquePixelIndexes) = Fill(pixels, image.width, colorSensitivity, samples);
+                foreach (int clearIndex in clearPixels)
+                {
+                    pixels[clearIndex] = Color.clear;
+                }
+            }
+
             modifiedTexture.SetPixels(0, 0, image.width, image.height, pixels, 0);
             modifiedTexture.Apply();
 
-            int featherSize = 1 + feather * 2;
-            float maxAlphaAmount = featherSize * featherSize * (1 - featherAmount / 100f);
-            foreach (int opaqueIndex in opaquePixelIndexes)
+            if (feather > 0)
             {
-                Color pixel = pixels[opaqueIndex];
-                (int x, int y) = IndexToCoords(opaqueIndex, image.width);
-                
-                Color[] featherArea = new Color[] { };
-                if (x > feather && x < image.width - feather && y > feather && y < image.height - feather)
+                int featherSize = 1 + feather * 2;
+                float maxAlphaAmount = featherSize * featherSize * (1 - featherAmount / 100f);
+                foreach (int opaqueIndex in opaquePixelIndexes)
                 {
-                    featherArea = modifiedTexture.GetPixels(x - feather, y - feather, featherSize, featherSize);
-                }
+                    Color pixel = pixels[opaqueIndex];
+                    (int x, int y) = IndexToCoords(opaqueIndex, image.width);
 
-                int alphaCount = featherArea.Count(color => color.a == 0);
+                    Color[] featherArea = new Color[] { };
+                    if (x > feather && x < image.width - feather && y > feather && y < image.height - feather)
+                    {
+                        featherArea = modifiedTexture.GetPixels(x - feather, y - feather, featherSize, featherSize);
+                    }
 
-                if (alphaCount > 0)
-                {
-                    float featherRatio = 1 - Mathf.Min(1, alphaCount / (float)maxAlphaAmount);
-                    
-                    pixels[opaqueIndex] = new Color(pixel.r, pixel.g, pixel.b, featherRatio); //transparent
+                    int alphaCount = featherArea.Count(color => color.a == 0);
+
+                    if (alphaCount > 0)
+                    {
+                        float featherRatio = 1 - Mathf.Min(1, alphaCount / (float)maxAlphaAmount);
+
+                        pixels[opaqueIndex] = new Color(pixel.r, pixel.g, pixel.b, featherRatio); //transparent
+                    }
                 }
             }
 
@@ -165,7 +269,7 @@ namespace OpenAi.Utils
                             else
                             {
                                 Color oldColor = GetOld(x, y);
-                                oldColor.a = distanceRatio;
+                                oldColor.a *= distanceRatio;
                                 Set(mirrorX, mirrorY, oldColor);
                             }
                         }
@@ -209,11 +313,6 @@ namespace OpenAi.Utils
             
             Color Average(Color baseColor, List<Color> colors)
             {
-                float red = 0;
-                float green = 0;
-                float blue = 0;
-                float alpha = 0;
-                
                 colors.Sort((color1, color2) => (int)((color1.a - color2.a) * 100));
                 Color averageOfColors = colors[0];
                 
@@ -237,15 +336,16 @@ namespace OpenAi.Utils
                 }
                 float maxAlpha = colors.Max(color => color.a);
                 averageOfColors.a = maxAlpha;
-
-                alpha = averageOfColors.a / 2;
-
-                return new Color(
+                float alpha = averageOfColors.a * (averageOfColors.a / (averageOfColors.a + baseColor.a));
+                
+                Color averageColor = new Color(
                     baseColor.r * (1 - alpha) + averageOfColors.r * alpha,
                     baseColor.g * (1 - alpha) + averageOfColors.g * alpha,
                     baseColor.b * (1 - alpha) + averageOfColors.b * alpha,
-                    1
+                    Mathf.Max(baseColor.a, averageOfColors.a) 
                 );
+
+                return averageColor;
             }
 
             Texture2D modifiedTexture = new Texture2D(newSize, newSize);
@@ -253,109 +353,6 @@ namespace OpenAi.Utils
             modifiedTexture.Apply();
 
             return modifiedTexture;
-        }
-
-        public static Texture2D WrapTextureAi(Texture2D image, int wrap, int wrapAmount)
-        {
-            // int oldSize = image.width;
-            // Color[] oldPixels = image.GetPixels(0, 0, oldSize, oldSize, 0);
-            //
-            // int inset = (int)(wrap / 200f * image.width / 2);
-            // int overlapSize = inset * 2;
-            // int newSize = image.width - overlapSize;
-            // Color[] newPixels = image.GetPixels(inset, inset, newSize, newSize, 0);
-            //
-            // float alphaMultiplier = wrapAmount / 100f;
-            //
-            // // for points inside
-            // for (int x = 0; x < oldSize; x++)
-            // {
-            //     for (int y = 0; y < oldSize; y++)
-            //     {
-            //         if (x <= inset|| x > oldSize - inset || y <= inset || y > oldSize - inset)
-            //         {
-            //             int mirrorX;
-            //             int mirrorY;
-            //
-            //             float distance = 0;
-            //             float maxDistance = inset;
-            //             
-            //             if (x <= inset)
-            //             {
-            //                 mirrorX = inset - x;
-            //                 distance += mirrorX;
-            //                 mirrorX = newSize - mirrorX - 1;
-            //             }
-            //             else if (x > oldSize- inset)
-            //             {
-            //                 mirrorX = newSize - (x - (oldSize - inset));
-            //                 distance += newSize - mirrorX;
-            //                 mirrorX = newSize - mirrorX - 1;
-            //             }
-            //             else
-            //             {
-            //                 mirrorX = x - inset;
-            //             }
-            //             
-            //             if (y <= inset)
-            //             {
-            //                 mirrorY = inset - y;
-            //                 distance += mirrorY;
-            //                 mirrorY = newSize - mirrorY - 1;
-            //             }
-            //             else if (y > oldSize - inset)
-            //             {
-            //                 mirrorY = newSize - (y - (oldSize - inset));
-            //                 distance += newSize - mirrorY;
-            //                 mirrorY = newSize - mirrorY - 1;
-            //             }
-            //             else
-            //             {
-            //                 mirrorY = y - inset;
-            //             }
-            //
-            //             float alphaFade = 1 - (.5f + Mathf.Min(distance / maxDistance, 1) / 2);
-            //
-            //             int oldi = CoordsToIndex(x, y, oldSize);
-            //             int newi = CoordsToIndex(mirrorX, mirrorY, newSize);
-            //
-            //             try
-            //             {
-            //                 Color oldColor = oldPixels[oldi];
-            //                 Color newColor = newPixels[newi];
-            //
-            //                 float oldAlpha = alphaFade;
-            //                 float newAlpha = 1 - alphaFade;
-            //
-            //                 newPixels[newi] = new Color(
-            //                     oldColor.r * oldAlpha + newColor.r * newAlpha,
-            //                     oldColor.g * oldAlpha + newColor.g * newAlpha,
-            //                     oldColor.b * oldAlpha + newColor.b * newAlpha,
-            //                     1
-            //                 );
-            //             }
-            //             catch (Exception exception)
-            //             {
-            //                 Debug.LogWarning(exception);
-            //                 Debug.Log("x: " + x);
-            //                 Debug.Log("y: " + y);
-            //                 Debug.Log("oldSize: " + oldSize);
-            //                 Debug.Log("mirrorX: " + mirrorX);
-            //                 Debug.Log("mirrorY: " + mirrorY);
-            //                 Debug.Log("newSize: " + newSize);
-            //                 Debug.Log("oldi: " + oldi);
-            //                 Debug.Log("newi: " + newi);
-            //             }
-            //         }
-            //     }   
-            // }
-            //
-            // Texture2D modifiedTexture = new Texture2D(newSize, newSize);
-            // modifiedTexture.SetPixels(0, 0, newSize, newSize, newPixels, 0);
-            // modifiedTexture.Apply();
-            //
-            // return modifiedTexture;
-            return default;
         }
 
         private static string lastSaveFileLocation = "";
@@ -406,7 +403,6 @@ namespace OpenAi.Utils
 
                     lastSaveFileLocation = Path.GetDirectoryName(path);
                 }
-                
                 
                 //Create new texture to avoid error, Texture2D::EncodeTo functions do not support compressed texture formats.
                 Color[] pixels = texture.GetPixels(0, 0, texture.width, texture.height, 0);

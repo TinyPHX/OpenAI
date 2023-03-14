@@ -1,8 +1,8 @@
 ﻿    using System;
     using System.Linq;
     using MyBox;
-    using UnityEditor.PackageManager.UI;
     using UnityEngine;
+    using UnityEngine.Networking;
 
     namespace OpenAi
     {
@@ -17,10 +17,11 @@
             [Separator("Remove Background")] 
             [OverrideLabel("")] public bool removeBackground;
             [ConditionalField(nameof(removeBackground)), ReadOnly] public Texture2D textureNoBackground;
-            [ConditionalField(nameof(removeBackground))] public SamplePointArray samplePoints;
-            [ConditionalField(nameof(removeBackground)), Range(0,255)] public int colorSensitivity = 30;
-            [ConditionalField(nameof(removeBackground)), Range(0,10)] public int featherSize = 3;
-            [ConditionalField(nameof(removeBackground)), Range(0, 100)] public int featherAmount = 50;
+            [ConditionalField(nameof(removeBackground))] public SamplePointArray samplePoints = new SamplePointArray();
+            [ConditionalField(nameof(removeBackground)), Range(0,255)] public int colorSensitivity = 25;
+            [ConditionalField(nameof(removeBackground))] public bool continuous = true;
+            [ConditionalField(nameof(removeBackground)), Range(0,20)] public int featherSize = 3;
+            [ConditionalField(nameof(removeBackground)), Range(0, 100)] public int featherAmount = 80;
 
             [Separator("Wrap Texture")] 
             [OverrideLabel("")] public bool wrap;
@@ -40,17 +41,21 @@
                 requestPending = true;
                 AiImage aiImage = await openai.CreateImage(prompt, size);
                 requestPending = false;
-                texture = aiImage.data[0].texture;
 
-                SelectSamplePoints();
-                RemoveBackground();
-
-                if (wrap)
+                if (aiImage.Result == UnityWebRequest.Result.Success)
                 {
-                    WrapTexture();
-                }
+                    texture = aiImage.data[0].texture;
 
-                callback?.Invoke();
+                    SelectSamplePoints();
+                    RemoveBackground();
+
+                    if (wrap)
+                    {
+                        WrapTexture();
+                    }
+
+                    callback?.Invoke();
+                }
             }
 
             private void SelectSamplePoints()
@@ -86,13 +91,31 @@
                 samplePoints.points = samplePoints.points.OrderBy(a => a.similarity).Take(samplePoints.points.Length - 1).ToArray(); //Drop one outlier.
             }
             
+            public Texture2D Texture 
+            {
+                get
+                {
+                    Texture2D resultTexture = texture;
+
+                    if (textureNoBackground != null && removeBackground)
+                    {
+                        resultTexture = textureNoBackground;
+                    }
+                
+                    if (textureWrapped != null && wrap)
+                    {
+                        resultTexture = textureWrapped;
+                    }
+
+                    return resultTexture;
+                }
+            }
+            
             private void UpdateSpriteRenderer()
             {
-                if (removeBackground)
-                {
-                    texture = textureNoBackground;
-                }
-                Sprite newSprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f));
+                Texture2D newTexture = Texture;
+                
+                Sprite newSprite = Sprite.Create(newTexture, new Rect(0, 0, newTexture.width, newTexture.height), new Vector2(0.5f, 0.5f));
                 if (spriteRenderer != null)
                 {
                     spriteRenderer.sprite = newSprite;
@@ -105,7 +128,6 @@
                         sprite.sprite = newSprite;
                     }
                 }
-                
             }
             
             public void RemoveBackground()
@@ -113,11 +135,12 @@
                 if (texture)
                 {
                     textureNoBackground = Utils.Image.RemoveBackground(
-                        (Texture2D)texture,
+                        texture,
                         colorSensitivity,
                         featherSize,
                         featherAmount,
-                        samplePoints.points
+                        samplePoints.points,
+                        continuous
                     );
                     UpdateSpriteRenderer();
                 }
@@ -167,7 +190,32 @@
             {
                 return new SamplePoint(color, position);
             }
-            
+
+            public static bool SequenceEqual(SamplePoint[] points1, SamplePoint[] points2)
+            {
+                if (points1 == null && points2 == null)
+                {
+                    return true;
+                }
+                else if (points1 == null || points2 == null)
+                {
+                    return false;
+                }
+                else
+                {
+                    return points1.SequenceEqual(points2);
+                }
+            }
+
+            // https://stackoverflow.com/a/1646913
+            public override int GetHashCode()
+            {
+                int hash = 17;
+                hash = hash * 31 + color.GetHashCode();
+                hash = hash * 31 + position.GetHashCode();
+                return hash;
+            }
+
             public override bool Equals(object obj) => this.Equals(obj as SamplePoint);
             public bool Equals(SamplePoint other) 
             {

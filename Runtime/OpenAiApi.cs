@@ -3,11 +3,11 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
-using UnityEditor;
+using OpenAI;
 using UnityEngine;
 using UnityEngine.Networking;
-using Object = System.Object;
 
 namespace OpenAi
 {
@@ -196,12 +196,15 @@ namespace OpenAi
         };
 
         private Configuration config;
-
-        class CoroutineRunner : MonoBehaviour { }
         private static CoroutineRunner runner;
         private static CoroutineRunner Runner {
             get
             {
+                if (!runner)
+                {
+                    runner = GameObject.FindObjectOfType<CoroutineRunner>();
+                }
+                
                 if (!runner)
                 {
                     GameObject gameObject = new GameObject("Open AI Request Runner");
@@ -332,7 +335,7 @@ namespace OpenAi
                     if (OpenAi.Configuration.SaveTempImages)
                     {
                         string num = i > 0 ? (" " + i) : "";
-                        texture = Utils.Image.SaveToFile(request.prompt + num, (Texture2D)texture, false, Utils.Image.TempDirectory);
+                        texture = Utils.Image.SaveToFile(request.prompt + num, texture, false, Utils.Image.TempDirectory);
                     }
                     
                     data.texture = texture;
@@ -348,12 +351,15 @@ namespace OpenAi
         
         private Task<Texture2D[]> GetAllImages(AiImage aiImage)
         {
-            Task<Texture2D>[] getImageTasks = new Task<Texture2D>[aiImage.data.Length];
+            List<Task<Texture2D>> getImageTasks = new List<Task<Texture2D>>{};
             
             for (int i = 0; i < aiImage.data.Length; i++)
             {
                 AiImage.Data data = aiImage.data[i];
-                getImageTasks[i] = GetImageFromUrl(data.url);
+                if (data.url != "")
+                {
+                    getImageTasks.Add(GetImageFromUrl(data.url));
+                }
             }
 
             return Task.WhenAll(getImageTasks);
@@ -417,20 +423,31 @@ namespace OpenAi
             
             webRequest.uploadHandler = new UploadHandlerRaw(bodyByteArray);
             webRequest.downloadHandler = new DownloadHandlerBuffer();
+            webRequest.disposeUploadHandlerOnDispose = true;
+            webRequest.disposeDownloadHandlerOnDispose = true;
             webRequest.method = UnityWebRequest.kHttpVerbPOST;
             
             yield return webRequest.SendWebRequest();
+            
             LogRequestResult(body, webRequest);
-
+            
+            T response;
             if (webRequest.result == UnityWebRequest.Result.Success)
             {
-                var parsedResponse = new T().FromJson(webRequest.downloadHandler.text);
-                completionCallback(parsedResponse);
+                response = new T().FromJson(webRequest.downloadHandler.text);
+                response.Result = webRequest.result;
             }
             else
             {
-                completionCallback(default(T));
+                response = new T
+                {
+                    Result = webRequest.result
+                };
             }
+            
+            webRequest.Dispose();
+            
+            completionCallback(response);
         }
 
         private void LogRequestResult(string body, UnityWebRequest request)
@@ -454,9 +471,11 @@ namespace OpenAi
         }
     }
     
+    
     public interface IRequestable<T>
     {
         string URL { get; }
+        UnityWebRequest.Result Result { set; get; }
         T FromJson(string jsonString);
     }
     
@@ -475,8 +494,10 @@ namespace OpenAi
             public int n;
             public float temperature;
             public int max_tokens;
+            
+            private const int defaultMaxTokens = 1000;
 
-            public Request(string prompt, string model, int n=1, float temperature=.8f, int max_tokens=100)
+            public Request(string prompt, string model, int n=1, float temperature=.8f, int max_tokens=defaultMaxTokens)
             {
                 this.prompt = prompt;
                 this.model = model;
@@ -485,7 +506,7 @@ namespace OpenAi
                 this.max_tokens = max_tokens;
             }
 
-            public Request(string prompt, OpenAiApi.Model model, int n=1, float temperature=.8f, int max_tokens=100)
+            public Request(string prompt, OpenAiApi.Model model, int n=1, float temperature=.8f, int max_tokens=defaultMaxTokens)
             {
                 this.prompt = prompt;
                 this.model = OpenAiApi.ModelToString[model];
@@ -498,8 +519,8 @@ namespace OpenAi
         [Serializable]
         public class Choice
         {
-            public string text;
-            public int index;
+            public string text = "";
+            public int index = 0;
             public string logprobs;
             public string finish_reason;
         }
@@ -516,9 +537,16 @@ namespace OpenAi
         public string obj;
         public int created;
         public string model;
-        public Choice[] choices;
+        public Choice[] choices = new Choice[] {};
         public Usage usage;
-            
+
+        public UnityWebRequest.Result Result { get; set; }
+
+        public AiText()
+        {
+            choices = new [] { new Choice() };
+        }
+        
         public AiText FromJson(string jsonString)
         {
             jsonString = jsonString.Replace("\"object\":", "\"obj\":"); //Have to replace object since it's a reserved word. 
@@ -568,7 +596,16 @@ namespace OpenAi
         }
         
         public int created;
-        public Data[] data;
+        public Data[] data = new Data[]{};
+
+        public UnityWebRequest.Result Result { get; set; }
+
+        public AiImage()
+        {
+            data = new [] { new Data
+                { url = "", texture = null } 
+            };
+        }
             
         public AiImage FromJson(string jsonString)
         {

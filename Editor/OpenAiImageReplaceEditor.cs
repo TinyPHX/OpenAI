@@ -12,6 +12,7 @@ namespace OpenAi
         private bool previousRemoveBackgroud = false;
         private SamplePoint[] previousSamplePoints = new SamplePoint[] { };
         private float previousColorSensitivity = 0;
+        private bool previousContinuous = true;
         private float previousFeatherSize = 0;
         private float previousFeatherAmount = 0;
 
@@ -53,17 +54,7 @@ namespace OpenAi
             if (openAiImageReplace.texture != null)
             {
                 Rect rect = GUILayoutUtility.GetRect(Screen.width, Screen.width);
-                Texture2D textureToDisplay = openAiImageReplace.texture;
-
-                if (openAiImageReplace.textureNoBackground != null && openAiImageReplace.removeBackground)
-                {
-                    textureToDisplay = openAiImageReplace.textureNoBackground;
-                }
-                
-                if (openAiImageReplace.textureWrapped != null && openAiImageReplace.wrap)
-                {
-                    textureToDisplay = openAiImageReplace.textureWrapped;
-                }
+                Texture2D textureToDisplay = openAiImageReplace.Texture;
 
                 if (!openAiImageReplace.wrap || openAiImageReplace.previewGrid == 1)
                 {
@@ -82,24 +73,15 @@ namespace OpenAi
                             EditorGUI.DrawPreviewTexture(gridRect, textureToDisplay, new Material(Shader.Find("Sprites/Default")));
                         }
                     }
-                    
-                    // Rect rect1 = new Rect(rect.x, rect.y, rectWidth, rectHeight);
-                    // Rect rect2 = new Rect(rect.x + rectWidth, rect.y, rectWidth, rectHeight);
-                    // Rect rect3 = new Rect(rect.x, rect.y + rectHeight, rectWidth, rectHeight);
-                    // Rect rect4 = new Rect(rect.x + rectWidth, rect.y + rectHeight, rectWidth, rectHeight);
-                
-                    // EditorGUI.DrawPreviewTexture(rect1, textureToDisplay, new Material(Shader.Find("Sprites/Default")));
-                    // EditorGUI.DrawPreviewTexture(rect2, textureToDisplay, new Material(Shader.Find("Sprites/Default")));
-                    // EditorGUI.DrawPreviewTexture(rect3, textureToDisplay, new Material(Shader.Find("Sprites/Default")));
-                    // EditorGUI.DrawPreviewTexture(rect4, textureToDisplay, new Material(Shader.Find("Sprites/Default")));
                 }
             }
 
             bool removeBackgroundSettingChanged =
                 openAiImageReplace != null && (
                     previousRemoveBackgroud != openAiImageReplace.removeBackground ||
-                    !previousSamplePoints.SequenceEqual(openAiImageReplace.samplePoints.points) ||
+                    !SamplePoint.SequenceEqual(previousSamplePoints, openAiImageReplace.samplePoints.points) ||
                     previousColorSensitivity != openAiImageReplace.colorSensitivity ||
+                    previousContinuous != openAiImageReplace.continuous ||
                     previousFeatherAmount != openAiImageReplace.featherAmount ||
                     previousFeatherSize != openAiImageReplace.featherSize
                 );
@@ -107,8 +89,16 @@ namespace OpenAi
             if (removeBackgroundSettingChanged)
             {
                 previousRemoveBackgroud = openAiImageReplace.removeBackground;
-                previousSamplePoints = openAiImageReplace.samplePoints.points.Select(samplePoint =>(SamplePoint)samplePoint.Clone()).ToArray();
+                if (openAiImageReplace.samplePoints.points == null)
+                {
+                    previousSamplePoints = null;
+                }
+                else
+                {
+                    previousSamplePoints = openAiImageReplace.samplePoints.points.Select(samplePoint =>(SamplePoint)samplePoint.Clone()).ToArray();
+                }
                 previousColorSensitivity = openAiImageReplace.colorSensitivity;
+                previousContinuous = openAiImageReplace.continuous;
                 previousFeatherAmount = openAiImageReplace.featherAmount;
                 previousFeatherSize = openAiImageReplace.featherSize;
 
@@ -122,7 +112,7 @@ namespace OpenAi
                     previousPreviewGrid != openAiImageReplace.previewGrid
                 );
 
-            if (wrapSettingChanged)
+            if (wrapSettingChanged || removeBackgroundSettingChanged)
             {
                 previousWrap = openAiImageReplace.wrap;
                 previousWrapSize = openAiImageReplace.wrapSize;
@@ -131,22 +121,25 @@ namespace OpenAi
                 openAiImageReplace.WrapTexture();
             }
 
+            // Save to file
+            Texture2D textureToSave = openAiImageReplace.texture;
+            string name = openAiImageReplace.prompt;
+            if (openAiImageReplace.textureNoBackground != null && openAiImageReplace.removeBackground)
+            {
+                textureToSave = openAiImageReplace.textureNoBackground;
+                name += "_alpha";
+            }
+            if (openAiImageReplace.textureWrapped != null && openAiImageReplace.wrap)
+            {
+                textureToSave = openAiImageReplace.textureWrapped;
+                name += "_wrapped";
+            }
+            EditorGUI.BeginDisabledGroup(textureToSave == null);
             if (GUILayout.Button("Save to File"))
             {
-                Texture2D textureToSave = openAiImageReplace.texture;
-
-                if (openAiImageReplace.textureNoBackground != null && openAiImageReplace.removeBackground)
-                {
-                    textureToSave = openAiImageReplace.textureNoBackground;
-                }
-                
-                if (openAiImageReplace.textureWrapped != null && openAiImageReplace.wrap)
-                {
-                    textureToSave = openAiImageReplace.textureWrapped;
-                }
-                
-                Utils.Image.SaveToFile(openAiImageReplace.prompt, (Texture2D)textureToSave, true);
+                Utils.Image.SaveToFile(name, textureToSave, true);
             }
+            EditorGUI.EndDisabledGroup();
         }
     }
 }
