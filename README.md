@@ -30,7 +30,7 @@ Get Started
 5. Place the file on you computer in `C:\Users\uname\.openai\auth.json`
     ![](https://i.imgur.com/VyqUK0r.png)
 
-6. Add one of the built in components to your scene:
+6. Add one of the built-in components to your scene:
 7. Add the `OpenAiImageReplace` or `OpenAiTextReplace` example components to any GameObject in your scene.
 8. Add a prompt and click `Generate Image` or `Generate Text`
 
@@ -45,7 +45,7 @@ OpenAI Unity Asset includes three components for integrating OpenAI APIs into Un
 -   `OpenAiTextReplace` for replacing text objects with AI-generated text.
 
 
-Scritping Interface
+Scripting Interface
 -------------------------
 
 Here's an example of how you can create a text completion request and image generation request in Unity using the OpenAI Unity Integration:
@@ -59,8 +59,8 @@ using OpenAi;
 
 public class SampleScript : MonoBehaviour {
     async void Start() {
-        var openai = new OpenAiApi(this);
-        Completion completion = await openai.CreateCompletion("Hello world");
+        var openai = new OpenAiApi();
+        var completion = await openai.CreateCompletion("Hello world");
         Debug.Log("OpenAI Response: " + completion.Text);
     }
 }
@@ -83,18 +83,18 @@ using OpenAi;
 
 public class SampleScript : MonoBehaviour {
     async void Start() {
-        var openai = new OpenAiApi( this);
-        Image image = await openai.CreateImage("Hello cat");
-        Texture2D texture = image.Texture2d;
+        var openai = new OpenAiApi();
+        var image = await openai.CreateImage("Hello cat");
+        Texture2D texture = image.Texture;
     }
 }
 ```
 
 Using a callback instead async/await
 ```csharp
-openai.CreateImage("Hello world", completion =>
+openai.CreateImage("Hello world", image =>
 {
-    Debug.Log("OpenAI Response: " + image.Text);
+    Texture2D texture = image.Texture;
 });
 ```
 
