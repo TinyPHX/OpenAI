@@ -27,7 +27,12 @@ namespace OpenAi
 
         public void ShowPlaceholderText()
         {
-            int lineReturnCount = response.Count(character => character == '\n');
+            int lineReturnCount = 0;
+            if (response != null)
+            {
+                lineReturnCount = response.Count(character => character == '\n');
+            }
+
             response = "Generating..." + new string(Enumerable.Repeat('\n', lineReturnCount).ToArray());
         }
     }

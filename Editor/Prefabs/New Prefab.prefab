@@ -1,0 +1,73 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &4602069700108203604
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 6395368433862158675}
+  - component: {fileID: -813277908811009425}
+  m_Layer: 0
+  m_Name: New Prefab
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &6395368433862158675
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4602069700108203604}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &-813277908811009425
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4602069700108203604}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d71fd1c7e2064804b29cda72a6a0315c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  spriteRenderer: {fileID: 0}
+  spriteRenderers: []
+  prompt: dwadw
+  size: 0
+  texture: {fileID: 2800000, guid: d130d4bb31a44e241bd7f9bb7ac8ce12, type: 3}
+  removeBackground: 1
+  textureNoBackground: {fileID: 0}
+  samplePoints:
+    points:
+    - color: {r: 0.03137255, g: 0.03137255, b: 0.03137255, a: 1}
+      position: {x: 25.6, y: 25.6}
+      similarity: 85.333336
+    - color: {r: 0.6784314, g: 0.69803923, b: 0.6117647, a: 1}
+      position: {x: 25.6, y: 230.4}
+      similarity: 85.333336
+    - color: {r: 0.03137255, g: 0.03137255, b: 0.03137255, a: 1}
+      position: {x: 230.4, y: 25.6}
+      similarity: 85.333336
+  colorSensitivity: 25
+  continuous: 1
+  featherSize: 3
+  featherAmount: 80
+  wrap: 1
+  textureWrapped: {fileID: 0}
+  wrapSize: 25
+  previewGrid: 2
+  newTextureSize: 224x224
+  requestPending: 0

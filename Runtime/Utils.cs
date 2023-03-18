@@ -187,6 +187,7 @@ namespace OpenAi.Utils
             return modifiedTexture;
         }
 
+        // ReSharper disable Unity.PerformanceAnalysis
         public static Texture2D WrapTexture(Texture2D image, int wrap)
         {
             bool test = false;

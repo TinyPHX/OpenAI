@@ -3,13 +3,12 @@
     using MyBox;
     using UnityEngine;
     using UnityEngine.Networking;
+    using UnityEngine.UI;
 
     namespace OpenAi
     {
         public class OpenAiImageReplace : MonoBehaviour
         {
-            public SpriteRenderer spriteRenderer;
-            public SpriteRenderer[] spriteRenderers;
             [TextAreaAttribute(1,20)] public string prompt;
             public OpenAiApi.Size size;
             [ReadOnly] public Texture2D texture;
@@ -30,8 +29,21 @@
             [ConditionalField(nameof(wrap)), Range(1, 10)] public int previewGrid = 2;
             [ConditionalField(nameof(wrap)), ReadOnly] public string newTextureSize = "";
             
+            [Separator("Replace In Scene")] 
+            [OverrideLabel("")] public bool replace;
+            [ConditionalField(nameof(replace))] public SpriteRenderers sprite = new SpriteRenderers();
+            [ConditionalField(nameof(replace))] public MeshRenderers mesh = new MeshRenderers();
+            [ConditionalField(nameof(replace))] public UiImage uiImage = new UiImage();
+            
+            
             [Separator("")] 
             [ReadOnly] public bool requestPending = false;
+
+            public OpenAiImageReplace ShallowCopy()
+            {
+                return (OpenAiImageReplace)this.MemberwiseClone();
+            }
+            
             public delegate void Callback();
             
             public async void ReplaceImage(Callback callback=null)
@@ -111,22 +123,65 @@
                 }
             }
             
-            private void UpdateSpriteRenderer()
+            private void ReplaceInScene()
             {
-                Texture2D newTexture = Texture;
-                
-                Sprite newSprite = Sprite.Create(newTexture, new Rect(0, 0, newTexture.width, newTexture.height), new Vector2(0.5f, 0.5f));
-                if (spriteRenderer != null)
+                if (replace)
                 {
-                    spriteRenderer.sprite = newSprite;
-                }
+                    Texture2D newTexture = Texture;
 
-                if (spriteRenderers != null)
-                {
-                    foreach (SpriteRenderer sprite in spriteRenderers)
+                    ReplaceMeshTexture(mesh.singleMesh, newTexture);
+                    foreach (MeshRenderer meshRenderer in mesh.multipleMeshes)
                     {
-                        sprite.sprite = newSprite;
+                        ReplaceMeshTexture(meshRenderer, newTexture);
                     }
+                    
+                    ReplaceSpriteTexture(sprite.singleSprite, newTexture);
+                    foreach (SpriteRenderer spriteRenderer in sprite.multipleSprites)
+                    {
+                        ReplaceSpriteTexture(spriteRenderer, newTexture);
+                    }
+                    
+                    ReplaceImageTexture(uiImage.singleImage, newTexture);
+                    foreach (Image image in uiImage.multipleImages)
+                    {
+                        ReplaceImageTexture(image, newTexture);
+                    }
+                }
+            }
+
+            public void ReplaceMeshTexture(MeshRenderer mesh, Texture2D texutre)
+            {
+                if (mesh)
+                {
+                    if (Application.isPlaying)
+                    {
+                        mesh.material.mainTexture = texutre;
+                    }
+                    else
+                    {
+                        Material newMaterial = new Material(mesh.sharedMaterial);
+                        newMaterial.mainTexture = texutre;
+                        mesh.sharedMaterial = newMaterial;
+                    }
+                }
+                
+            }
+            
+            public void ReplaceSpriteTexture(SpriteRenderer sprite, Texture2D texutre)
+            {
+                if (sprite)
+                {
+                    Sprite newSprite = Sprite.Create(texutre, new Rect(0, 0, texutre.width, texutre.height), new Vector2(0.5f, 0.5f));
+                    sprite.sprite = newSprite;
+                }
+            }
+            
+            public void ReplaceImageTexture(Image image, Texture2D texutre)
+            {
+                if (image)
+                {
+                    Sprite newSprite = Sprite.Create(texutre, new Rect(0, 0, texutre.width, texutre.height), new Vector2(0.5f, 0.5f));
+                    image.sprite = newSprite;
                 }
             }
             
@@ -142,7 +197,7 @@
                         samplePoints.points,
                         continuous
                     );
-                    UpdateSpriteRenderer();
+                    ReplaceInScene();
                 }
             }
 
@@ -159,10 +214,32 @@
 
                     newTextureSize = textureWrapped.width + "x" + textureWrapped.height;
                     
-                    UpdateSpriteRenderer();
+                    ReplaceInScene();
                 }
             }
         }
+
+        [Serializable]
+        public struct SpriteRenderers
+        {
+            public SpriteRenderer singleSprite;
+            public SpriteRenderer[] multipleSprites;
+        }
+
+        [Serializable]
+        public struct MeshRenderers
+        {
+            public MeshRenderer singleMesh;
+            public MeshRenderer[] multipleMeshes;
+        }
+
+        [Serializable]
+        public struct UiImage
+        {
+            public Image singleImage;
+            public Image[] multipleImages;
+        }
+        
         
         [Serializable]
         public struct SamplePointArray { public SamplePoint[] points; } //Workaround for ConditionalField https://github.com/Deadcows/MyBox/issues/10#issuecomment-629495790

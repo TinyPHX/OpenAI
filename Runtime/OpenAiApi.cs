@@ -14,8 +14,9 @@ namespace OpenAi
     [Serializable]
     public class Configuration
     {
+        public static string AuthFileDir => "/.openai";
         public static string AuthFilePath => "/.openai/auth.json";
-        public static Configuration GlobalConfig;
+        public static Configuration GlobalConfig = new Configuration("", "");
         public static bool SaveTempImages => true;
         public class GlobalConfigFormat
         {
@@ -257,13 +258,36 @@ namespace OpenAi
                 return ActiveConfig.Organization;
             }
         }
+        
+        // public static Configuration
+        
+        public static string ConfigFileDir => Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + OpenAi.Configuration.AuthFileDir;
+        public static string ConfigFilePath => Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + OpenAi.Configuration.AuthFilePath;
 
         public static Configuration ReadConfigFromUserDirectory()
         {
-            string configFilePath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + OpenAi.Configuration.AuthFilePath;
-            string jsonConfig = File.ReadAllText(configFilePath);
-            var config = JsonUtility.FromJson<Configuration.GlobalConfigFormat>(jsonConfig);
-            return new Configuration(config.private_api_key, config.organization);
+            try
+            {
+                string jsonConfig = File.ReadAllText(ConfigFilePath);
+                var config = JsonUtility.FromJson<Configuration.GlobalConfigFormat>(jsonConfig);
+                return new Configuration(config.private_api_key, config.organization);
+            }
+            catch (Exception exception) when (exception is DirectoryNotFoundException || exception is FileNotFoundException)
+            {
+                return new Configuration("", "");
+            }
+        }
+
+        public static void SaveConfigToUserDirectory(Configuration config)
+        {
+            if (!Directory.Exists(ConfigFileDir)) { Directory.CreateDirectory(ConfigFileDir); }
+            Configuration.GlobalConfigFormat globalConfig = new Configuration.GlobalConfigFormat
+            {
+                private_api_key = config.ApiKey,
+                organization = config.Organization
+            };
+            string jsonConfig = JsonUtility.ToJson(globalConfig, true);
+            File.WriteAllText(ConfigFilePath, jsonConfig);
         }
         
         public static void Configuration(string globalApiKey, string globalOrganization)

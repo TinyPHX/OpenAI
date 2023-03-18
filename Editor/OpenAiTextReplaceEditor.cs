@@ -18,6 +18,12 @@ namespace OpenAi
             
             if (GUILayout.Button("Generate Text"))
             {
+                if (Configuration.GlobalConfig.ApiKey == "")
+                {
+                    OpenAiCredentialsWindow.InitWithHelp("Please setup your API Key before using the Open AI API.", MessageType.Info);
+                    return;
+                }
+                
                 openAiTextReplace.ReplaceText();
             }
         }
