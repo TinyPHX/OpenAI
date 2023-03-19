@@ -1,11 +1,7 @@
-﻿using System;
+﻿using System.Collections;
 using System.Linq;
-using System.Reflection;
-using NUnit.Framework.Constraints;
 using UnityEditor;
-using UnityEditor.PackageManager.UI;
 using UnityEngine;
-using Object = UnityEngine.Object;
 
 namespace OpenAi
 {
@@ -66,8 +62,11 @@ namespace OpenAi
         }
 
         void DrawGroup1()
-        { 
-            DrawDefaultInspector();
+        {
+            if (this)
+            {
+                DrawDefaultInspector();
+            }
         }
 
         void DrawGroup2()
@@ -88,32 +87,25 @@ namespace OpenAi
             EditorGUI.BeginDisabledGroup(openAiImageReplace.requestPending);
             if (GUILayout.Button("Generate Image"))
             {
-                if (Configuration.GlobalConfig.ApiKey == "")
+                if (!EditorUtils.ApiKeyPromptCheck())
                 {
-                    Configuration.GlobalConfig = OpenAiApi.ReadConfigFromUserDirectory();
-                    if (Configuration.GlobalConfig.ApiKey == "")
+                    string assetPath = AssetDatabase.GetAssetPath(openAiImageReplace.gameObject);
+                    isPrefab = assetPath != "";
+
+                    if (isPrefab)
                     {
-                        OpenAiCredentialsWindow.InitWithHelp("Please setup your API Key before using the Open AI API.", MessageType.Info);
-                        return;
+                        GameObject prefabRoot = PrefabUtility.LoadPrefabContents(assetPath);
+                        OpenAiImageReplace prefabTarget = prefabRoot.GetComponent<OpenAiImageReplace>();
+                        prefabTarget.ReplaceImage(() =>
+                        {
+                            PrefabUtility.SaveAsPrefabAsset(prefabRoot, assetPath, out bool success);
+                            PrefabUtility.UnloadPrefabContents(prefabRoot);
+                        });
                     }
-                }
-
-                string assetPath = AssetDatabase.GetAssetPath(openAiImageReplace.gameObject);
-                isPrefab = assetPath != "";
-
-                if (isPrefab)
-                {
-                    GameObject prefabRoot = PrefabUtility.LoadPrefabContents(assetPath);
-                    OpenAiImageReplace prefabTarget = prefabRoot.GetComponent<OpenAiImageReplace>();
-                    prefabTarget.ReplaceImage(() =>
+                    else
                     {
-                        PrefabUtility.SaveAsPrefabAsset(prefabRoot, assetPath, out bool success);
-                        PrefabUtility.UnloadPrefabContents(prefabRoot);
-                    });
-                }
-                else
-                {
-                    openAiImageReplace.ReplaceImage();
+                        openAiImageReplace.ReplaceImage();
+                    }
                 }
             }
             EditorGUI.EndDisabledGroup();
@@ -134,11 +126,12 @@ namespace OpenAi
                 name += "_wrapped";
             }
             EditorGUI.BeginDisabledGroup(textureToSave == null);
-            if (GUILayout.Button("Save to File"))
-            {
-                Utils.Image.SaveToFile(name, textureToSave, true);
-            }
-            EditorGUI.EndDisabledGroup();
+            EditorUtils.Disable(textureToSave == null, () => {
+                if (GUILayout.Button("Save to File"))
+                {
+                    Utils.Image.SaveToFile(name, textureToSave, true);
+                }
+            });
         }
 
         void UpdateTexture()

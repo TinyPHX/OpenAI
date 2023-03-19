@@ -1,10 +1,8 @@
-﻿using System.Diagnostics;
-using System.Linq;
-using NUnit.Framework.Constraints;
-using Unity.Collections;
+﻿using System;
+using System.Diagnostics;
 using UnityEditor;
-using UnityEditor.PackageManager.UI;
 using UnityEngine;
+using Debug = UnityEngine.Debug;
 
 namespace OpenAi
 {
@@ -78,6 +76,16 @@ namespace OpenAi
             callback();
             EditorGUI.EndDisabledGroup();
         }
+
+        public static void ChangeCheck(Callback callback, Callback changeCallback)
+        {
+            EditorGUI.BeginChangeCheck();
+            callback();
+            if (EditorGUI.EndChangeCheck())
+            {
+                changeCallback();
+            }
+        }
         
         public static void OpenFolder(string folderPath)
         {
@@ -90,104 +98,21 @@ namespace OpenAi
             Process.Start(startInfo);
         }
 
-        // private static string apiKey;
-        // private static string orgId;
-        // private static bool showApiKey;
-        // public static Rect DrawCredentialsUi(string curentApiKey, string currentOrgId)
-        // {
-        //     EditorUtils.apiKey = curentApiKey;
-        //     EditorUtils.orgId = currentOrgId;
-        //     
-        //     return Horizontal(() =>
-        //     {
-        //         SmallSpace();
-        //         Vertical(() =>
-        //         {
-        //             SmallSpace();
-        //             if (helpText != "")
-        //             {
-        //                 EditorGUILayout.HelpBox(helpText, messageType);
-        //             }
-        //
-        //             SmallSpace();
-        //
-        //             Horizontal(() =>
-        //             {
-        //                 string priorValue = EditorUtils.apiKey;
-        //                 if (showApiKey)
-        //                 {
-        //                     EditorUtils.apiKey = EditorGUILayout.TextField("API Key", EditorUtils.apiKey);
-        //                 }
-        //                 else
-        //                 {
-        //                     EditorUtils.apiKey = EditorGUILayout.PasswordField("API Key", EditorUtils.apiKey);
-        //                 }
-        //
-        //                 if (apiKey != priorValue)
-        //                 {
-        //                     canSave = true;
-        //                 }
-        //
-        //                 if (GUILayout.Button("*", smallButton))
-        //                 {
-        //                     showApiKey = !showApiKey;
-        //                 }
-        //
-        //                 if (GUILayout.Button("?", smallButton))
-        //                 {
-        //                     Application.OpenURL("https://platform.openai.com/account/api-keys");
-        //                 }
-        //             });
-        //
-        //             EditorUtils.Horizontal(() =>
-        //             {
-        //                 string priorValue = apiKey;
-        //                 priorValue = orgId;
-        //                 orgId = EditorGUILayout.TextField("Organization ID", orgId);
-        //                 if (orgId != priorValue)
-        //                 {
-        //                     canSave = true;
-        //                 }
-        //
-        //                 if (GUILayout.Button("?", smallButton))
-        //                 {
-        //                     Application.OpenURL("https://platform.openai.com/account/org-settings");
-        //                 }
-        //             });
-        //             GUILayout.Space(spacingBig);
-        //             EditorUtils.Horizontal(() =>
-        //             {
-        //                 GUILayout.Space(spacingBig);
-        //                 if (GUILayout.Button("Cancel"))
-        //                 {
-        //                     PopulateCurrentCredentials();
-        //                     window.Close();
-        //                 }
-        //
-        //                 BigSpace();
-        //                 EditorUtils.Disable(!Directory.Exists(OpenAiApi.ConfigFileDir), () =>
-        //                 {
-        //                     if (GUILayout.Button("Open"))
-        //                     {
-        //                         OpenFolder(OpenAiApi.ConfigFileDir);
-        //                     }
-        //                 });
-        //                 BigSpace();
-        //                 EditorUtils.Disable(!canSave, () =>
-        //                 {
-        //                     if (GUILayout.Button("Save"))
-        //                     {
-        //                         Configuration.GlobalConfig = new Configuration(apiKey, orgId);
-        //                         OpenAiApi.SaveConfigToUserDirectory(Configuration.GlobalConfig);
-        //                         window.Close();
-        //                     }
-        //                 });
-        //                 BigSpace();
-        //             });
-        //             SmallSpace();
-        //         });
-        //         SmallSpace();
-        //     }));
-        // }
+        public static bool ApiKeyPromptCheck()
+        {
+            bool promptShown = false;
+            
+            if (Configuration.GlobalConfig.ApiKey == "")
+            {
+                Configuration.GlobalConfig = OpenAiApi.ReadConfigFromUserDirectory();
+                if (Configuration.GlobalConfig.ApiKey == "")
+                {
+                    OpenAiCredentialsWindow.InitWithHelp("Please setup your API Key before using the Open AI API.", MessageType.Info);
+                    promptShown = true;
+                }
+            }
+
+            return promptShown;
+        }
     }
 }

@@ -198,7 +198,7 @@ namespace OpenAi
 
         private Configuration config;
         private static CoroutineRunner runner;
-        private static CoroutineRunner Runner {
+        public static CoroutineRunner Runner {
             get
             {
                 if (!runner)

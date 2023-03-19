@@ -42,13 +42,21 @@
             [ReadOnly] public bool requestPending = false;
 
             [HideInInspector] public bool isEditorWindow;
-            
-            public OpenAiImageReplace ShallowCopy()
-            {
-                return (OpenAiImageReplace)this.MemberwiseClone();
-            }
+
+            private bool componentsInitialized = false;
             
             public delegate void Callback();
+
+            public void Update()
+            {
+                if (!componentsInitialized)
+                {
+                    componentsInitialized = true;
+                    sprite.single = GetComponent<SpriteRenderer>();
+                    mesh.single = GetComponent<MeshRenderer>();
+                    uiImage.single = GetComponent<Image>();
+                }
+            }
             
             public async void ReplaceImage(Callback callback=null)
             {
@@ -133,20 +141,20 @@
                 {
                     Texture2D newTexture = Texture;
 
-                    ReplaceMeshTexture(mesh.singleMesh, newTexture);
-                    foreach (MeshRenderer meshRenderer in mesh.multipleMeshes)
+                    ReplaceMeshTexture(mesh.single, newTexture);
+                    foreach (MeshRenderer meshRenderer in mesh.multiple)
                     {
                         ReplaceMeshTexture(meshRenderer, newTexture);
                     }
                     
-                    ReplaceSpriteTexture(sprite.singleSprite, newTexture);
-                    foreach (SpriteRenderer spriteRenderer in sprite.multipleSprites)
+                    ReplaceSpriteTexture(sprite.single, newTexture);
+                    foreach (SpriteRenderer spriteRenderer in sprite.multiple)
                     {
                         ReplaceSpriteTexture(spriteRenderer, newTexture);
                     }
                     
-                    ReplaceImageTexture(uiImage.singleImage, newTexture);
-                    foreach (Image image in uiImage.multipleImages)
+                    ReplaceImageTexture(uiImage.single, newTexture);
+                    foreach (Image image in uiImage.multiple)
                     {
                         ReplaceImageTexture(image, newTexture);
                     }
@@ -225,22 +233,22 @@
         [Serializable]
         public struct SpriteRenderers
         {
-            public SpriteRenderer singleSprite;
-            public SpriteRenderer[] multipleSprites;
+            public SpriteRenderer single;
+            public SpriteRenderer[] multiple;
         }
 
         [Serializable]
         public struct MeshRenderers
         {
-            public MeshRenderer singleMesh;
-            public MeshRenderer[] multipleMeshes;
+            public MeshRenderer single;
+            public MeshRenderer[] multiple;
         }
 
         [Serializable]
         public struct UiImage
         {
-            public Image singleImage;
-            public Image[] multipleImages;
+            public Image single;
+            public Image[] multiple;
         }
         
         

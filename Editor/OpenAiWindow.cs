@@ -3,19 +3,16 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 using System.IO;
-using System.Diagnostics;
 using System.Linq;
+using TP;
 using UnityEngine.SceneManagement;
-using UnityEngine.UIElements;
-using Debug = UnityEngine.Debug;
+using Object = UnityEngine.Object;
 
 namespace OpenAi
 {
     public class OpenAiWindow: EditorWindow
      {
          private static OpenAiWindow window;
-         private static OpenAiImageReplace target;
-         private static OpenAiImageReplaceEditor openAiImageReplaceEditor;
          private static Vector2 scroll = new Vector2();
          private static int activeTab = 0;
          private static int spacing = 20;
@@ -38,7 +35,7 @@ namespace OpenAi
              { Tabs.text, "Text Completion" },
              { Tabs.image, "Image Generation" },
              { Tabs.creds, "Credentials" },
-             { Tabs.help, "Help" }
+             { Tabs.help, "Readme" }
          };
          
          private static Dictionary<Tabs, string> shortTabNames = new Dictionary<Tabs, string>()
@@ -50,45 +47,75 @@ namespace OpenAi
              { Tabs.help, "Help" }
          };
 
-         private static OpenAiImageReplace Target {
-             get
+         private static Dictionary<Type, Object> Targets = new Dictionary<Type, Object>();
+         private static Dictionary<Type, Object> Editors = new Dictionary<Type, Object>();
+         private static Dictionary<Type, GameObject> Prefabs = new Dictionary<Type, GameObject>();
+
+         private static T GetTargetEditor<T>() where T : Editor
+         {
+             if (!Editors.ContainsKey(typeof(T)) || Editors[typeof(T)] == null)
              {
-                 Scene previousScene = activeScene;
-                 activeScene = SceneManager.GetActiveScene();
-                 if (activeScene != previousScene)
+                 T editor = CreateInstance<T>();
+
+                 Editors[typeof(T)] = editor;
+             }
+
+             return Editors[typeof(T)] as T;
+         }
+
+
+         private static T GetTarget<T>() where T : MonoBehaviour
+         {
+             Scene previousScene = activeScene;
+             activeScene = SceneManager.GetActiveScene();
+             if (activeScene != previousScene)
+             {
+                 // TODO create hidden instance :(
+                 // Doing this will allow for "Replace in Scene" to work in EditorWindow.
+             }
+             
+             if (!Targets.ContainsKey(typeof(T)) || Targets[typeof(T)] == null)
+             {
+                 var findAssetResults = AssetDatabase.FindAssets ( $"t:Script {nameof(OpenAiWindow)}" );
+                 var assetPath = Path.GetDirectoryName(AssetDatabase.GUIDToAssetPath(findAssetResults[0]));
+
+                 string defaultPrefabPath = "/Prefabs/prefab.prefab";
+                 string newPrefabPath = $"/Prefabs/{typeof(T)}.prefab";
+
+                 GameObject prefab;
+                 if (File.Exists(Application.dataPath + assetPath.Substring("Assets".Length) + newPrefabPath))
                  {
-                     // TODO create hidden instance :(
-                     // Doing this will allow for "Replace in Scene" to work in EditorWindow.
+                     GameObject loadedPrefab = PrefabUtility.LoadPrefabContents(assetPath + newPrefabPath);
+                     prefab = PrefabUtility.SaveAsPrefabAsset(loadedPrefab, assetPath + newPrefabPath, out bool success);
+                     prefab = PrefabUtility.SavePrefabAsset(prefab);
+                     PrefabUtility.UnloadPrefabContents(loadedPrefab);
+                 }
+                 else
+                 {
+                     GameObject defaultPrefab = PrefabUtility.LoadPrefabContents(assetPath + defaultPrefabPath);
+                     prefab = PrefabUtility.SaveAsPrefabAsset(defaultPrefab, assetPath + newPrefabPath, out bool success);
+                     PrefabUtility.UnloadPrefabContents(defaultPrefab);
+                     prefab.AddComponent<T>();
+                     prefab = PrefabUtility.SavePrefabAsset(prefab);
+                     
+                     AssetDatabase.Refresh();
                  }
                  
-                 if (target == null)
-                 {
-                     var findAssetResults = AssetDatabase.FindAssets ( $"t:Script {nameof(OpenAiWindow)}" );
-                     var assetPath = Path.GetDirectoryName(AssetDatabase.GUIDToAssetPath(findAssetResults[0]));
+                 Prefabs[typeof(T)] = prefab;
 
-                     string defaultPrefabPath = "/Prefabs/prefab.prefab";
-                     string newPrefabPath = "/Prefabs/OpenAiImageReplace.prefab";
+                 T newTarget = prefab.GetComponent<T>();
 
-                     GameObject prefab;
-                     if (File.Exists(Application.dataPath + assetPath.Substring("Assets".Length) + newPrefabPath))
-                     {
-                         prefab = PrefabUtility.LoadPrefabContents(assetPath + newPrefabPath);
-                     }
-                     else
-                     {
-                         GameObject defaultPrefab = PrefabUtility.LoadPrefabContents(assetPath + defaultPrefabPath);
-                         prefab = PrefabUtility.SaveAsPrefabAsset(defaultPrefab, assetPath + newPrefabPath, out bool success);
-                         PrefabUtility.UnloadPrefabContents(defaultPrefab);
-                         target = prefab.AddComponent<OpenAiImageReplace>();
-                         prefab = PrefabUtility.SavePrefabAsset(target.gameObject);
-                         
-                         AssetDatabase.Refresh();
-                     }
+                 Targets[typeof(T)] = newTarget;
+             }
 
-                     target = prefab.GetComponent<OpenAiImageReplace>();
-                 }
+             return Targets[typeof(T)] as T;
+         }
 
-                 return target;
+         private void SavePrefab<T>() where T : MonoBehaviour
+         {
+             if (Targets.ContainsKey(typeof(T)))
+             {
+                 PrefabUtility.SavePrefabAsset(Prefabs[typeof(T)]);
              }
          }
 
@@ -139,19 +166,48 @@ namespace OpenAi
 
              GUILayout.Space(spacing);
 
+             if (activeTab == (int)Tabs.raw)
+             {
+                 var editor = GetTargetEditor<OpenAiApiExampleEditor>();
+                 
+                 if (editor.InternalTarget == null)
+                 {
+                     editor.InternalTarget = GetTarget<OpenAiApiExample>();
+                 }
+                 
+                 editor.OnInspectorGUI();
+             }
+
+             if (activeTab == (int)Tabs.text)
+             {
+                 var editor = GetTargetEditor<OpenAiTextReplaceEditor>();
+                 
+                 if (editor.InternalTarget == null)
+                 {
+                     editor.InternalTarget = GetTarget<OpenAiTextReplace>();
+                 }
+
+                 EditorUtils.ChangeCheck(() =>
+                 {
+                     editor.OnInspectorGUI();
+                 }, () =>
+                 {
+                     SavePrefab<OpenAiTextReplace>();
+                 });
+             }
+
              if (activeTab == (int)Tabs.image)
              {
-                 if (openAiImageReplaceEditor == null)
-                 {
-                     openAiImageReplaceEditor = CreateInstance<OpenAiImageReplaceEditor>();
-                 }
+                 var editor = GetTargetEditor<OpenAiImageReplaceEditor>();
+                 editor.InternalTarget = GetTarget<OpenAiImageReplace>();
 
-                 if (openAiImageReplaceEditor.InternalTarget == null)
+                 EditorUtils.ChangeCheck(() =>
                  {
-                     openAiImageReplaceEditor.InternalTarget = Target;
-                 }
-
-                 openAiImageReplaceEditor.OnInspectorGUI();
+                     editor.OnInspectorGUI();
+                 }, () =>
+                 {
+                     SavePrefab<OpenAiImageReplace>();
+                 });
              }
 
              if (activeTab == (int)Tabs.creds)
@@ -167,6 +223,26 @@ namespace OpenAi
                  }
                  
                  credsWindow.DrawUi();
+             }
+
+             if (activeTab == (int)Tabs.help)
+             {
+                 var editor = GetTargetEditor<ReadmeEditor>();
+                 
+                 Readme readme = GetTarget<Readme>();
+                 
+                 if (editor.InternalTarget == null)
+                 {
+                     editor.InternalTarget = readme;
+                 }
+                 
+                 EditorUtils.ChangeCheck(() =>
+                 {
+                     editor.OnInspectorGUI();
+                 }, () =>
+                 {
+                     SavePrefab<Readme>();
+                 });
              }
 
              GUILayout.Space(spacing);

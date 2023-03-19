@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using MyBox;
 using UnityEngine;
 using TMPro;
 
@@ -10,8 +11,19 @@ namespace OpenAi
         [TextAreaAttribute(1,20)]
         public string prompt;
         public OpenAiApi.Model model;
-        [TextAreaAttribute(1,20)]
+        [TextAreaAttribute(1,20), ReadOnly]
         public string response;
+        
+        private bool componentsInitialized = false;
+            
+        public void Update()
+        {
+            if (!componentsInitialized)
+            {
+                componentsInitialized = true;
+                textMesh = GetComponent<TextMeshProUGUI>();
+            }
+        }
         
         public async void ReplaceText()
         {

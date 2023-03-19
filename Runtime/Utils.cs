@@ -399,6 +399,7 @@ namespace OpenAi.Utils
                     path = EditorUtility.SaveFilePanel("Save Image", directory, adjustedFileName, extension);
                     if (path.Length == 0)
                     {
+                        GUIUtility.ExitGUI();
                         return default; //Canceled
                     }
 
@@ -426,6 +427,12 @@ namespace OpenAi.Utils
 
                 Texture2D newTexture = AssetDatabase.LoadAssetAtPath<Texture2D>(assetPath);
                 MakeTextureReadable(newTexture);
+
+                if (showDialogue)
+                {
+                    System.Threading.Thread.Sleep(1000); // Stupid hack: https://forum.unity.com/threads/endlayoutgroup-beginlayoutgroup-must-be-called-first.523209/#post-3652876
+                    GUIUtility.ExitGUI();
+                }
 
                 return newTexture;
             #else
