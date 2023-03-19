@@ -12,18 +12,18 @@ namespace OpenAi
          private static bool canSave = false;
          private static string apiKey;
          private static string orgId;
-         private static int spacingBig = 25;
-         private static int spacingSmall = 10;
          private static string helpText = "";
          private static bool showApiKey;
          private static MessageType messageType;
+         private bool isShowing = false;
+         
          GUILayoutOption[] smallButton = new[]
          {
              GUILayout.Width(EditorGUIUtility.singleLineHeight),
              GUILayout.Height(EditorGUIUtility.singleLineHeight)
          };
          
-         [MenuItem("Window/OpenAI/Credentials")]
+         // [MenuItem("Window/OpenAI/Credentials")]
          public static void InitFromMenu()
          {
              HideHelp();
@@ -35,8 +35,13 @@ namespace OpenAi
              ShowHelp(helpText, messageType);
              Init();
          }
+
+         public static OpenAiCredentialsWindow InitFromEditorWindow()
+         {
+             return Init(false);
+         }
          
-         private static void Init () 
+         private static OpenAiCredentialsWindow Init(bool show=true) 
          {
              PopulateCurrentCredentials();
              if (window != null)
@@ -45,7 +50,13 @@ namespace OpenAi
              }
              
              window = CreateInstance( typeof(OpenAiCredentialsWindow) ) as OpenAiCredentialsWindow;
-             window.ShowUtility();
+             if (show)
+             {
+                window.ShowUtility();
+                window.isShowing = true;
+             }
+
+             return window;
          }
 
          private static void ShowHelp(string helpText, MessageType messageType)
@@ -81,7 +92,7 @@ namespace OpenAi
 
          public void Destroy()
          {
-             Close();
+             CloseWindow();
 
              if (Application.isPlaying)
              {
@@ -93,65 +104,80 @@ namespace OpenAi
              }
          }
          
-         private static void PopulateCurrentCredentials()
+         public static void PopulateCurrentCredentials()
          {
              Configuration config = OpenAiApi.ReadConfigFromUserDirectory();
              apiKey = config.ApiKey;
              orgId = config.Organization;
          }
-         
-         private static void OpenFolder(string folderPath)
-         {
-             ProcessStartInfo startInfo = new ProcessStartInfo
-             {
-                 Arguments = folderPath.Replace('/', '\\'),
-                 FileName = "explorer.exe"
-             };
 
-             Process.Start(startInfo);
+         void CloseWindow()
+         {
+             if (window != null && window.isShowing)
+             {
+                 window.Close();
+             }
          }
-         
+
+         void Cancel()
+         {
+             PopulateCurrentCredentials();
+             GUI.FocusControl("");
+             CloseWindow();
+         }
+
          void OnGUI()
          {
              UpdateInstance();
              
-             UpdateWindowSize(EditorUtils.Horizontal(() => {
-                 GUILayout.Space(spacingSmall);
-                 EditorUtils.Vertical(() => {
-                     GUILayout.Space(spacingSmall);
+             UpdateWindowSize(DrawUi());
+         }
+
+         public Rect DrawUi()
+         {
+             return EditorUtils.Horizontal(() =>
+             {
+                 EditorUtils.SmallSpace();
+                 EditorUtils.Vertical(() =>
+                 {
+                     EditorUtils.SmallSpace();
                      if (helpText != "")
                      {
                          EditorGUILayout.HelpBox(helpText, messageType);
                      }
-                     GUILayout.Space(spacingSmall);
 
-                     EditorUtils.Horizontal(() => {
+                     EditorUtils.SmallSpace();
+
+                     EditorUtils.Horizontal(() =>
+                     {
                          string priorValue = apiKey;
                          if (showApiKey)
                          {
-                             apiKey = EditorGUILayout.TextField("API Key", apiKey);                             
+                             apiKey = EditorGUILayout.TextField("API Key", apiKey);
                          }
                          else
                          {
-                             apiKey = EditorGUILayout.PasswordField("API Key", apiKey);                             
+                             apiKey = EditorGUILayout.PasswordField("API Key", apiKey);
                          }
+
                          if (apiKey != priorValue)
                          {
                              canSave = true;
                          }
-                         
-                         if (GUILayout.Button("*", smallButton))
+
+                         if (GUILayout.Button("*", EditorUtils.smallButton))
                          {
                              showApiKey = !showApiKey;
                          }
 
-                         if (GUILayout.Button("?", smallButton))
+                         if (GUILayout.Button("?", EditorUtils.smallButton))
                          {
                              Application.OpenURL("https://platform.openai.com/account/api-keys");
                          }
                      });
 
-                     EditorUtils.Horizontal(() => {
+                     EditorUtils.Horizontal(() =>
+                     {
                          string priorValue = apiKey;
                          priorValue = orgId;
                          orgId = EditorGUILayout.TextField("Organization ID", orgId);
@@ -160,44 +186,44 @@ namespace OpenAi
                              canSave = true;
                          }
 
-                         if (GUILayout.Button("?", smallButton))
+                         if (GUILayout.Button("?", EditorUtils.smallButton))
                          {
                              Application.OpenURL("https://platform.openai.com/account/org-settings");
                          }
                      });
-                     GUILayout.Space(spacingBig);
-                     EditorUtils.Horizontal(() => {
-                         GUILayout.Space(spacingBig);
+                     EditorUtils.BigSpace();
+                     EditorUtils.Horizontal(() =>
+                     {
+                         EditorUtils.BigSpace();
                          if (GUILayout.Button("Cancel"))
                          {
-                             PopulateCurrentCredentials();
-                             window.Close();
+                             Cancel();
                          }
 
-                         GUILayout.Space(spacingBig);
+                         EditorUtils.BigSpace();
                          EditorUtils.Disable(!Directory.Exists(OpenAiApi.ConfigFileDir), () =>
                          {
                              if (GUILayout.Button("Open"))
                              {
-                                 OpenFolder(OpenAiApi.ConfigFileDir);
+                                 EditorUtils.OpenFolder(OpenAiApi.ConfigFileDir);
                              }
                          });
-                         GUILayout.Space(spacingBig);
+                         EditorUtils.BigSpace();
                          EditorUtils.Disable(!canSave, () =>
                          {
                              if (GUILayout.Button("Save"))
                              {
                                  Configuration.GlobalConfig = new Configuration(apiKey, orgId);
                                  OpenAiApi.SaveConfigToUserDirectory(Configuration.GlobalConfig);
-                                 window.Close();
+                                 CloseWindow();
                              }
                          });
-                         GUILayout.Space(spacingBig); 
+                         EditorUtils.BigSpace();
                      });
-                     GUILayout.Space(spacingSmall);
+                     EditorUtils.SmallSpace();
                  });
-                 GUILayout.Space(spacingSmall);
-             }));
+                 EditorUtils.SmallSpace();
+             });
          }
      }
 }

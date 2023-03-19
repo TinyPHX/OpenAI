@@ -29,6 +29,8 @@ namespace OpenAi
         public override void OnInspectorGUI()
         {
             openAiImageReplace = target as OpenAiImageReplace;
+            openAiImageReplace.isEditorWindow = isEditorWindow;
+            openAiImageReplace.replace &= !isEditorWindow;
             
             if (Screen.width < 500)
             {
@@ -50,7 +52,7 @@ namespace OpenAi
 
         void WideLayout()
         {
-            activeWidth = Screen.width / 2f - 25;
+            activeWidth = Screen.width / 2f - 35;
             EditorGUIUtility.labelWidth = Screen.width / 5;
             EditorUtils.Horizontal(() => {
                 EditorUtils.Vertical(() => {
@@ -107,7 +109,6 @@ namespace OpenAi
                     {
                         PrefabUtility.SaveAsPrefabAsset(prefabRoot, assetPath, out bool success);
                         PrefabUtility.UnloadPrefabContents(prefabRoot);
-                        // OnUpdate?.Invoke(this);
                     });
                 }
                 else
@@ -187,12 +188,6 @@ namespace OpenAi
         {
             if (openAiImageReplace.texture != null)
             {
-                // float currentWidth = EditorUtils.GetWidth();
-                // if (currentWidth > 0)
-                // {
-                //     activeWidth = currentWidth;
-                // }
-
                 Rect rect = GUILayoutUtility.GetRect(activeWidth, activeWidth);
                 Texture2D textureToDisplay = openAiImageReplace.Texture;
 
@@ -214,16 +209,6 @@ namespace OpenAi
                         }
                     }
                 }
-            }
-        }
-
-        void SavePrefabChanges()
-        {
-            if (isPrefab)
-            {
-                string assetPath = AssetDatabase.GetAssetPath(openAiImageReplace.gameObject);
-                GameObject prefabRoot = PrefabUtility.LoadPrefabContents(assetPath);
-                PrefabUtility.SaveAsPrefabAsset(prefabRoot, assetPath, out bool success);
             }
         }
     }

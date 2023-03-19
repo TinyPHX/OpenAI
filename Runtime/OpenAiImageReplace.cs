@@ -28,8 +28,10 @@
             [ConditionalField(nameof(wrap)), Range(0, 100)] public int wrapSize = 25;
             [ConditionalField(nameof(wrap)), Range(1, 10)] public int previewGrid = 2;
             [ConditionalField(nameof(wrap)), ReadOnly] public string newTextureSize = "";
-            
+
             [Separator("Replace In Scene")] 
+            [ConditionalField(nameof(isEditorWindow)), ReadOnly]
+            public string WARNING = "ONLY WORKS AS COMPONENT";
             [OverrideLabel("")] public bool replace;
             [ConditionalField(nameof(replace))] public SpriteRenderers sprite = new SpriteRenderers();
             [ConditionalField(nameof(replace))] public MeshRenderers mesh = new MeshRenderers();
@@ -39,6 +41,8 @@
             [Separator("")] 
             [ReadOnly] public bool requestPending = false;
 
+            [HideInInspector] public bool isEditorWindow;
+            
             public OpenAiImageReplace ShallowCopy()
             {
                 return (OpenAiImageReplace)this.MemberwiseClone();
@@ -149,7 +153,7 @@
                 }
             }
 
-            public void ReplaceMeshTexture(MeshRenderer mesh, Texture2D texutre)
+            private void ReplaceMeshTexture(MeshRenderer mesh, Texture2D texutre)
             {
                 if (mesh)
                 {
@@ -164,10 +168,9 @@
                         mesh.sharedMaterial = newMaterial;
                     }
                 }
-                
             }
             
-            public void ReplaceSpriteTexture(SpriteRenderer sprite, Texture2D texutre)
+            private void ReplaceSpriteTexture(SpriteRenderer sprite, Texture2D texutre)
             {
                 if (sprite)
                 {
@@ -176,7 +179,7 @@
                 }
             }
             
-            public void ReplaceImageTexture(Image image, Texture2D texutre)
+            private void ReplaceImageTexture(Image image, Texture2D texutre)
             {
                 if (image)
                 {

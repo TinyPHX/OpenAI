@@ -21,6 +21,8 @@ namespace OpenAi
          private static int spacing = 20;
          private static Scene activeScene;
 
+         private OpenAiCredentialsWindow credsWindow;
+
          private enum Tabs
          {
              raw = 0,
@@ -55,7 +57,8 @@ namespace OpenAi
                  activeScene = SceneManager.GetActiveScene();
                  if (activeScene != previousScene)
                  {
-                     //TODO create hidden instance :(
+                     // TODO create hidden instance :(
+                     // Doing this will allow for "Replace in Scene" to work in EditorWindow.
                  }
                  
                  if (target == null)
@@ -67,7 +70,7 @@ namespace OpenAi
                      string newPrefabPath = "/Prefabs/OpenAiImageReplace.prefab";
 
                      GameObject prefab;
-                     if (Directory.Exists(Application.dataPath + assetPath))
+                     if (File.Exists(Application.dataPath + assetPath.Substring("Assets".Length) + newPrefabPath))
                      {
                          prefab = PrefabUtility.LoadPrefabContents(assetPath + newPrefabPath);
                      }
@@ -75,13 +78,11 @@ namespace OpenAi
                      {
                          GameObject defaultPrefab = PrefabUtility.LoadPrefabContents(assetPath + defaultPrefabPath);
                          prefab = PrefabUtility.SaveAsPrefabAsset(defaultPrefab, assetPath + newPrefabPath, out bool success);
-                         // PrefabUtility.SaveAsPrefabAsset(defaultPrefab, assetPath + newPrefabPath, out bool success);
                          PrefabUtility.UnloadPrefabContents(defaultPrefab);
-                         // prefab = PrefabUtility.LoadPrefabContents(assetPath + newPrefabPath);
                          target = prefab.AddComponent<OpenAiImageReplace>();
                          prefab = PrefabUtility.SavePrefabAsset(target.gameObject);
                          
-                         // Save();
+                         AssetDatabase.Refresh();
                      }
 
                      target = prefab.GetComponent<OpenAiImageReplace>();
@@ -91,35 +92,7 @@ namespace OpenAi
              }
          }
 
-         // private static void OnUpdate<T>(T updated)
-         private static void OnUpdate<T>(T updated)
-         {
-             if (typeof(T) == typeof(OpenAiImageReplace))
-             {
-                 //TIS GARBAGE!
-                 
-                 // var findAssetResults = AssetDatabase.FindAssets ( $"t:Script {nameof(OpenAiWindow)}" );
-                 // var assetPath = Path.GetDirectoryName(AssetDatabase.GUIDToAssetPath(findAssetResults[0]));
-                 // string newPrefabPath = "/Prefabs/OpenAiImageReplace.prefab";
-                 // GameObject prefab = PrefabUtility.LoadPrefabContents(assetPath + newPrefabPath);
-                 // target = updated as OpenAiImageReplace;
-                 
-                 // Save();
-                 // DrawUi();
-             }
-         }
-
-         private static void Save()
-         {
-             // string newPrefabPath = "/Prefabs/OpenAiImageReplace.prefab";
-             // PrefabUtility.SaveAsPrefabAsset(target.gameObject, newPrefabPath, out bool success);
-             // GameObject prefab = PrefabUtility.SavePrefabAsset(target.gameObject);
-             // target = prefab.GetComponent<OpenAiImageReplace>();
-             // AssetDatabase.SaveAssets();
-             // AssetDatabase.Refresh();
-         }
-
-         [MenuItem("Window/OpenAI/Show Window")] 
+         [MenuItem("Window/OpenAI")] 
          private static void Init () 
          {
              if (window != null)
@@ -128,7 +101,6 @@ namespace OpenAi
              }
              
              window  = (OpenAiWindow)GetWindow(typeof(OpenAiWindow), false, "OpenAI");
-             // window = CreateInstance( typeof(OpenAiWindow) ) as OpenAiWindow;
              
              window.ShowUtility();
          }
@@ -160,9 +132,11 @@ namespace OpenAi
              GUILayout.Space(spacing);
 
              string[] names = (Screen.width < 550 ? shortTabNames.Values : tabNames.Values).ToArray();
-             
+
+             int previousActiveTab = activeTab;
              activeTab = GUILayout.Toolbar(activeTab, names, GUILayout.Width(Screen.width - spacing * 2 - 5));
-             
+             bool tabChanged = previousActiveTab == activeTab;
+
              GUILayout.Space(spacing);
 
              if (activeTab == (int)Tabs.image)
@@ -172,30 +146,27 @@ namespace OpenAi
                      openAiImageReplaceEditor = CreateInstance<OpenAiImageReplaceEditor>();
                  }
 
-                 if (openAiImageReplaceEditor.OnUpdate == null)
-                 {
-                     openAiImageReplaceEditor.OnUpdate = OnUpdate;
-                 }
-
                  if (openAiImageReplaceEditor.InternalTarget == null)
                  {
                      openAiImageReplaceEditor.InternalTarget = Target;
                  }
 
-                 if (openAiImageReplaceEditor.InternalTarget != Target)
-                 { 
-                     Debug.Log("WTF");
+                 openAiImageReplaceEditor.OnInspectorGUI();
+             }
+
+             if (activeTab == (int)Tabs.creds)
+             {
+                 if (credsWindow == null)
+                 {
+                     credsWindow = OpenAiCredentialsWindow.InitFromEditorWindow();
                  }
 
-                 openAiImageReplaceEditor.OnInspectorGUI();
+                 if (tabChanged)
+                 {
+                     OpenAiCredentialsWindow.PopulateCurrentCredentials();
+                 }
                  
-                 
-                 // if (Event.current.type == EventType.Used)
-                 // {
-                 //     // Save();
-                 // }
-                 //
-                 // Debug.Log("Event.current.type: " + Event.current.type);
+                 credsWindow.DrawUi();
              }
 
              GUILayout.Space(spacing);

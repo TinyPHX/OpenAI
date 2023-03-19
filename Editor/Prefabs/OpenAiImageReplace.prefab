@@ -9,7 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2606718476774641721}
-  - component: {fileID: -4271481948988302797}
+  - component: {fileID: -5187403769571932550}
   m_Layer: 0
   m_Name: OpenAiImageReplace
   m_TagString: Untagged
@@ -31,7 +31,7 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &-4271481948988302797
+--- !u!114 &-5187403769571932550
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -59,6 +59,7 @@ MonoBehaviour:
   wrapSize: 25
   previewGrid: 2
   newTextureSize: 
+  WARNING: ONLY WORKS AS COMPONENT
   replace: 0
   sprite:
     singleSprite: {fileID: 0}
@@ -70,3 +71,4 @@ MonoBehaviour:
     singleImage: {fileID: 0}
     multipleImages: []
   requestPending: 0
+  isEditorWindow: 0
