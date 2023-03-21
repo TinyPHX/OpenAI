@@ -51,6 +51,22 @@ namespace OpenAi
          private static Dictionary<Type, Object> Editors = new Dictionary<Type, Object>();
          private static Dictionary<Type, GameObject> Prefabs = new Dictionary<Type, GameObject>();
 
+         private void RenderInspector<T,P>() 
+             where T : EditorWidowOrInspector<T>
+             where P : MonoBehaviour
+         {
+             var editor = GetTargetEditor<T>();
+             editor.InternalTarget = GetTarget<P>();
+
+             EditorUtils.ChangeCheck(() =>
+             {
+                 editor.OnInspectorGUI();
+             }, () =>
+             {
+                 SavePrefab<P>();
+             });
+         }
+         
          private static T GetTargetEditor<T>() where T : Editor
          {
              if (!Editors.ContainsKey(typeof(T)) || Editors[typeof(T)] == null)
@@ -62,7 +78,6 @@ namespace OpenAi
 
              return Editors[typeof(T)] as T;
          }
-
 
          private static T GetTarget<T>() where T : MonoBehaviour
          {
@@ -168,46 +183,17 @@ namespace OpenAi
 
              if (activeTab == (int)Tabs.raw)
              {
-                 var editor = GetTargetEditor<OpenAiApiExampleEditor>();
-                 
-                 if (editor.InternalTarget == null)
-                 {
-                     editor.InternalTarget = GetTarget<OpenAiApiExample>();
-                 }
-                 
-                 editor.OnInspectorGUI();
+                 RenderInspector<OpenAiApiExampleEditor, OpenAiApiExample>();
              }
 
              if (activeTab == (int)Tabs.text)
              {
-                 var editor = GetTargetEditor<OpenAiTextReplaceEditor>();
-                 
-                 if (editor.InternalTarget == null)
-                 {
-                     editor.InternalTarget = GetTarget<OpenAiTextReplace>();
-                 }
-
-                 EditorUtils.ChangeCheck(() =>
-                 {
-                     editor.OnInspectorGUI();
-                 }, () =>
-                 {
-                     SavePrefab<OpenAiTextReplace>();
-                 });
+                 RenderInspector<OpenAiTextReplaceEditor, OpenAiTextReplace>();
              }
 
              if (activeTab == (int)Tabs.image)
              {
-                 var editor = GetTargetEditor<OpenAiImageReplaceEditor>();
-                 editor.InternalTarget = GetTarget<OpenAiImageReplace>();
-
-                 EditorUtils.ChangeCheck(() =>
-                 {
-                     editor.OnInspectorGUI();
-                 }, () =>
-                 {
-                     SavePrefab<OpenAiImageReplace>();
-                 });
+                 RenderInspector<OpenAiImageReplaceEditor, OpenAiImageReplace>();
              }
 
              if (activeTab == (int)Tabs.creds)
@@ -227,22 +213,7 @@ namespace OpenAi
 
              if (activeTab == (int)Tabs.help)
              {
-                 var editor = GetTargetEditor<ReadmeEditor>();
-                 
-                 Readme readme = GetTarget<Readme>();
-                 
-                 if (editor.InternalTarget == null)
-                 {
-                     editor.InternalTarget = readme;
-                 }
-                 
-                 EditorUtils.ChangeCheck(() =>
-                 {
-                     editor.OnInspectorGUI();
-                 }, () =>
-                 {
-                     SavePrefab<Readme>();
-                 });
+                 RenderInspector<ReadmeEditor, Readme>();
              }
 
              GUILayout.Space(spacing);

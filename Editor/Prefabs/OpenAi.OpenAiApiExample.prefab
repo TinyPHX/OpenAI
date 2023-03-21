@@ -47,31 +47,43 @@ MonoBehaviour:
     apiKey: 
     organization: 
   completionRequest:
-    prompt: 
-    model: 
-    n: 0
-    temperature: 0
-    max_tokens: 0
+    prompt: Say hellow world in a random language
+    model: text-davinci-003
+    n: 3
+    temperature: 0.8
+    max_tokens: 100
   aiTextResponse:
-    id: 
-    obj: 
-    created: 0
-    model: 
+    id: cmpl-6wZ8SpejhyYmrdhn9BfTs6VUsjRZE
+    obj: text_completion
+    created: 1679416104
+    model: text-davinci-003
     choices:
-    - text: 
+    - text: Hallo Welt auf Deutsch!
       index: 0
       logprobs: 
-      finish_reason: 
+      finish_reason: stop
+    - text: Salve mundi!
+      index: 1
+      logprobs: 
+      finish_reason: stop
+    - text: Hallo Welt! (German)
+      index: 2
+      logprobs: 
+      finish_reason: stop
     usage:
-      prompt_tokens: 0
-      completion_tokens: 0
-      total_tokens: 0
+      prompt_tokens: 8
+      completion_tokens: 28
+      total_tokens: 36
   imageRequest:
-    prompt: 
-    size: 
-    n: 0
+    prompt: Image of a dog catching a frisbe
+    size: 256x256
+    n: 3
   aiImageResponse:
-    created: 0
+    created: 1679378262
     data:
-    - url: 
-      texture: {fileID: 0}
+    - url: https://oaidalleapiprodscus.blob.core.windows.net/private/org-cRmD5luMV9W6CyQlXwIsHWim/user-0q1fQT1Wk0SPwDfhXjB2VtGv/img-zwEJGiQ2nIfnBPahPQKiJYFf.png?st=2023-03-21T04%3A57%3A42Z&se=2023-03-21T06%3A57%3A42Z&sp=r&sv=2021-08-06&sr=b&rscd=inline&rsct=image/png&skoid=6aaadede-4fb3-4698-a8f6-684d7786b067&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2023-03-21T04%3A47%3A17Z&ske=2023-03-22T04%3A47%3A17Z&sks=b&skv=2021-08-06&sig=dWItyVvwhqeWzDrauPM17yVQTnepj0AM6xcaR505pqw%3D
+      texture: {fileID: 2800000, guid: c73073a13d486d348b0eec3ec65396b7, type: 3}
+    - url: https://oaidalleapiprodscus.blob.core.windows.net/private/org-cRmD5luMV9W6CyQlXwIsHWim/user-0q1fQT1Wk0SPwDfhXjB2VtGv/img-1rD1ftzG1SfGhKVHBuaRfp3o.png?st=2023-03-21T04%3A57%3A42Z&se=2023-03-21T06%3A57%3A42Z&sp=r&sv=2021-08-06&sr=b&rscd=inline&rsct=image/png&skoid=6aaadede-4fb3-4698-a8f6-684d7786b067&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2023-03-21T04%3A47%3A17Z&ske=2023-03-22T04%3A47%3A17Z&sks=b&skv=2021-08-06&sig=q5Ef9WBeM8Poh88e0p20nZv6T4UEuRYGI8L%2B5IEqwTU%3D
+      texture: {fileID: 2800000, guid: 2cd04c117a9340446afe321d9a2d40f3, type: 3}
+    - url: https://oaidalleapiprodscus.blob.core.windows.net/private/org-cRmD5luMV9W6CyQlXwIsHWim/user-0q1fQT1Wk0SPwDfhXjB2VtGv/img-bPm9545E5plsD3TsTaNquCAI.png?st=2023-03-21T04%3A57%3A42Z&se=2023-03-21T06%3A57%3A42Z&sp=r&sv=2021-08-06&sr=b&rscd=inline&rsct=image/png&skoid=6aaadede-4fb3-4698-a8f6-684d7786b067&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2023-03-21T04%3A47%3A17Z&ske=2023-03-22T04%3A47%3A17Z&sks=b&skv=2021-08-06&sig=44N2stukyp/4JS/9RN2KqTNcpI%2B/6ocYhP1wb%2BG9dog%3D
+      texture: {fileID: 2800000, guid: a7ebfca90feb9924fb10d5e0ca12a239, type: 3}

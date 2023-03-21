@@ -43,31 +43,31 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d71fd1c7e2064804b29cda72a6a0315c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  prompt: cute pixelated robot bird 3d art hero character for a game
+  prompt: Bananna with legs doing a kickflip with a skateboard over a 10 stair
   size: 0
-  texture: {fileID: 2800000, guid: a0808753a84474945a6b91006452ad08, type: 3}
+  texture: {fileID: 2800000, guid: 923a3ea24b64e1940a2db7bb280d36bb, type: 3}
   removeBackground: 0
-  textureNoBackground: {fileID: 0}
+  textureNoBackground: {fileID: 2800000, guid: d68cdfdec77ef8c46862fd1b48ebb259, type: 3}
   samplePoints:
     points:
-    - color: {r: 0, g: 0.003921569, b: 0, a: 1}
+    - color: {r: 0.90588236, g: 0.8745098, b: 0.8156863, a: 1}
+      position: {x: 25.6, y: 25.6}
+      similarity: 47.166664
+    - color: {r: 0.3529412, g: 0.5019608, b: 0.70980394, a: 1}
       position: {x: 25.6, y: 230.4}
-      similarity: 118.91667
-    - color: {r: 0.7176471, g: 0.9764706, b: 0.9882353, a: 1}
+      similarity: 47.166664
+    - color: {r: 0.90588236, g: 0.8784314, b: 0.8392157, a: 1}
       position: {x: 230.4, y: 25.6}
-      similarity: 118.91667
-    - color: {r: 0, g: 0.003921569, b: 0, a: 1}
-      position: {x: 230.4, y: 230.4}
-      similarity: 118.91667
-  colorSensitivity: 25
-  continuous: 1
+      similarity: 48.333336
+  colorSensitivity: 8
+  continuous: 0
   featherSize: 3
-  featherAmount: 80
-  wrap: 0
-  textureWrapped: {fileID: 0}
-  wrapSize: 25
+  featherAmount: 60
+  wrap: 1
+  textureWrapped: {fileID: 2800000, guid: 5c85298e479b7634c87fca20d82a9be0, type: 3}
+  wrapSize: 53
   previewGrid: 2
-  newTextureSize: 224x224
+  newTextureSize: 128x128
   WARNING: ONLY WORKS AS COMPONENT
   replace: 0
   sprite:
@@ -81,3 +81,4 @@ MonoBehaviour:
     multiple: []
   requestPending: 0
   isEditorWindow: 1
+  componentsInitialized: 0

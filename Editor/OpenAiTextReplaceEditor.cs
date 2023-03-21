@@ -6,7 +6,7 @@ using UnityEngine;
 namespace OpenAi
 {
     [CustomEditor(typeof(OpenAiTextReplace)), CanEditMultipleObjects]
-    public class OpenAiTextReplaceEditor : EditorWidowOrInspector<OpenAiImageReplaceEditor>
+    public class OpenAiTextReplaceEditor : EditorWidowOrInspector<OpenAiTextReplaceEditor>
     {
         public override void OnInspectorGUI()
         {

@@ -1,26 +1,32 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Linq;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace OpenAi
 {
     [CustomEditor(typeof(OpenAiImageReplace)), CanEditMultipleObjects]
     public class OpenAiImageReplaceEditor : EditorWidowOrInspector<OpenAiImageReplaceEditor>
     {
-        private bool isPrefab;
+        private bool isPrefab = false;
         private float activeWidth = 0;
         private OpenAiImageReplace openAiImageReplace;
+        private static Rect textureDisplayRect;
+        private static Vector2 previousMousePosition = Vector2.zero;
         
         // Change detection
-        private bool previousRemoveBackgroud = false;
-        private SamplePointArray previousSamplePoints = new SamplePointArray { };
-        private float previousColorSensitivity = 0;
-        private bool previousContinuous = true;
-        private float previousFeatherSize = 0;
-        private float previousFeatherAmount = 0;
-        private bool previousWrap = false;
-        private int previousWrapSize = 0;
+        private static Texture2D textureWithSamplePoints;
+        private static bool previousRemoveBackground = false;
+        private static SamplePointArray previousSamplePoints = new SamplePointArray { };
+        private static float previousColorSensitivity = 0;
+        private static bool previousContinuous = true;
+        private static float previousFeatherSize = 0;
+        private static float previousFeatherAmount = 0;
+        private static bool previousWrap = false;
+        private static int previousWrapSize = 0;
+        private static bool previousReplace = false;
 
         public override void OnInspectorGUI()
         {
@@ -35,6 +41,11 @@ namespace OpenAi
             else
             {
                 WideLayout();   
+            }
+            
+            if (Event.current.type != EventType.ExecuteCommand && Event.current.type != EventType.Layout)
+            {
+                previousMousePosition = Event.current.mousePosition;
             }
         }
 
@@ -94,6 +105,7 @@ namespace OpenAi
 
                     if (isPrefab)
                     {
+                        EditorUtility.SetDirty(openAiImageReplace);
                         GameObject prefabRoot = PrefabUtility.LoadPrefabContents(assetPath);
                         OpenAiImageReplace prefabTarget = prefabRoot.GetComponent<OpenAiImageReplace>();
                         prefabTarget.ReplaceImage(() =>
@@ -113,32 +125,77 @@ namespace OpenAi
 
         void SaveButton()
         {
-            Texture2D textureToSave = openAiImageReplace.texture;
-            string name = openAiImageReplace.prompt;
-            if (openAiImageReplace.textureNoBackground != null && openAiImageReplace.removeBackground)
-            {
-                textureToSave = openAiImageReplace.textureNoBackground;
-                name += "_alpha";
-            }
-            if (openAiImageReplace.textureWrapped != null && openAiImageReplace.wrap)
-            {
-                textureToSave = openAiImageReplace.textureWrapped;
-                name += "_wrapped";
-            }
-            EditorGUI.BeginDisabledGroup(textureToSave == null);
-            EditorUtils.Disable(textureToSave == null, () => {
+            EditorUtils.Disable(openAiImageReplace.Texture == null, () => {
                 if (GUILayout.Button("Save to File"))
                 {
-                    Utils.Image.SaveToFile(name, textureToSave, true);
+                    openAiImageReplace.SaveFinal();
                 }
             });
+        }
+
+        void UpdateSamplePoints()
+        {
+            if (openAiImageReplace != null && openAiImageReplace.Texture != null && previousSamplePoints.points != null)
+            {
+                int textureSize = openAiImageReplace.Texture.height;
+
+                int newPointLength = openAiImageReplace.samplePoints.points.Length;
+                int oldPointLength = previousSamplePoints.points.Length;
+
+                bool pointAdded = newPointLength == oldPointLength + 1;
+                if (pointAdded && newPointLength > 1)
+                {
+                    SamplePoint lastPoint = openAiImageReplace.samplePoints.points[newPointLength - 1];
+                    SamplePoint nextToLastPoint = openAiImageReplace.samplePoints.points[newPointLength - 2];
+
+                    if (lastPoint.Equals(nextToLastPoint))
+                    {
+                        SamplePoint point = openAiImageReplace.samplePoints.points[newPointLength - 1];
+                        point.color = Color.magenta;
+                        openAiImageReplace.samplePoints.points[newPointLength - 1] = point;
+                    }
+                }
+
+                bool samplePointChanged = 
+                    newPointLength == oldPointLength &&
+                    !SamplePoint.SequenceEqual(previousSamplePoints.points, openAiImageReplace.samplePoints.points);
+                
+                if (samplePointChanged)
+                {
+                    for (int i = 0; i < newPointLength; i++)
+                    {
+                        SamplePoint newPoint = openAiImageReplace.samplePoints.points[i];;
+                        SamplePoint oldPoint = previousSamplePoints.points[i];
+
+                        if (newPoint.color != oldPoint.color)
+                        {
+                            bool captureMouse = textureDisplayRect.Contains(previousMousePosition);
+
+                            if (captureMouse)
+                            {
+                                newPoint.position = (previousMousePosition - textureDisplayRect.position);
+                                newPoint.position.x = (newPoint.position.x / textureDisplayRect.width) * textureSize;
+                                newPoint.position.y = (newPoint.position.y / textureDisplayRect.height) * textureSize;
+                                newPoint.position.y = textureSize - newPoint.position.y;
+
+                                newPoint.color = openAiImageReplace.texture.GetPixel(
+                                    Mathf.RoundToInt(newPoint.position.x), 
+                                    Mathf.RoundToInt(newPoint.position.y)
+                                );
+                            }
+                        }
+
+                        openAiImageReplace.samplePoints.points[i] = newPoint;
+                    }
+                }
+            }
         }
 
         void UpdateTexture()
         {
             bool removeBackgroundSettingChanged =
                 openAiImageReplace != null && (
-                    previousRemoveBackgroud != openAiImageReplace.removeBackground ||
+                    previousRemoveBackground != openAiImageReplace.removeBackground ||
                     !SamplePoint.SequenceEqual(previousSamplePoints.points, openAiImageReplace.samplePoints.points) ||
                     previousColorSensitivity != openAiImageReplace.colorSensitivity ||
                     previousContinuous != openAiImageReplace.continuous ||
@@ -146,9 +203,11 @@ namespace OpenAi
                     previousFeatherSize != openAiImageReplace.featherSize
                 );
             
+            UpdateSamplePoints();
+
             if (removeBackgroundSettingChanged)
             {
-                previousRemoveBackgroud = openAiImageReplace.removeBackground;
+                previousRemoveBackground = openAiImageReplace.removeBackground;
                 previousSamplePoints = new SamplePointArray();
                 if (openAiImageReplace.samplePoints.points != null)
                 {
@@ -175,34 +234,83 @@ namespace OpenAi
                 
                 openAiImageReplace.WrapTexture();
             }
+
+            if (previousReplace != openAiImageReplace.replace && openAiImageReplace.texture != null)
+            {
+                previousReplace = openAiImageReplace.replace;
+                openAiImageReplace.ReplaceInScene();
+            }
         }
 
         void ImagePreview()
         {
             if (openAiImageReplace.texture != null)
             {
-                Rect rect = GUILayoutUtility.GetRect(activeWidth, activeWidth);
+                textureDisplayRect = GUILayoutUtility.GetRect(activeWidth, activeWidth);
                 Texture2D textureToDisplay = openAiImageReplace.Texture;
+
+                if (openAiImageReplace.removeBackground)
+                {
+                    textureToDisplay = GetTextureWithSamplePoints(openAiImageReplace.Texture);
+                }
 
                 if (!openAiImageReplace.wrap || openAiImageReplace.previewGrid == 1)
                 {
-                    EditorGUI.DrawPreviewTexture(rect, textureToDisplay, new Material(Shader.Find("Sprites/Default")), ScaleMode.ScaleToFit);
+                    EditorGUI.DrawPreviewTexture(textureDisplayRect, textureToDisplay, new Material(Shader.Find("Sprites/Default")), ScaleMode.ScaleToFit);
                 }
                 else
                 {
-                    int rectWidth = Mathf.RoundToInt(rect.size.x / openAiImageReplace.previewGrid);
-                    int rectHeight = Mathf.RoundToInt(rect.size.y / openAiImageReplace.previewGrid);
+                    int rectWidth = Mathf.RoundToInt(textureDisplayRect.size.x / openAiImageReplace.previewGrid);
+                    int rectHeight = Mathf.RoundToInt(textureDisplayRect.size.y / openAiImageReplace.previewGrid);
                     
                     for (int xi = 0; xi < openAiImageReplace.previewGrid; xi++)
                     {
                         for (int yi = 0; yi < openAiImageReplace.previewGrid; yi++)
                         {
-                            Rect gridRect = new Rect(rect.x + rectWidth * xi, rect.y + rectHeight * yi, rectWidth, rectHeight);
+                            Rect gridRect = new Rect(textureDisplayRect.x + rectWidth * xi, textureDisplayRect.y + rectHeight * yi, rectWidth, rectHeight);
                             EditorGUI.DrawPreviewTexture(gridRect, textureToDisplay, new Material(Shader.Find("Sprites/Default")));
                         }
                     }
                 }
             }
+        }
+
+        private Texture2D GetTextureWithSamplePoints(Texture2D texture)
+        {
+            textureWithSamplePoints = new Texture2D(texture.width, texture.height);
+            textureWithSamplePoints.SetPixels(texture.GetPixels(0, 0, texture.width, texture.height));
+
+            int[] crossHairOffsets = new []{-5, -4, -3, -2, 2, 3, 4, 5};
+            
+            foreach (SamplePoint samplePoint in openAiImageReplace.samplePoints.points)
+            {
+                for (int xi = 0; xi < crossHairOffsets.Length; xi++)
+                {
+                    int x = Mathf.RoundToInt(samplePoint.position.x) + crossHairOffsets[xi];
+                    int y = Mathf.RoundToInt(samplePoint.position.y);
+                    Color color = textureWithSamplePoints.GetPixel(x, y);
+                    Color inverted = Color.white;
+                    if (color.a != 0)
+                    {
+                        inverted = new Color(1 - color.r, 1 - color.g, 1 - color.b, 1);
+                    }
+                    textureWithSamplePoints.SetPixel(x, y, inverted);
+                }
+                for (int yi = 0; yi < crossHairOffsets.Length; yi++)
+                {
+                    int x = Mathf.RoundToInt(samplePoint.position.x);
+                    int y = Mathf.RoundToInt(samplePoint.position.y) + crossHairOffsets[yi];
+                    Color color = textureWithSamplePoints.GetPixel(x, y);
+                    Color inverted = Color.white;
+                    if (color.a != 0)
+                    {
+                        inverted = new Color(1 - color.r, 1 - color.g, 1 - color.b, 1);
+                    }
+                    textureWithSamplePoints.SetPixel(x, y, inverted);
+                }
+            }
+            textureWithSamplePoints.Apply();
+            return textureWithSamplePoints;
         }
     }
 }

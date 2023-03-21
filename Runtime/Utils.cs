@@ -2,17 +2,10 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Xml.Schema;
-using MyBox;
-using TMPro;
-using Unity.Collections;
-using UnityEditorInternal.Profiling.Memory.Experimental;
 using UnityEngine;
-using Random = UnityEngine.Random;
 
 #if UNITY_EDITOR
 using UnityEditor;
-using UnityEngine.UI;
 #endif
 
 namespace OpenAi.Utils
@@ -117,6 +110,13 @@ namespace OpenAi.Utils
                         Push(x1, y1 - 1);
                         Push(x1, y1 + 1);
                     }
+                }
+                
+                //Try to detect infinite loops
+                if (stack.Count > size * size * 10)
+                {
+                    Debug.LogWarning("Flood fill recursion detected. Exiting to prevent infinite loop.");
+                    break;
                 }
             }
 
@@ -360,7 +360,7 @@ namespace OpenAi.Utils
         private static string DefaultDirectory => Application.dataPath + "/Packages/TP/OpenAI/Images";
         public static string TempDirectory => Application.dataPath + "/Packages/TP/OpenAI/Images/Temp";
 
-        public static Texture2D SaveToFile(string name, Texture2D texture, bool showDialogue=true, string directory="")
+        public static Texture2D SaveToFile(string name, Texture2D texture, bool showDialogue=true, string directory="", bool overwrite=false)
         {
             #if UNITY_EDITOR
                 if (!Directory.Exists(DefaultDirectory)) { Directory.CreateDirectory(DefaultDirectory); }
@@ -386,7 +386,7 @@ namespace OpenAi.Utils
                 string newFullPath = directory + "/" + fileName + "." + extension;
                 string adjustedFileName = fileName;
                 int fileCount = 1;
-                while (File.Exists(newFullPath))
+                while (File.Exists(newFullPath) && !overwrite)
                 {
                     adjustedFileName = string.Format("{0}_{1}", fileName, fileCount++);
                     newFullPath = directory + "/" + adjustedFileName + "." + extension;
@@ -436,7 +436,7 @@ namespace OpenAi.Utils
 
                 return newTexture;
             #else
-                return default;
+                return texture;
             #endif
             
         }

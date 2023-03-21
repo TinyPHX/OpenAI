@@ -14,16 +14,8 @@ namespace OpenAi
         [TextAreaAttribute(1,20), ReadOnly]
         public string response;
         
+        [SerializeField, HideInInspector]
         private bool componentsInitialized = false;
-            
-        public void Update()
-        {
-            if (!componentsInitialized)
-            {
-                componentsInitialized = true;
-                textMesh = GetComponent<TextMeshProUGUI>();
-            }
-        }
         
         public async void ReplaceText()
         {
@@ -46,6 +38,25 @@ namespace OpenAi
             }
 
             response = "Generating..." + new string(Enumerable.Repeat('\n', lineReturnCount).ToArray());
+        }
+            
+        public void Update()
+        {
+            GetComponents();
+        }
+
+        public void Reset()
+        {
+            GetComponents();
+        }
+
+        public void GetComponents()
+        {
+            if (!componentsInitialized)
+            {
+                componentsInitialized = true;
+                textMesh = GetComponent<TextMeshProUGUI>();
+            }
         }
     }
 }

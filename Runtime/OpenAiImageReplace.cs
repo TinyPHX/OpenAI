@@ -1,4 +1,5 @@
 ﻿    using System;
+    using System.Collections;
     using System.Linq;
     using MyBox;
     using UnityEngine;
@@ -17,9 +18,9 @@
             [OverrideLabel("")] public bool removeBackground;
             [ConditionalField(nameof(removeBackground)), ReadOnly] public Texture2D textureNoBackground;
             [ConditionalField(nameof(removeBackground))] public SamplePointArray samplePoints = new SamplePointArray();
-            [ConditionalField(nameof(removeBackground)), Range(0,255)] public int colorSensitivity = 25;
+            [ConditionalField(nameof(removeBackground)), Range(0,100)] public int colorSensitivity = 25;
             [ConditionalField(nameof(removeBackground))] public bool continuous = true;
-            [ConditionalField(nameof(removeBackground)), Range(0,20)] public int featherSize = 3;
+            [ConditionalField(nameof(removeBackground)), Range(0,10)] public int featherSize = 3;
             [ConditionalField(nameof(removeBackground)), Range(0, 100)] public int featherAmount = 80;
 
             [Separator("Wrap Texture")] 
@@ -42,12 +43,29 @@
             [ReadOnly] public bool requestPending = false;
 
             [HideInInspector] public bool isEditorWindow;
-
-            private bool componentsInitialized = false;
+            [SerializeField, HideInInspector] private bool componentsInitialized = false;
+            
+            private bool IsPrefab()
+            {
+                bool isPrefab = gameObject != null && (gameObject.scene.name == null ||
+                                                       gameObject.gameObject != null &&
+                                                       gameObject.gameObject.scene.name == null);
+                return isPrefab;
+            }
             
             public delegate void Callback();
-
+            
             public void Update()
+            {
+                GetComponents();
+            }
+
+            public void Reset()
+            {
+                GetComponents();
+            }
+
+            public void GetComponents()
             {
                 if (!componentsInitialized)
                 {
@@ -58,12 +76,19 @@
                 }
             }
             
+            private IEnumerator RequestPendingTimout() {
+                yield return new WaitForSeconds(20);
+                requestPending = false;
+            }
+            
             public async void ReplaceImage(Callback callback=null)
             {
                 OpenAiApi openai = new OpenAiApi();
 
                 requestPending = true;
+                Coroutine requestPendingTimeoutRoutine = OpenAiApi.Runner.StartCoroutine(RequestPendingTimout());
                 AiImage aiImage = await openai.CreateImage(prompt, size);
+                OpenAiApi.Runner.StopCoroutine(requestPendingTimeoutRoutine);
                 requestPending = false;
 
                 if (aiImage.Result == UnityWebRequest.Result.Success)
@@ -134,8 +159,29 @@
                     return resultTexture;
                 }
             }
+
+            public string TextureName
+            {
+                get
+                {
+                    string textureName = prompt;
+
+                    if (textureNoBackground != null && removeBackground)
+                    {
+                        textureName += "_alpha";
+                    }
+                
+                    if (textureWrapped != null && wrap)
+                    {
+                        textureName += "_wrapped";
+                    }
+
+                    return textureName;
+                }
+            }
             
-            private void ReplaceInScene()
+            
+            public void ReplaceInScene()
             {
                 if (replace)
                 {
@@ -202,12 +248,19 @@
                 {
                     textureNoBackground = Utils.Image.RemoveBackground(
                         texture,
-                        colorSensitivity,
+                        (int)(colorSensitivity / 100f * 255f),
                         featherSize,
                         featherAmount,
                         samplePoints.points,
                         continuous
                     );
+
+                    if (IsPrefab())
+                    {
+                        textureNoBackground = SaveTemp("alpha", textureNoBackground);
+                    }
+                    
+
                     ReplaceInScene();
                 }
             }
@@ -223,9 +276,36 @@
                         wrapSize
                     );
 
+                    if (IsPrefab())
+                    {
+                        textureWrapped = SaveTemp("wrapped", textureWrapped);
+                    }
+
                     newTextureSize = textureWrapped.width + "x" + textureWrapped.height;
-                    
+
                     ReplaceInScene();
+                }
+            }
+
+            Texture2D SaveTemp(string name, Texture2D textureToSave)
+            {
+                if (Configuration.SaveTempImages)
+                {
+                    string fullName = prompt + "_temp_" + name;
+                    Texture2D tempImage = Utils.Image.SaveToFile(fullName, textureToSave, false, Utils.Image.TempDirectory, true);
+                    return tempImage;
+                }
+                else
+                {
+                    return textureToSave;
+                }
+            }
+
+            public void SaveFinal()
+            {
+                if (Texture != null)
+                {   
+                    Utils.Image.SaveToFile(TextureName, Texture);   
                 }
             }
         }
