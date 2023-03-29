@@ -19,7 +19,6 @@ namespace OpenAi.Utils
         {
             #if UNITY_EDITOR
                 if (!Directory.Exists(DefaultScriptDirectory)) { Directory.CreateDirectory(DefaultScriptDirectory); }
-                // if (!Directory.Exists(TempImageDirectory)) { Directory.CreateDirectory(TempImageDirectory); }
             
                 string fileName = name;
                 char[] invalids = Path.GetInvalidFileNameChars();
@@ -54,7 +53,6 @@ namespace OpenAi.Utils
                     path = EditorUtility.SaveFilePanel("Save Script", directory, adjustedFileName, extension);
                     if (path.Length == 0)
                     {
-                        // GUIUtility.ExitGUI();
                         return default; //Canceled
                     }
 
@@ -77,12 +75,10 @@ namespace OpenAi.Utils
                 }
 
                 MonoScript newScript = AssetDatabase.LoadAssetAtPath<MonoScript>(assetPath);
-                // MakeTextureReadable(newScript);
 
                 if (showDialogue)
                 {
                     System.Threading.Thread.Sleep(1000); // Stupid hack: https://forum.unity.com/threads/endlayoutgroup-beginlayoutgroup-must-be-called-first.523209/#post-3652876
-                    // GUIUtility.ExitGUI();
                 }
 
                 return newScript;

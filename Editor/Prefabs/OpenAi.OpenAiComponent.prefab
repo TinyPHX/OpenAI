@@ -111,8 +111,8 @@ MonoBehaviour:
     attributes for all public or serializable fields
   editPrePrompt: 'Edit the script with this prompt:'
   editPostPrompt: 'Current script:'
-  script: {fileID: 11500000, guid: 4086fb9b7620c7744b4dfb38188868ef, type: 3}
-  scriptInstance: {fileID: 7988186044435631498}
+  script: {fileID: 0}
+  scriptInstance: {fileID: 0}
   canEdit: 0
   editPrompt: 
   addOnReload: 
