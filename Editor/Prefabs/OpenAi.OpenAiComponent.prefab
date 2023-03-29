@@ -1,0 +1,260 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &5236814685837551670
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2606718476774641721}
+  - component: {fileID: -836908125849792889}
+  - component: {fileID: 6475590509803358721}
+  - component: {fileID: 3684528014619505802}
+  - component: {fileID: 3502368128840063301}
+  - component: {fileID: -5818152696658978920}
+  - component: {fileID: 3046621658613688979}
+  - component: {fileID: 7988186044435631498}
+  m_Layer: 0
+  m_Name: OpenAi.OpenAiComponent
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2606718476774641721
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5236814685837551670}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &-836908125849792889
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5236814685837551670}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2dac210a80c64f089652dec17dda8e47, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  fontColor: {r: 0.82, g: 0.82, b: 0.82, a: 1}
+  richTextTagMap: 
+  font: {fileID: 0}
+  fontSize: 0
+  iconBeingUsed: 1
+  useTackIcon: 1
+  readonlyMode: 0
+  activeSettings:
+    name: Paid
+    id: 30c0eca9-01de-41b5-bf2e-1a8e9a1206f7
+    skin: Custom
+    fileName: Paid
+    redistributable: 0
+    lite: 0
+    priority: 5
+    type: json
+  allSettings:
+  - name: Default
+    id: 06d9302a-b288-402f-8f1c-b00178d18860
+    skin: Default
+    fileName: Default
+    redistributable: 0
+    lite: 1
+    priority: 7
+    type: json
+  - name: Paid
+    id: 30c0eca9-01de-41b5-bf2e-1a8e9a1206f7
+    skin: Custom
+    fileName: Paid
+    redistributable: 0
+    lite: 0
+    priority: 5
+    type: json
+  readmeData:
+    richText: 
+    textAreaObjectFields: []
+    objectIdPairs: []
+--- !u!114 &6475590509803358721
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5236814685837551670}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 33945dc9c86843d6b1a4706d15ddf313, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  prompt: Create a script that prints hello world to the consle on game start
+  advanced: 0
+  scriptName: GameStartPrinter
+  useOpenAiMonoBehaviour: 1
+  prePrompt: 'Create unity component using the following user prompt: '
+  postPrompt: Make sure to use UnityEngine PropertyAttributes to make the UI user
+    friendly. Also this needs to be compatible with Unity version {unity_version}.
+    Lastly, the class name should be {script_name}. Don't ever try to load anything
+    from the resources folder unless the user prompt specifically calls for it. Add
+    public fields for anything needed by the components. Make sure to include tooltip
+    attributes for all public or serializable fields
+  editPrePrompt: 'Edit the script with this prompt:'
+  editPostPrompt: 'Current script:'
+  script: {fileID: 11500000, guid: 4086fb9b7620c7744b4dfb38188868ef, type: 3}
+  scriptInstance: {fileID: 7988186044435631498}
+  canEdit: 0
+  editPrompt: 
+  addOnReload: 
+--- !u!114 &3684528014619505802
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5236814685837551670}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6e3926c2ff0fdcc4dbc45c722344df59, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  startPrompt: 
+  editsArray:
+    edits: []
+--- !u!114 &3502368128840063301
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5236814685837551670}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6e3926c2ff0fdcc4dbc45c722344df59, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  startPrompt: 
+  editsArray:
+    edits:
+    - script: "//Adding a comment to the Start function\n//This function will print
+        'play' to the console when the game starts if the boolean value of printOnStart
+        is true\nvoid Start()\n{\n    if (printOnStart && !printed)\n    {\n       
+        print(\"play\");\n        printed = true;\n    }\n}"
+      editPrompt: add a comment to the start function
+      editedScript: "//Adding a comment to the Start function\n//This function will
+        print 'play' to the console when the game starts if the boolean value of
+        printOnStart is true\nvoid Start()\n{\n    if (printOnStart && !printed)\n   
+        {\n        print(\"play\");\n        printed = true;\n    }\n}"
+--- !u!114 &-5818152696658978920
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5236814685837551670}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6e3926c2ff0fdcc4dbc45c722344df59, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  startPrompt: 
+  editsArray:
+    edits:
+    - script: '//Adding a comment to the start function
+
+        //This function
+        prints the message to the console when the game starts.'
+      editPrompt: Add a comment to the start function.
+      editedScript: '//Adding a comment to the start function
+
+        //This function
+        prints the message to the console when the game starts.'
+--- !u!114 &3046621658613688979
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5236814685837551670}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6e3926c2ff0fdcc4dbc45c722344df59, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  startPrompt: 
+  editsArray:
+    edits:
+    - script: "/// <summary>\n/// A component that prints \"Play\" to the console
+        once when the game starts.\n/// </summary>\n[AddComponentMenu(\"GameStartPrinter\")]\npublic
+        class GameStartPrinter : OpenAiMonoBehaviour\n{\n    [Header(\"Game Settings\")]\n   
+        [Tooltip(\"If checked, the game will print play once when the game starts\")]\n   
+        public bool printPlayOnStart;\n\n    /// <summary>\n    /// Prints \"Play\"
+        to the console when the game starts.\n    /// </summary>\n    private void
+        Start()\n    {\n        if (printPlayOnStart)\n        {\n            Debug.Log(\"Play\");\n       
+        }\n    }\n}"
+      editPrompt: Add a comment to the start function.
+      editedScript: "/// <summary>\n/// A component that prints \"Play\" to the console
+        once when the game starts.\n/// </summary>\n[AddComponentMenu(\"GameStartPrinter\")]\npublic
+        class GameStartPrinter : OpenAiMonoBehaviour\n{\n    [Header(\"Game Settings\")]\n   
+        [Tooltip(\"If checked, the game will print play once when the game starts\")]\n   
+        public bool printPlayOnStart;\n\n    /// <summary>\n    /// Prints \"Play\"
+        to the console when the game starts.\n    /// </summary>\n    private void
+        Start()\n    {\n        if (printPlayOnStart)\n        {\n            Debug.Log(\"Play\");\n       
+        }\n    }\n}"
+    - script: "[AddComponentMenu(\"GameStartPrinter\")]\npublic class GameStartPrinter
+        : OpenAiMonoBehaviour\n{\n    [Header(\"Game Settings\")]\n    [Tooltip(\"If
+        checked, the game will print play once when the game starts\")]\n    public
+        bool printPlayOnStart;\n\n    private void Start()\n    {\n        if (printPlayOnStart)\n       
+        {\n            Debug.Log(\"Play\");\n        }\n    }\n}"
+      editPrompt: Remove all the comments
+      editedScript: "[AddComponentMenu(\"GameStartPrinter\")]\npublic class GameStartPrinter
+        : OpenAiMonoBehaviour\n{\n    [Header(\"Game Settings\")]\n    [Tooltip(\"If
+        checked, the game will print play once when the game starts\")]\n    public
+        bool printPlayOnStart;\n\n    private void Start()\n    {\n        if (printPlayOnStart)\n       
+        {\n            Debug.Log(\"Play\");\n        }\n    }\n}"
+--- !u!114 &7988186044435631498
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5236814685837551670}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6e3926c2ff0fdcc4dbc45c722344df59, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  startPrompt: 
+  editsArray:
+    edits:
+    - script: "using OpenAiMonoBehaviour = OpenAi.OpenAiMonoBehaviour;\nusing UnityEngine;\n\npublic
+        class GameStartPrinter : OpenAiMonoBehaviour\n{\n    [Tooltip(\"The message
+        to print at the start of the game.\")]\n    public string Message = \"Hello
+        World!\";\n\n    void Start()\n    {\n        Debug.Log(Message);\n    }\n\n   
+        void Update()\n    {\n        Debug.Log(\"Hello World!\");\n    }\n}"
+      editPrompt: Updated the script to also print hello world on update
+      editedScript: "using OpenAiMonoBehaviour = OpenAi.OpenAiMonoBehaviour;\nusing
+        UnityEngine;\n\npublic class GameStartPrinter : OpenAiMonoBehaviour\n{\n   
+        [Tooltip(\"The message to print at the start of the game.\")]\n    public
+        string Message = \"Hello World!\";\n\n    void Start()\n    {\n        Debug.Log(Message);\n   
+        }\n\n    void Update()\n    {\n        Debug.Log(\"Hello World!\");\n   
+        }\n}"
+    - script: '// Add a comment to the Update function
+
+        // The Update function
+        will print the message "Hello World!" every frame'
+      editPrompt: add a comment to the update function
+      editedScript: '// Add a comment to the Update function
+
+        // The Update
+        function will print the message "Hello World!" every frame'

@@ -47,97 +47,202 @@ MonoBehaviour:
   prompt: Give me 100 sentences describing game assets I could use to generate sprites
     or environment textures for a game
   model: 0
-  response: 'Generating...
+  response: '1. A detailed stone wall with ivy crawling up the sides
 
+    2. An ancient
+    wooden door with rusty hinges and a carved pattern
 
+    3. A worn cobblestone
+    street with a few weeds sprouting up in between the cracks
 
+    4. An intricately
+    designed wrought iron fence in front of an old building
 
+    5. A winding dirt
+    path leading up a hill to a castle
 
+    6. A pile of broken stones and rubble
+    in a corner of a ruined room
 
+    7. An old wooden bridge spanning a river with
+    a few boats passing by
 
+    8. A rickety wooden ladder leading up to the roof
+    of a building
 
+    9. A mossy rock with a pool of water underneath it
 
+    10.
+    A tall cactus in the middle of a desert
 
+    11. A winding staircase leading
+    up the side of a mountain
 
+    12. A broken down stone wall with an archway at
+    the end
 
+    13. A bubbling pool of lava with smoke rising from it
 
+    14. An
+    ivy-covered tree with a few birds perched on its branches
 
+    15. A rainbow-colored
+    waterfall cascading down a mountain
 
+    16. A grassy hill with a few flowers
+    swaying in the wind
 
+    17. A lush forest with tall trees and a few paths winding
+    through it
 
+    18. An old rickety boat floating in the middle of a lake
 
+    19.
+    An abandoned cabin with a few broken windows
 
+    20. A dense jungle with vines
+    hanging from the trees
 
+    21. A crystal-clear lake surrounded by mountains
 
+    22.
+    A snow-covered mountain with a few icicles dripping from it
 
+    23. An open
+    field with a few scattered wildflowers
 
+    24. A winding river with a few ducks
+    swimming in it
 
+    25. A smoldering campfire surrounded by a few logs
 
+    26.
+    A wooden dock with a few fishing boats tied up to it
 
+    27. A rocky shoreline
+    with a few seagulls flying overhead
 
+    28. A sandy beach with a few palm trees
+    swaying in the breeze
 
+    29. A mysterious cave entrance with a few bats hovering
+    around it
 
+    30. An eerie graveyard with a few tombstones scattered throughout
 
+    31.
+    A thick fog rolling in from the horizon
 
+    32. A deep canyon with a few eagles
+    soaring through the air
 
+    33. An old windmill with a few rusted gears
 
+    34.
+    A tall lighthouse with a beam of light shining from the top
 
+    35. A rocky
+    outcrop overlooking a vast ocean
 
+    36. A winding path snaking through a forest
 
+    37.
+    A few gnarled trees standing alone in a clearing
 
+    38. A raging thunderstorm
+    with lightning flashing across the sky
 
+    39. A deserted town with a few broken
+    down buildings
 
+    40. A castle with a few turrets reaching up into the sky
 
+    41.
+    An abandoned mine shaft with a few carts of ore
 
+    42. A rickety wooden bridge
+    spanning a chasm
 
+    43. A tranquil pond with a few lily pads floating on it
 
+    44.
+    An old rusted out bridge with a few missing planks
 
+    45. A lush meadow with
+    a few tall grasses blowing in the wind
 
+    46. A pathway leading up to a tall
+    stone tower
 
+    47. A decrepit barn with a few missing boards
 
+    48. A stormy
+    night sky with a few stars twinkling in the distance
 
+    49. A rushing river
+    with a few rapids and waterfalls
 
+    50. A dense fog rolling in from the horizon
 
+    51.
+    An ancient temple with a few crumbling statues
 
+    52. A creaky wooden bridge
+    spanning a rocky river
 
+    53. A smoldering volcano with a few lava flows streaming
+    down its sides
 
+    54. A lush green field with a few yellow wildflowers
 
+    55.
+    An eerie swamp with a few trees shrouded in mist
 
+    56. An old abandoned house
+    with a few missing windows
 
+    57. An open plain with a few scattered rocks
 
+    58.
+    A rocky hillside with a few shrubs scattered throughout
 
+    59. A dark forest
+    with a few trees swaying in the wind
 
+    60. A small village with a few huts
+    and thatched roofs
 
+    61. A rocky mountain with a few snow-covered peaks
 
+    62.
+    A bright blue sky with a few wispy clouds
 
+    63. A small stream flowing through
+    a lush forest
 
+    64. A deep ravine with a few tall cliffs
 
+    65. A rolling
+    hillside with a few wildflowers blooming
 
+    66. An old windmill with a few
+    blades spinning in the wind
 
+    67. A dense jungle with a few vines hanging
+    from the trees
 
+    68. A sandy beach with a few shells scattered along it
 
+    69.
+    A crystal clear lake surrounded by a few tall trees
 
+    70. A winding road leading
+    up to a castle
 
+    71. An open field with a few scattered rocks
 
+    72. An
+    ancient ruin with a few moss-covered walls
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-'
+    73'
   componentsInitialized: 0

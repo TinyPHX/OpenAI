@@ -10,6 +10,88 @@ using UnityEditor;
 
 namespace OpenAi.Utils
 {
+    public static class Script
+    {
+        private static string lastScriptSaveFileLocation = "";
+        private static string DefaultScriptDirectory => Application.dataPath + "/Packages/TP/OpenAI/Generated/Code";
+
+        public static MonoScript CreateScript(string name, string contents, bool showDialogue=true, string directory="", bool overwrite=false)
+        {
+            #if UNITY_EDITOR
+                if (!Directory.Exists(DefaultScriptDirectory)) { Directory.CreateDirectory(DefaultScriptDirectory); }
+                // if (!Directory.Exists(TempImageDirectory)) { Directory.CreateDirectory(TempImageDirectory); }
+            
+                string fileName = name;
+                char[] invalids = Path.GetInvalidFileNameChars();
+                fileName = String.Join("_", fileName.Split(invalids, StringSplitOptions.RemoveEmptyEntries)) .TrimEnd('.');
+                fileName = fileName.Replace(" ", "_");
+                string extension = "cs";
+                if (directory == "")
+                {
+                    if (lastScriptSaveFileLocation != "")
+                    {
+                        directory = lastScriptSaveFileLocation;
+                    }
+                    else
+                    {
+                        directory = DefaultScriptDirectory;
+                    }
+                }
+
+                string newFullPath = directory + "/" + fileName + "." + extension;
+                string adjustedFileName = fileName;
+                int fileCount = 1;
+                while (File.Exists(newFullPath) && !overwrite)
+                {
+                    adjustedFileName = string.Format("{0}_{1}", fileName, fileCount++);
+                    newFullPath = directory + "/" + adjustedFileName + "." + extension;
+                }
+
+                string path = newFullPath;
+
+                if (showDialogue)
+                {
+                    path = EditorUtility.SaveFilePanel("Save Script", directory, adjustedFileName, extension);
+                    if (path.Length == 0)
+                    {
+                        // GUIUtility.ExitGUI();
+                        return default; //Canceled
+                    }
+
+                    lastScriptSaveFileLocation = Path.GetDirectoryName(path);
+                }
+                
+                string finalFileName = Path.GetFileNameWithoutExtension(path);
+                if (finalFileName != name)
+                {
+                    contents = contents.Replace(name, finalFileName);
+                }
+                
+                File.WriteAllText(path, contents);
+                
+                AssetDatabase.Refresh();
+                
+                string assetPath = "";
+                if (path.StartsWith(Application.dataPath)) {
+                    assetPath = "Assets" + path.Substring(Application.dataPath.Length);
+                }
+
+                MonoScript newScript = AssetDatabase.LoadAssetAtPath<MonoScript>(assetPath);
+                // MakeTextureReadable(newScript);
+
+                if (showDialogue)
+                {
+                    System.Threading.Thread.Sleep(1000); // Stupid hack: https://forum.unity.com/threads/endlayoutgroup-beginlayoutgroup-must-be-called-first.523209/#post-3652876
+                    // GUIUtility.ExitGUI();
+                }
+
+                return newScript;
+            #else
+                return default;
+            #endif
+        }
+    }
+
     public static class Image
     {
         static (int, int) IndexToCoords(int index, int size) => (index % size, index / size);
@@ -356,15 +438,15 @@ namespace OpenAi.Utils
             return modifiedTexture;
         }
 
-        private static string lastSaveFileLocation = "";
-        private static string DefaultDirectory => Application.dataPath + "/Packages/TP/OpenAI/Images";
-        public static string TempDirectory => Application.dataPath + "/Packages/TP/OpenAI/Images/Temp";
+        private static string lastImageSaveFileLocation = "";
+        private static string DefaultImageDirectory => Application.dataPath + "/Packages/TP/OpenAI/Generated/Images";
+        public static string TempImageDirectory => Application.dataPath + "/Packages/TP/OpenAI/Generated/Images/Temp";
 
-        public static Texture2D SaveToFile(string name, Texture2D texture, bool showDialogue=true, string directory="", bool overwrite=false)
+        public static Texture2D SaveImageToFile(string name, Texture2D texture, bool showDialogue=true, string directory="", bool overwrite=false)
         {
             #if UNITY_EDITOR
-                if (!Directory.Exists(DefaultDirectory)) { Directory.CreateDirectory(DefaultDirectory); }
-                if (!Directory.Exists(TempDirectory)) { Directory.CreateDirectory(TempDirectory); }
+                if (!Directory.Exists(DefaultImageDirectory)) { Directory.CreateDirectory(DefaultImageDirectory); }
+                if (!Directory.Exists(TempImageDirectory)) { Directory.CreateDirectory(TempImageDirectory); }
             
                 string fileName = name;
                 char[] invalids = Path.GetInvalidFileNameChars();
@@ -373,13 +455,13 @@ namespace OpenAi.Utils
                 string extension = "png";
                 if (directory == "")
                 {
-                    if (lastSaveFileLocation != "")
+                    if (lastImageSaveFileLocation != "")
                     {
-                        directory = lastSaveFileLocation;
+                        directory = lastImageSaveFileLocation;
                     }
                     else
                     {
-                        directory = DefaultDirectory;
+                        directory = DefaultImageDirectory;
                     }
                 }
 
@@ -403,7 +485,7 @@ namespace OpenAi.Utils
                         return default; //Canceled
                     }
 
-                    lastSaveFileLocation = Path.GetDirectoryName(path);
+                    lastImageSaveFileLocation = Path.GetDirectoryName(path);
                 }
                 
                 //Create new texture to avoid error, Texture2D::EncodeTo functions do not support compressed texture formats.
@@ -438,7 +520,6 @@ namespace OpenAi.Utils
             #else
                 return texture;
             #endif
-            
         }
         
         public static void MakeTextureReadable(Texture2D texture)

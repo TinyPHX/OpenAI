@@ -48,6 +48,7 @@ MonoBehaviour:
     organization: 
   completionRequest:
     prompt: Say hellow world in a random language
+    messages: []
     model: text-davinci-003
     n: 3
     temperature: 0.8
@@ -59,14 +60,23 @@ MonoBehaviour:
     model: text-davinci-003
     choices:
     - text: Hallo Welt auf Deutsch!
+      message:
+        role: user
+        content: 
       index: 0
       logprobs: 
       finish_reason: stop
     - text: Salve mundi!
+      message:
+        role: user
+        content: 
       index: 1
       logprobs: 
       finish_reason: stop
     - text: Hallo Welt! (German)
+      message:
+        role: user
+        content: 
       index: 2
       logprobs: 
       finish_reason: stop

@@ -213,6 +213,7 @@ namespace OpenAi
                          {
                              if (GUILayout.Button("Save"))
                              {
+                                 canSave = false;
                                  Configuration.GlobalConfig = new Configuration(apiKey, orgId);
                                  OpenAiApi.SaveConfigToUserDirectory(Configuration.GlobalConfig);
                                  CloseWindow();

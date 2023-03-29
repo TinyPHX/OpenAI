@@ -77,6 +77,19 @@ namespace OpenAi
             EditorGUI.EndDisabledGroup();
         }
 
+        public static bool Foldout(bool shown, string name, Callback callback)
+        {
+            bool newShown = EditorGUILayout.Foldout(shown, name);
+            if (newShown)
+            {
+                EditorGUI.indentLevel++;
+                callback();
+                EditorGUI.indentLevel--;
+            }
+
+            return newShown;
+        }
+
         public static void ChangeCheck(Callback callback, Callback changeCallback)
         {
             EditorGUI.BeginChangeCheck();
@@ -107,6 +120,7 @@ namespace OpenAi
                 Configuration.GlobalConfig = OpenAiApi.ReadConfigFromUserDirectory();
                 if (Configuration.GlobalConfig.ApiKey == "")
                 {
+                    OpenAiWindow.InitTab(OpenAiWindow.Tabs.help);
                     OpenAiCredentialsWindow.InitWithHelp("Please setup your API Key before using the Open AI API.", MessageType.Info);
                     promptShown = true;
                 }

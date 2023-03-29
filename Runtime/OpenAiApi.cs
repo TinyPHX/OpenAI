@@ -3,8 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net;
 using System.Threading.Tasks;
+using MyBox;
 using OpenAI;
 using UnityEngine;
 using UnityEngine.Networking;
@@ -42,7 +42,11 @@ namespace OpenAi
     {
         public enum Model
         {
-            CHAT_GPT,
+            GPT_3,
+            GPT_3_5_TURBO,
+            GPT_3_5_TURBO_0301,
+            GPT_4,
+            GPT_4_0314,
             ADA,
             ADA_CODE_SEARCH_CODE,
             ADA_CODE_SEARCH_TEXT,
@@ -108,19 +112,17 @@ namespace OpenAi
             TEXT_SIMILARITY_ADA_001,
             TEXT_SIMILARITY_BABBAGE_001,
             TEXT_SIMILARITY_CURIE_001,
-            TEXT_SIMILARITY_DAVINCI_001
-        }
-
-        public enum Size
-        {
-            SMALL,
-            MEDIUM,
-            LARGE
+            TEXT_SIMILARITY_DAVINCI_001,
+            WHISPER_1
         }
 
         public static readonly Dictionary<Model, string> ModelToString = new Dictionary<Model, string>()
-        {
-            { Model.CHAT_GPT, "text-davinci-003" },
+        {            
+            { Model.GPT_3, "text-davinci-003" },
+            { Model.GPT_3_5_TURBO, "gpt-3.5-turbo" },
+            { Model.GPT_3_5_TURBO_0301, "gpt-3.5-turbo-0301" },
+            { Model.GPT_4, "gpt-4" },
+            { Model.GPT_4_0314, "gpt-4-0314" },
             { Model.ADA, "ada" },
             { Model.ADA_CODE_SEARCH_CODE, "ada-code-search-code" },
             { Model.ADA_CODE_SEARCH_TEXT, "ada-code-search-text" },
@@ -186,14 +188,43 @@ namespace OpenAi
             { Model.TEXT_SIMILARITY_ADA_001, "text-similarity-ada-001" },
             { Model.TEXT_SIMILARITY_BABBAGE_001, "text-similarity-babbage-001" },
             { Model.TEXT_SIMILARITY_CURIE_001, "text-similarity-curie-001" },
-            { Model.TEXT_SIMILARITY_DAVINCI_001, "text-similarity-davinci-001" }
+            { Model.TEXT_SIMILARITY_DAVINCI_001, "text-similarity-davinci-001" },
+            { Model.WHISPER_1, "whisper-1" }
         };
+
+        public static readonly Dictionary<string, bool> isChat = new Dictionary<string, bool>()
+        {
+            { "gpt-3.5-turbo", true },
+            { "gpt-3.5-turbo-0301", true },
+            { "gpt-4", true }
+        };
+
+        public enum Size
+        {
+            SMALL,
+            MEDIUM,
+            LARGE
+        }
 
         public static readonly Dictionary<Size, string> SizeToString = new Dictionary<Size, string>()
         {
             { Size.SMALL, "256x256" },
             { Size.MEDIUM, "512x512" },
             { Size.LARGE, "1024x1024" }
+        };
+
+        public enum MessageRole
+        {
+            SYSTEM,
+            ASSISTANT, 
+            USER
+        }
+
+        public static readonly Dictionary<MessageRole, string> MessageRoleToString = new Dictionary<MessageRole, string>()
+        {
+            { MessageRole.SYSTEM, "system" },
+            { MessageRole.ASSISTANT, "assistant" },
+            { MessageRole.USER, "user" }
         };
 
         private Configuration config;
@@ -239,7 +270,7 @@ namespace OpenAi
         {
             get
             {
-                if (ActiveConfig == null)
+                if (OpenAi.Configuration.GlobalConfig == null || OpenAi.Configuration.GlobalConfig.ApiKey == "")
                 {
                     OpenAi.Configuration.GlobalConfig = ReadConfigFromUserDirectory();
                 }
@@ -251,7 +282,7 @@ namespace OpenAi
         {
             get
             {
-                if (ActiveConfig == null)
+                if (OpenAi.Configuration.GlobalConfig == null || OpenAi.Configuration.GlobalConfig.Organization == "")
                 {
                     OpenAi.Configuration.GlobalConfig = ReadConfigFromUserDirectory();
                 }
@@ -359,7 +390,7 @@ namespace OpenAi
                     if (OpenAi.Configuration.SaveTempImages)
                     {
                         string num = i > 0 ? (" " + i) : "";
-                        texture = Utils.Image.SaveToFile(request.prompt + num, texture, false, Utils.Image.TempDirectory);
+                        texture = Utils.Image.SaveImageToFile(request.prompt + num, texture, false, Utils.Image.TempImageDirectory);
                     }
                     
                     data.texture = texture;
@@ -416,10 +447,10 @@ namespace OpenAi
             return new Tuple<Task<T>, Callback<T>>(taskCompletion.Task, wrappedCallback);
         }
         
-        private Task<T> Post<T,R>(R requestBody, Callback<T> completionCallback=null) where T : IRequestable<T>, new()
+        private Task<T> Post<T,R>(R requestBody, Callback<T> completionCallback=null) where T : IRequestable<T>, new() where R : IRequester
         {
-            string url = new T().URL;
-            string bodyString = JsonUtility.ToJson(requestBody);
+            string url = requestBody.URL;
+            string bodyString = requestBody.JSON;
             completionCallback ??= value => {  };
 
             (Task<T> task, Callback<T> taskCallback) = CallbackToTask(completionCallback);
@@ -488,7 +519,7 @@ namespace OpenAi
                 Debug.LogError(
                     "Method: " + request.method + "\n" + 
                     "URL: " + request.uri + ": \n" +
-                    "body: " + body.Take(10000) + "..." + ": \n\n" +
+                    "body: " + body.Take(1000) + "..." + ": \n\n" +
                     "result: " + request.result + ": \n\n" +
                     "response: " + request.downloadHandler.text);
             }
@@ -498,22 +529,68 @@ namespace OpenAi
     
     public interface IRequestable<T>
     {
-        string URL { get; }
         UnityWebRequest.Result Result { set; get; }
         T FromJson(string jsonString);
     }
+
+    public interface IRequester
+    {
+        string URL { get; }
+        
+        string JSON { get; }
+    }
+    
     
     [Serializable]
     public class AiText : IRequestable<AiText>
     {
-        public string URL => "https://api.openai.com/v1/completions";
-
         public string Text => choices.Length > 0 ? choices[0].text : default;
-            
+
         [Serializable]
-        public class Request
+        public class Message
         {
+            public string role;
+            public string content;
+
+            public Message(string role, string content)
+            {
+                this.role = role;
+                this.content = content;
+            }
+            
+            public Message(OpenAiApi.MessageRole role, string content)
+            {
+                this.role = OpenAiApi.MessageRoleToString[role];
+                this.content = content;
+            }
+        }
+        
+        [Serializable]
+        public class Request : IRequester
+        {
+            public string URL => IsChat ? "https://api.openai.com/v1/chat/completions" : "https://api.openai.com/v1/completions";
+            public string JSON {
+                get 
+                {
+                    Validate();
+                    
+                    string json = JsonUtility.ToJson(this);
+                    if (IsChat)
+                    {
+                        json = json.Replace("\"prompt\":\"\",", "");
+                    }
+                    else
+                    {
+                        json = json.Replace("\"messages\":[],", "");
+                    }
+                    return json;
+                }
+            }
+            private bool IsChat => OpenAiApi.isChat.ContainsKey(model);
+            
+            [TextArea(1,20)] 
             public string prompt;
+            public Message[] messages; 
             public string model;
             public int n;
             public float temperature;
@@ -523,20 +600,112 @@ namespace OpenAi
 
             public Request(string prompt, string model, int n=1, float temperature=.8f, int max_tokens=defaultMaxTokens)
             {
-                this.prompt = prompt;
-                this.model = model;
-                this.temperature = temperature;
-                this.n = n;
-                this.max_tokens = max_tokens;
+                Init(
+                    prompt,
+                    null,
+                    model,
+                    n,
+                    temperature,
+                    max_tokens
+                );
             }
 
             public Request(string prompt, OpenAiApi.Model model, int n=1, float temperature=.8f, int max_tokens=defaultMaxTokens)
             {
+                Init(
+                    prompt,
+                    null,
+                    OpenAiApi.ModelToString[model],
+                    n,
+                    temperature,
+                    max_tokens
+                );
+            }
+
+            public Request(Message[] messages, string model, int n=1, float temperature=.8f, int max_tokens=defaultMaxTokens)
+            {
+                Init(
+                    null,
+                    messages,
+                    model,
+                    n,
+                    temperature,
+                    max_tokens
+                );
+            }
+
+            public Request(Message[] messages, OpenAiApi.Model model, int n=1, float temperature=.8f, int max_tokens=defaultMaxTokens)
+            {
+                Init(
+                    null,
+                    messages,
+                    OpenAiApi.ModelToString[model],
+                    n,
+                    temperature,
+                    max_tokens
+                );
+            }
+
+            private void Init(string prompt, Message[] messages, string model, int n=1, float temperature=.8f, int max_tokens=defaultMaxTokens)
+            {
                 this.prompt = prompt;
-                this.model = OpenAiApi.ModelToString[model];
+                this.messages = messages;
+                this.model = model;
                 this.temperature = temperature;
                 this.n = n;
                 this.max_tokens = max_tokens;
+                
+                Validate();
+            }
+
+            private void Validate()
+            {
+                if (IsChat)
+                {
+                    if (messages == null)
+                    {
+                        messages = new Message[] { };
+                    }
+                    
+                    if (!prompt.IsNullOrEmpty())
+                    {
+                        messages = PromptToMessages(prompt).Concat(messages).ToArray();
+                        prompt = null;
+                    }
+                }
+                else
+                {
+                    if (messages != null)
+                    {
+                        if (prompt == null)
+                        {
+                            prompt = "";
+                        }
+                        
+                        prompt += MessagesToPrompt(messages);
+                        messages = null;
+                    }
+                }
+            }
+
+            private string MessagesToPrompt(Message[] messages)
+            {
+                string messageAsPrompt = "";
+
+                foreach (Message message in messages)
+                {
+                    messageAsPrompt += $"{message.role}: '{message.content}'\n";
+                }
+
+                return messageAsPrompt;
+            }
+
+            private Message[] PromptToMessages(string prompt)
+            {
+                return new Message[]
+                {
+                    new Message(OpenAiApi.MessageRole.USER, prompt)
+                };
             }
         }
             
@@ -544,6 +713,7 @@ namespace OpenAi
         public class Choice
         {
             public string text = "";
+            public Message message = new Message(OpenAiApi.MessageRole.USER, "");
             public int index = 0;
             public string logprobs;
             public string finish_reason;
@@ -578,6 +748,15 @@ namespace OpenAi
             foreach (var choice in aiText.choices)
             {
                 choice.text = choice.text.Trim();
+
+                if (choice.message.content != "")
+                {
+                    choice.text = choice.message.content;
+                }
+                else if (choice.text != "")
+                {
+                    choice.message.content = choice.text;
+                }
             }
             return aiText;
         }
@@ -586,13 +765,13 @@ namespace OpenAi
     [Serializable]
     public class AiImage : IRequestable<AiImage>
     {
-        public string URL => "https://api.openai.com/v1/images/generations";
-
         public Texture2D Texture => data.Length > 0 ? data[0].texture : default;
 
-            [Serializable]
-        public class Request
+        [Serializable]
+        public class Request : IRequester
         {
+            public string URL => "https://api.openai.com/v1/images/generations";
+            public string JSON => JsonUtility.ToJson(this);
             public string prompt;
             public string size;
             public int n;

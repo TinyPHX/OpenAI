@@ -8,10 +8,10 @@ namespace OpenAi
     public class OpenAiTextReplace : MonoBehaviour
     {
         public TextMeshProUGUI textMesh;
-        [TextAreaAttribute(1,20)]
+        [TextArea(1,20)]
         public string prompt;
         public OpenAiApi.Model model;
-        [TextAreaAttribute(1,20), ReadOnly]
+        [TextArea(1,20), ReadOnly]
         public string response;
         
         [SerializeField, HideInInspector]

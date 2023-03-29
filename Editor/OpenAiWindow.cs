@@ -14,19 +14,21 @@ namespace OpenAi
      {
          private static OpenAiWindow window;
          private static Vector2 scroll = new Vector2();
-         private static int activeTab = 0;
+         public static int ActiveTab { get; private set; } = -1;
+         private int previousActiveTab = -1;
          private static int spacing = 20;
          private static Scene activeScene;
 
          private OpenAiCredentialsWindow credsWindow;
 
-         private enum Tabs
+         public enum Tabs
          {
              raw = 0,
              text = 1,
              image = 2,
-             creds = 3,
-             help = 4,
+             script = 3,
+             creds = 4,
+             help = 5,
          }
          
          private static Dictionary<Tabs, string> tabNames = new Dictionary<Tabs, string>()
@@ -34,6 +36,7 @@ namespace OpenAi
              { Tabs.raw, "Raw Requests" },
              { Tabs.text, "Text Completion" },
              { Tabs.image, "Image Generation" },
+             { Tabs.script, "Script (Beta)" },
              { Tabs.creds, "Credentials" },
              { Tabs.help, "Readme" }
          };
@@ -43,6 +46,7 @@ namespace OpenAi
              { Tabs.raw, "Raw" },
              { Tabs.text, "Text" },
              { Tabs.image, "Image" },
+             { Tabs.script, "Script" },
              { Tabs.creds, "Creds" },
              { Tabs.help, "Help" }
          };
@@ -135,7 +139,17 @@ namespace OpenAi
          }
 
          [MenuItem("Window/OpenAI")] 
-         private static void Init () 
+         public static void Init ()
+         {
+             InitTab(Tabs.help);
+         }
+
+         public static void InitTab(Tabs tab)
+         {
+             Init((int)tab);
+         }
+
+         private static void Init(int startTab)
          {
              if (window != null)
              {
@@ -143,7 +157,12 @@ namespace OpenAi
              }
              
              window  = (OpenAiWindow)GetWindow(typeof(OpenAiWindow), false, "OpenAI");
-             
+
+             if (startTab != -1)
+             {
+                 ActiveTab = startTab;
+             }
+
              window.ShowUtility();
          }
 
@@ -175,28 +194,34 @@ namespace OpenAi
 
              string[] names = (Screen.width < 550 ? shortTabNames.Values : tabNames.Values).ToArray();
 
-             int previousActiveTab = activeTab;
-             activeTab = GUILayout.Toolbar(activeTab, names, GUILayout.Width(Screen.width - spacing * 2 - 5));
-             bool tabChanged = previousActiveTab == activeTab;
+             ActiveTab = ActiveTab != -1 ? ActiveTab : previousActiveTab;
+             previousActiveTab = ActiveTab;
+             ActiveTab = GUILayout.Toolbar(ActiveTab, names, GUILayout.Width(Screen.width - spacing * 2 - 5));
+             bool tabChanged = previousActiveTab != ActiveTab;
 
              GUILayout.Space(spacing);
 
-             if (activeTab == (int)Tabs.raw)
+             if (ActiveTab == (int)Tabs.raw)
              {
                  RenderInspector<OpenAiApiExampleEditor, OpenAiApiExample>();
              }
 
-             if (activeTab == (int)Tabs.text)
+             if (ActiveTab == (int)Tabs.text)
              {
                  RenderInspector<OpenAiTextReplaceEditor, OpenAiTextReplace>();
              }
 
-             if (activeTab == (int)Tabs.image)
+             if (ActiveTab == (int)Tabs.image)
              {
                  RenderInspector<OpenAiImageReplaceEditor, OpenAiImageReplace>();
              }
 
-             if (activeTab == (int)Tabs.creds)
+             if (ActiveTab == (int)Tabs.script)
+             {
+                 RenderInspector<OpenAiComponentEditor, OpenAiComponent>();
+             }
+
+             if (ActiveTab == (int)Tabs.creds)
              {
                  if (credsWindow == null)
                  {
@@ -211,7 +236,7 @@ namespace OpenAi
                  credsWindow.DrawUi();
              }
 
-             if (activeTab == (int)Tabs.help)
+             if (ActiveTab == (int)Tabs.help)
              {
                  RenderInspector<ReadmeEditor, Readme>();
              }

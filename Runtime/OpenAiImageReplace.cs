@@ -10,7 +10,7 @@
     {
         public class OpenAiImageReplace : MonoBehaviour
         {
-            [TextAreaAttribute(1,20)] public string prompt;
+            [TextArea(1,20)] public string prompt;
             public OpenAiApi.Size size;
             [ReadOnly] public Texture2D texture;
             
@@ -292,7 +292,7 @@
                 if (Configuration.SaveTempImages)
                 {
                     string fullName = prompt + "_temp_" + name;
-                    Texture2D tempImage = Utils.Image.SaveToFile(fullName, textureToSave, false, Utils.Image.TempDirectory, true);
+                    Texture2D tempImage = Utils.Image.SaveImageToFile(fullName, textureToSave, false, Utils.Image.TempImageDirectory, true);
                     return tempImage;
                 }
                 else
@@ -305,7 +305,7 @@
             {
                 if (Texture != null)
                 {   
-                    Utils.Image.SaveToFile(TextureName, Texture);   
+                    Utils.Image.SaveImageToFile(TextureName, Texture);   
                 }
             }
         }
