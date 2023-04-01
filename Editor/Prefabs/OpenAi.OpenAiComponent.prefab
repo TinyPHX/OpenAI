@@ -11,11 +11,7 @@ GameObject:
   - component: {fileID: 2606718476774641721}
   - component: {fileID: -836908125849792889}
   - component: {fileID: 6475590509803358721}
-  - component: {fileID: 3684528014619505802}
-  - component: {fileID: 3502368128840063301}
-  - component: {fileID: -5818152696658978920}
-  - component: {fileID: 3046621658613688979}
-  - component: {fileID: 7988186044435631498}
+  - component: {fileID: 7313810465350879814}
   m_Layer: 0
   m_Name: OpenAi.OpenAiComponent
   m_TagString: Untagged
@@ -52,7 +48,7 @@ MonoBehaviour:
   fontColor: {r: 0.82, g: 0.82, b: 0.82, a: 1}
   richTextTagMap: 
   font: {fileID: 0}
-  fontSize: 0
+  fontSize: 12
   iconBeingUsed: 1
   useTackIcon: 1
   readonlyMode: 0
@@ -111,118 +107,12 @@ MonoBehaviour:
     attributes for all public or serializable fields
   editPrePrompt: 'Edit the script with this prompt:'
   editPostPrompt: 'Current script:'
-  script: {fileID: 0}
-  scriptInstance: {fileID: 0}
-  canEdit: 0
+  script: {fileID: 11500000, guid: 504af0cdc8a5764468c9cec4e5ccbed4, type: 3}
+  scriptInstance: {fileID: 7313810465350879814}
+  canEdit: 1
   editPrompt: 
   addOnReload: 
---- !u!114 &3684528014619505802
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5236814685837551670}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6e3926c2ff0fdcc4dbc45c722344df59, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  startPrompt: 
-  editsArray:
-    edits: []
---- !u!114 &3502368128840063301
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5236814685837551670}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6e3926c2ff0fdcc4dbc45c722344df59, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  startPrompt: 
-  editsArray:
-    edits:
-    - script: "//Adding a comment to the Start function\n//This function will print
-        'play' to the console when the game starts if the boolean value of printOnStart
-        is true\nvoid Start()\n{\n    if (printOnStart && !printed)\n    {\n       
-        print(\"play\");\n        printed = true;\n    }\n}"
-      editPrompt: add a comment to the start function
-      editedScript: "//Adding a comment to the Start function\n//This function will
-        print 'play' to the console when the game starts if the boolean value of
-        printOnStart is true\nvoid Start()\n{\n    if (printOnStart && !printed)\n   
-        {\n        print(\"play\");\n        printed = true;\n    }\n}"
---- !u!114 &-5818152696658978920
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5236814685837551670}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6e3926c2ff0fdcc4dbc45c722344df59, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  startPrompt: 
-  editsArray:
-    edits:
-    - script: '//Adding a comment to the start function
-
-        //This function
-        prints the message to the console when the game starts.'
-      editPrompt: Add a comment to the start function.
-      editedScript: '//Adding a comment to the start function
-
-        //This function
-        prints the message to the console when the game starts.'
---- !u!114 &3046621658613688979
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5236814685837551670}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6e3926c2ff0fdcc4dbc45c722344df59, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  startPrompt: 
-  editsArray:
-    edits:
-    - script: "/// <summary>\n/// A component that prints \"Play\" to the console
-        once when the game starts.\n/// </summary>\n[AddComponentMenu(\"GameStartPrinter\")]\npublic
-        class GameStartPrinter : OpenAiMonoBehaviour\n{\n    [Header(\"Game Settings\")]\n   
-        [Tooltip(\"If checked, the game will print play once when the game starts\")]\n   
-        public bool printPlayOnStart;\n\n    /// <summary>\n    /// Prints \"Play\"
-        to the console when the game starts.\n    /// </summary>\n    private void
-        Start()\n    {\n        if (printPlayOnStart)\n        {\n            Debug.Log(\"Play\");\n       
-        }\n    }\n}"
-      editPrompt: Add a comment to the start function.
-      editedScript: "/// <summary>\n/// A component that prints \"Play\" to the console
-        once when the game starts.\n/// </summary>\n[AddComponentMenu(\"GameStartPrinter\")]\npublic
-        class GameStartPrinter : OpenAiMonoBehaviour\n{\n    [Header(\"Game Settings\")]\n   
-        [Tooltip(\"If checked, the game will print play once when the game starts\")]\n   
-        public bool printPlayOnStart;\n\n    /// <summary>\n    /// Prints \"Play\"
-        to the console when the game starts.\n    /// </summary>\n    private void
-        Start()\n    {\n        if (printPlayOnStart)\n        {\n            Debug.Log(\"Play\");\n       
-        }\n    }\n}"
-    - script: "[AddComponentMenu(\"GameStartPrinter\")]\npublic class GameStartPrinter
-        : OpenAiMonoBehaviour\n{\n    [Header(\"Game Settings\")]\n    [Tooltip(\"If
-        checked, the game will print play once when the game starts\")]\n    public
-        bool printPlayOnStart;\n\n    private void Start()\n    {\n        if (printPlayOnStart)\n       
-        {\n            Debug.Log(\"Play\");\n        }\n    }\n}"
-      editPrompt: Remove all the comments
-      editedScript: "[AddComponentMenu(\"GameStartPrinter\")]\npublic class GameStartPrinter
-        : OpenAiMonoBehaviour\n{\n    [Header(\"Game Settings\")]\n    [Tooltip(\"If
-        checked, the game will print play once when the game starts\")]\n    public
-        bool printPlayOnStart;\n\n    private void Start()\n    {\n        if (printPlayOnStart)\n       
-        {\n            Debug.Log(\"Play\");\n        }\n    }\n}"
---- !u!114 &7988186044435631498
+--- !u!114 &7313810465350879814
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -238,23 +128,62 @@ MonoBehaviour:
   editsArray:
     edits:
     - script: "using OpenAiMonoBehaviour = OpenAi.OpenAiMonoBehaviour;\nusing UnityEngine;\n\npublic
-        class GameStartPrinter : OpenAiMonoBehaviour\n{\n    [Tooltip(\"The message
-        to print at the start of the game.\")]\n    public string Message = \"Hello
-        World!\";\n\n    void Start()\n    {\n        Debug.Log(Message);\n    }\n\n   
-        void Update()\n    {\n        Debug.Log(\"Hello World!\");\n    }\n}"
-      editPrompt: Updated the script to also print hello world on update
+        class HelloWorld : OpenAiMonoBehaviour\n{\n    void Start()\n    {\n       
+        Debug.Log(\"Hello World!\");\n    }\n}"
+      editPrompt: Remove all comments
       editedScript: "using OpenAiMonoBehaviour = OpenAi.OpenAiMonoBehaviour;\nusing
-        UnityEngine;\n\npublic class GameStartPrinter : OpenAiMonoBehaviour\n{\n   
-        [Tooltip(\"The message to print at the start of the game.\")]\n    public
-        string Message = \"Hello World!\";\n\n    void Start()\n    {\n        Debug.Log(Message);\n   
-        }\n\n    void Update()\n    {\n        Debug.Log(\"Hello World!\");\n   
-        }\n}"
-    - script: '// Add a comment to the Update function
-
-        // The Update function
-        will print the message "Hello World!" every frame'
-      editPrompt: add a comment to the update function
-      editedScript: '// Add a comment to the Update function
-
-        // The Update
-        function will print the message "Hello World!" every frame'
+        UnityEngine;\n\npublic class HelloWorld : OpenAiMonoBehaviour\n{\n    void
+        Start()\n    {\n        Debug.Log(\"Hello World!\");\n    }\n}"
+    - script: "// The start function will log \"Hello World!\" to the debug console\nusing
+        OpenAiMonoBehaviour = OpenAi.OpenAiMonoBehaviour;\nusing UnityEngine;\n\npublic
+        class HelloWorld : OpenAiMonoBehaviour\n{\n    void Start()\n    {\n       
+        Debug.Log(\"Hello World!\");\n    }\n}"
+      editPrompt: Add a comment to the start function
+      editedScript: "// The start function will log \"Hello World!\" to the debug
+        console\nusing OpenAiMonoBehaviour = OpenAi.OpenAiMonoBehaviour;\nusing UnityEngine;\n\npublic
+        class HelloWorld : OpenAiMonoBehaviour\n{\n    void Start()\n    {\n       
+        Debug.Log(\"Hello World!\");\n    }\n}"
+    - script: "using OpenAiMonoBehaviour = OpenAi.OpenAiMonoBehaviour;\nusing UnityEngine;\n\n//
+        The start function will log \"Hello World!\" to the debug console \npublic
+        class HelloWorld : OpenAiMonoBehaviour\n{\n    void Start()\n    {\n       
+        Debug.Log(\"Hello World!\");\n    } \n}"
+      editPrompt: 'Move the comment about the start function to be directly above
+        the function and not at the top of the file '
+      editedScript: "using OpenAiMonoBehaviour = OpenAi.OpenAiMonoBehaviour;\nusing
+        UnityEngine;\n\n// The start function will log \"Hello World!\" to the debug
+        console \npublic class HelloWorld : OpenAiMonoBehaviour\n{\n    void Start()\n   
+        {\n        Debug.Log(\"Hello World!\");\n    } \n}"
+    - script: "using OpenAiMonoBehaviour = OpenAi.OpenAiMonoBehaviour;\nusing UnityEngine;\n\n///
+        <summary>\n/// The Start function will log \"Hello World!\" to the debug
+        console \n/// </summary> \npublic class HelloWorld : OpenAiMonoBehaviour\n{\n   
+        /// <summary>\n    /// Logs \"Hello World!\" to the debug console\n    ///
+        </summary>\n    void Start()\n    {\n        Debug.Log(\"Hello World!\");\n   
+        } \n}"
+      editPrompt: 'Remove all current comments and add a class function comment with
+        javadoc styling '
+      editedScript: "using OpenAiMonoBehaviour = OpenAi.OpenAiMonoBehaviour;\nusing
+        UnityEngine;\n\n/// <summary>\n/// The Start function will log \"Hello World!\"
+        to the debug console \n/// </summary> \npublic class HelloWorld : OpenAiMonoBehaviour\n{\n   
+        /// <summary>\n    /// Logs \"Hello World!\" to the debug console\n    ///
+        </summary>\n    void Start()\n    {\n        Debug.Log(\"Hello World!\");\n   
+        } \n}"
+    - script: "using OpenAiMonoBehaviour = OpenAi.OpenAiMonoBehaviour;\nusing UnityEngine;\n\n///
+        <summary>\n/// The Start function will log \"Hello World!\" to the debug
+        console \n/// </summary> \npublic class HelloWorld : OpenAiMonoBehaviour\n{\n   
+        private float _timePassed = 0;\n    private float _previousTime = 0;\n\n   
+        /// <summary>\n    /// Logs \"Hello World!\" to the debug console\n    ///
+        </summary>\n    void Start()\n    {\n        Debug.Log(\"Hello World!\");\n   
+        }\n\n    private void Update() \n    {\n        _timePassed = Time.time -
+        _previousTime;\n        Debug.Log(\"Time Passed: \" + _timePassed);\n       
+        _previousTime = Time.time;\n    }\n}"
+      editPrompt: 'add an update function that calculate the time passed between
+        calls and print it to the console. '
+      editedScript: "using OpenAiMonoBehaviour = OpenAi.OpenAiMonoBehaviour;\nusing
+        UnityEngine;\n\n/// <summary>\n/// The Start function will log \"Hello World!\"
+        to the debug console \n/// </summary> \npublic class HelloWorld : OpenAiMonoBehaviour\n{\n   
+        private float _timePassed = 0;\n    private float _previousTime = 0;\n\n   
+        /// <summary>\n    /// Logs \"Hello World!\" to the debug console\n    ///
+        </summary>\n    void Start()\n    {\n        Debug.Log(\"Hello World!\");\n   
+        }\n\n    private void Update() \n    {\n        _timePassed = Time.time -
+        _previousTime;\n        Debug.Log(\"Time Passed: \" + _timePassed);\n       
+        _previousTime = Time.time;\n    }\n}"

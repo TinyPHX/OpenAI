@@ -62,7 +62,7 @@ namespace OpenAi
              var editor = GetTargetEditor<T>();
              editor.InternalTarget = GetTarget<P>();
 
-             EditorUtils.ChangeCheck(() =>
+             AiEditorUtils.ChangeCheck(() =>
              {
                  editor.OnInspectorGUI();
              }, () =>

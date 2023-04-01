@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using MyBox;
 using OpenAI;
+using OpenAI.AiModels;
 using UnityEngine;
 using UnityEngine.Networking;
 
@@ -40,7 +41,7 @@ namespace OpenAi
 
     public class OpenAiApi
     {
-        public enum Model
+        public enum ModelName
         {
             GPT_3,
             GPT_3_5_TURBO,
@@ -54,7 +55,6 @@ namespace OpenAi
             ADA_SEARCH_QUERY,
             ADA_SIMILARITY,
             ADA_2020_05_03,
-            AUDIO_TRANSCRIBE_DEPRECATED,
             BABBAGE,
             BABBAGE_CODE_SEARCH_CODE,
             BABBAGE_CODE_SEARCH_TEXT,
@@ -62,9 +62,9 @@ namespace OpenAi
             BABBAGE_SEARCH_QUERY,
             BABBAGE_SIMILARITY,
             BABBAGE_2020_05_03,
-            CODE_CUSHMAN_001,
-            CODE_DAVINCI_002,
-            CODE_DAVINCI_EDIT_001,
+            // CODE_CUSHMAN_001,
+            // CODE_DAVINCI_002,
+            // CODE_DAVINCI_EDIT_001,
             CODE_SEARCH_ADA_CODE_001,
             CODE_SEARCH_ADA_TEXT_001,
             CODE_SEARCH_BABBAGE_CODE_001,
@@ -84,9 +84,9 @@ namespace OpenAi
             DAVINCI_SEARCH_QUERY,
             DAVINCI_SIMILARITY,
             DAVINCI_2020_05_03,
-            IF_CURIE_V2,
-            IF_DAVINCI_V2,
-            IF_DAVINCI_3_0_0,
+            // IF_CURIE_V2,
+            // IF_DAVINCI_V2,
+            // IF_DAVINCI_3_0_0,
             TEXT_ADA_001,
             TEXT_ADA__001,
             TEXT_BABBAGE_001,
@@ -113,83 +113,82 @@ namespace OpenAi
             TEXT_SIMILARITY_BABBAGE_001,
             TEXT_SIMILARITY_CURIE_001,
             TEXT_SIMILARITY_DAVINCI_001,
-            WHISPER_1
+            // WHISPER_1
         }
-
-        public static readonly Dictionary<Model, string> ModelToString = new Dictionary<Model, string>()
+        
+        public static readonly Dictionary<ModelName, string> ModelToString = new Dictionary<ModelName, string>()
         {            
-            { Model.GPT_3, "text-davinci-003" },
-            { Model.GPT_3_5_TURBO, "gpt-3.5-turbo" },
-            { Model.GPT_3_5_TURBO_0301, "gpt-3.5-turbo-0301" },
-            { Model.GPT_4, "gpt-4" },
-            { Model.GPT_4_0314, "gpt-4-0314" },
-            { Model.ADA, "ada" },
-            { Model.ADA_CODE_SEARCH_CODE, "ada-code-search-code" },
-            { Model.ADA_CODE_SEARCH_TEXT, "ada-code-search-text" },
-            { Model.ADA_SEARCH_DOCUMENT, "ada-search-document" },
-            { Model.ADA_SEARCH_QUERY, "ada-search-query" },
-            { Model.ADA_SIMILARITY, "ada-similarity" },
-            { Model.ADA_2020_05_03, "ada:2020-05-03" },
-            { Model.AUDIO_TRANSCRIBE_DEPRECATED, "audio-transcribe-deprecated" },
-            { Model.BABBAGE, "babbage" },
-            { Model.BABBAGE_CODE_SEARCH_CODE, "babbage-code-search-code" },
-            { Model.BABBAGE_CODE_SEARCH_TEXT, "babbage-code-search-text" },
-            { Model.BABBAGE_SEARCH_DOCUMENT, "babbage-search-document" },
-            { Model.BABBAGE_SEARCH_QUERY, "babbage-search-query" },
-            { Model.BABBAGE_SIMILARITY, "babbage-similarity" },
-            { Model.BABBAGE_2020_05_03, "babbage:2020-05-03" },
-            { Model.CODE_CUSHMAN_001, "code-cushman-001" },
-            { Model.CODE_DAVINCI_002, "code-davinci-002" },
-            { Model.CODE_DAVINCI_EDIT_001, "code-davinci-edit-001" },
-            { Model.CODE_SEARCH_ADA_CODE_001, "code-search-ada-code-001" },
-            { Model.CODE_SEARCH_ADA_TEXT_001, "code-search-ada-text-001" },
-            { Model.CODE_SEARCH_BABBAGE_CODE_001, "code-search-babbage-code-001" },
-            { Model.CODE_SEARCH_BABBAGE_TEXT_001, "code-search-babbage-text-001" },
-            { Model.CURIE, "curie" },
-            { Model.CURIE_INSTRUCT_BETA, "curie-instruct-beta" },
-            { Model.CURIE_SEARCH_DOCUMENT, "curie-search-document" },
-            { Model.CURIE_SEARCH_QUERY, "curie-search-query" },
-            { Model.CURIE_SIMILARITY, "curie-similarity" },
-            { Model.CURIE_2020_05_03, "curie:2020-05-03" },
-            { Model.CUSHMAN_2020_05_03, "cushman:2020-05-03" },
-            { Model.DAVINCI, "davinci" },
-            { Model.DAVINCI_IF_3_0_0, "davinci-if:3.0.0" },
-            { Model.DAVINCI_INSTRUCT_BETA, "davinci-instruct-beta" },
-            { Model.DAVINCI_INSTRUCT_BETA_2_0_0, "davinci-instruct-beta:2.0.0" },
-            { Model.DAVINCI_SEARCH_DOCUMENT, "davinci-search-document" },
-            { Model.DAVINCI_SEARCH_QUERY, "davinci-search-query" },
-            { Model.DAVINCI_SIMILARITY, "davinci-similarity" },
-            { Model.DAVINCI_2020_05_03, "davinci:2020-05-03" },
-            { Model.IF_CURIE_V2, "if-curie-v2" },
-            { Model.IF_DAVINCI_V2, "if-davinci-v2" },
-            { Model.IF_DAVINCI_3_0_0, "if-davinci:3.0.0" },
-            { Model.TEXT_ADA_001, "text-ada-001" },
-            { Model.TEXT_ADA__001, "text-ada:001" },
-            { Model.TEXT_BABBAGE_001, "text-babbage-001" },
-            { Model.TEXT_BABBAGE__001, "text-babbage:001" },
-            { Model.TEXT_CURIE_001, "text-curie-001" },
-            { Model.TEXT_CURIE__001, "text-curie:001" },
-            { Model.TEXT_DAVINCI_001, "text-davinci-001" },
-            { Model.TEXT_DAVINCI_002, "text-davinci-002" },
-            { Model.TEXT_DAVINCI_003, "text-davinci-003" },
-            { Model.TEXT_DAVINCI_EDIT_001, "text-davinci-edit-001" },
-            { Model.TEXT_DAVINCI_INSERT_001, "text-davinci-insert-001" },
-            { Model.TEXT_DAVINCI_INSERT_002, "text-davinci-insert-002" },
-            { Model.TEXT_DAVINCI__001, "text-davinci:001" },
-            { Model.TEXT_EMBEDDING_ADA_002, "text-embedding-ada-002" },
-            { Model.TEXT_SEARCH_ADA_DOC_001, "text-search-ada-doc-001" },
-            { Model.TEXT_SEARCH_ADA_QUERY_001, "text-search-ada-query-001" },
-            { Model.TEXT_SEARCH_BABBAGE_DOC_001, "text-search-babbage-doc-001" },
-            { Model.TEXT_SEARCH_BABBAGE_QUERY_001, "text-search-babbage-query-001" },
-            { Model.TEXT_SEARCH_CURIE_DOC_001, "text-search-curie-doc-001" },
-            { Model.TEXT_SEARCH_CURIE_QUERY_001, "text-search-curie-query-001" },
-            { Model.TEXT_SEARCH_DAVINCI_DOC_001, "text-search-davinci-doc-001" },
-            { Model.TEXT_SEARCH_DAVINCI_QUERY_001, "text-search-davinci-query-001" },
-            { Model.TEXT_SIMILARITY_ADA_001, "text-similarity-ada-001" },
-            { Model.TEXT_SIMILARITY_BABBAGE_001, "text-similarity-babbage-001" },
-            { Model.TEXT_SIMILARITY_CURIE_001, "text-similarity-curie-001" },
-            { Model.TEXT_SIMILARITY_DAVINCI_001, "text-similarity-davinci-001" },
-            { Model.WHISPER_1, "whisper-1" }
+            { ModelName.GPT_3, "text-davinci-003" },
+            { ModelName.GPT_3_5_TURBO, "gpt-3.5-turbo" },
+            { ModelName.GPT_3_5_TURBO_0301, "gpt-3.5-turbo-0301" },
+            { ModelName.GPT_4, "gpt-4" },
+            { ModelName.GPT_4_0314, "gpt-4-0314" },
+            { ModelName.ADA, "ada" },
+            { ModelName.ADA_CODE_SEARCH_CODE, "ada-code-search-code" },
+            { ModelName.ADA_CODE_SEARCH_TEXT, "ada-code-search-text" },
+            { ModelName.ADA_SEARCH_DOCUMENT, "ada-search-document" },
+            { ModelName.ADA_SEARCH_QUERY, "ada-search-query" },
+            { ModelName.ADA_SIMILARITY, "ada-similarity" },
+            { ModelName.ADA_2020_05_03, "ada:2020-05-03" },
+            { ModelName.BABBAGE, "babbage" },
+            { ModelName.BABBAGE_CODE_SEARCH_CODE, "babbage-code-search-code" },
+            { ModelName.BABBAGE_CODE_SEARCH_TEXT, "babbage-code-search-text" },
+            { ModelName.BABBAGE_SEARCH_DOCUMENT, "babbage-search-document" },
+            { ModelName.BABBAGE_SEARCH_QUERY, "babbage-search-query" },
+            { ModelName.BABBAGE_SIMILARITY, "babbage-similarity" },
+            { ModelName.BABBAGE_2020_05_03, "babbage:2020-05-03" },
+            // { ModelName.CODE_CUSHMAN_001, "code-cushman-001" },
+            // { ModelName.CODE_DAVINCI_002, "code-davinci-002" },
+            // { ModelName.CODE_DAVINCI_EDIT_001, "code-davinci-edit-001" },
+            { ModelName.CODE_SEARCH_ADA_CODE_001, "code-search-ada-code-001" },
+            { ModelName.CODE_SEARCH_ADA_TEXT_001, "code-search-ada-text-001" },
+            { ModelName.CODE_SEARCH_BABBAGE_CODE_001, "code-search-babbage-code-001" },
+            { ModelName.CODE_SEARCH_BABBAGE_TEXT_001, "code-search-babbage-text-001" },
+            { ModelName.CURIE, "curie" },
+            { ModelName.CURIE_INSTRUCT_BETA, "curie-instruct-beta" },
+            { ModelName.CURIE_SEARCH_DOCUMENT, "curie-search-document" },
+            { ModelName.CURIE_SEARCH_QUERY, "curie-search-query" },
+            { ModelName.CURIE_SIMILARITY, "curie-similarity" },
+            { ModelName.CURIE_2020_05_03, "curie:2020-05-03" },
+            { ModelName.CUSHMAN_2020_05_03, "cushman:2020-05-03" },
+            { ModelName.DAVINCI, "davinci" },
+            { ModelName.DAVINCI_IF_3_0_0, "davinci-if:3.0.0" },
+            { ModelName.DAVINCI_INSTRUCT_BETA, "davinci-instruct-beta" },
+            { ModelName.DAVINCI_INSTRUCT_BETA_2_0_0, "davinci-instruct-beta:2.0.0" },
+            { ModelName.DAVINCI_SEARCH_DOCUMENT, "davinci-search-document" },
+            { ModelName.DAVINCI_SEARCH_QUERY, "davinci-search-query" },
+            { ModelName.DAVINCI_SIMILARITY, "davinci-similarity" },
+            { ModelName.DAVINCI_2020_05_03, "davinci:2020-05-03" },
+            // { ModelName.IF_CURIE_V2, "if-curie-v2" },
+            // { ModelName.IF_DAVINCI_V2, "if-davinci-v2" },
+            // { ModelName.IF_DAVINCI_3_0_0, "if-davinci:3.0.0" },
+            { ModelName.TEXT_ADA_001, "text-ada-001" },
+            { ModelName.TEXT_ADA__001, "text-ada:001" },
+            { ModelName.TEXT_BABBAGE_001, "text-babbage-001" },
+            { ModelName.TEXT_BABBAGE__001, "text-babbage:001" },
+            { ModelName.TEXT_CURIE_001, "text-curie-001" },
+            { ModelName.TEXT_CURIE__001, "text-curie:001" },
+            { ModelName.TEXT_DAVINCI_001, "text-davinci-001" },
+            { ModelName.TEXT_DAVINCI_002, "text-davinci-002" },
+            { ModelName.TEXT_DAVINCI_003, "text-davinci-003" },
+            { ModelName.TEXT_DAVINCI_EDIT_001, "text-davinci-edit-001" },
+            { ModelName.TEXT_DAVINCI_INSERT_001, "text-davinci-insert-001" },
+            { ModelName.TEXT_DAVINCI_INSERT_002, "text-davinci-insert-002" },
+            { ModelName.TEXT_DAVINCI__001, "text-davinci:001" },
+            { ModelName.TEXT_EMBEDDING_ADA_002, "text-embedding-ada-002" },
+            { ModelName.TEXT_SEARCH_ADA_DOC_001, "text-search-ada-doc-001" },
+            { ModelName.TEXT_SEARCH_ADA_QUERY_001, "text-search-ada-query-001" },
+            { ModelName.TEXT_SEARCH_BABBAGE_DOC_001, "text-search-babbage-doc-001" },
+            { ModelName.TEXT_SEARCH_BABBAGE_QUERY_001, "text-search-babbage-query-001" },
+            { ModelName.TEXT_SEARCH_CURIE_DOC_001, "text-search-curie-doc-001" },
+            { ModelName.TEXT_SEARCH_CURIE_QUERY_001, "text-search-curie-query-001" },
+            { ModelName.TEXT_SEARCH_DAVINCI_DOC_001, "text-search-davinci-doc-001" },
+            { ModelName.TEXT_SEARCH_DAVINCI_QUERY_001, "text-search-davinci-query-001" },
+            { ModelName.TEXT_SIMILARITY_ADA_001, "text-similarity-ada-001" },
+            { ModelName.TEXT_SIMILARITY_BABBAGE_001, "text-similarity-babbage-001" },
+            { ModelName.TEXT_SIMILARITY_CURIE_001, "text-similarity-curie-001" },
+            { ModelName.TEXT_SIMILARITY_DAVINCI_001, "text-similarity-davinci-001" },
+            // { ModelName.WHISPER_1, "whisper-1" }
         };
 
         public static readonly Dictionary<string, bool> isChat = new Dictionary<string, bool>()
@@ -228,6 +227,7 @@ namespace OpenAi
         };
 
         private Configuration config;
+        private bool verbose = true;
         private static CoroutineRunner runner;
         public static CoroutineRunner Runner {
             get
@@ -253,15 +253,11 @@ namespace OpenAi
                 return runner;
             }
         }
-        
-        public OpenAiApi()
-        {
-            config = null;
-        }
 
-        public OpenAiApi(Configuration config)
+        public OpenAiApi(Configuration config = null, bool verbose = true)
         {
             this.config = config;
+            this.verbose = verbose;
         }
 
         public Configuration ActiveConfig => config ?? OpenAi.Configuration.GlobalConfig;
@@ -289,8 +285,6 @@ namespace OpenAi
                 return ActiveConfig.Organization;
             }
         }
-        
-        // public static Configuration
         
         public static string ConfigFileDir => Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + OpenAi.Configuration.AuthFileDir;
         public static string ConfigFilePath => Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + OpenAi.Configuration.AuthFilePath;
@@ -329,68 +323,57 @@ namespace OpenAi
         public delegate void Callback<T>(T response=default);
 
         #region Completions
-
-        public Task<AiText> CreateCompletion(string prompt, Callback<AiText> callback=null)
+        
+        public Task<CompletionResponse> TextCompletion(string prompt, ModelTypes.TextCompletion model=ModelTypes.TextCompletion.GPT_3, Callback<CompletionResponse> callback=null)
         {
-            return CreateCompletion(prompt, Model.TEXT_DAVINCI_003, callback);
+            return Post(new CompletionRequest{prompt=prompt, model=model}, callback);
         }
-
-        public Task<AiText> CreateCompletion(string prompt, Model model, Callback<AiText> callback=null)
+        
+        public Task<ChatCompletionResponse> ChatCompletion(Message[] messages, ModelTypes.ChatCompletion model=ModelTypes.ChatCompletion.GPT_4, Callback<ChatCompletionResponse> callback=null)
         {
-            string modelString = ModelToString[model];
-            return CreateCompletion(prompt, modelString, callback);
+            return Post(new ChatCompletionRequest{messages=messages, model=model}, callback);
         }
-
-        public Task<AiText> CreateCompletion(string prompt, string model, Callback<AiText> callback=null)
-        {
-            
-            AiText.Request request = new AiText.Request(prompt, model);
-            return CreateCompletion(request, callback);
-        }
-
-        public Task<AiText> CreateCompletion(AiText.Request request, Callback<AiText> callback=null)
+        
+        public Task<CompletionResponse> Send(CompletionRequest request, Callback<CompletionResponse> callback=null)
         {
             return Post(request, callback);
+        }
+        
+        public Task<ChatCompletionResponse> Send(ChatCompletionRequest request, Callback<ChatCompletionResponse> callback=null)
+        {
+            return Post(request, callback);
+        }
+
+        public Task<ImageGenerationResponse> Send(ImageGenerationRequest request, Callback<ImageGenerationResponse> callback=null)
+        {
+            return CreateImage(request, callback);
         }
         
         #endregion
 
         #region Images
 
-        public Task<AiImage> CreateImage(string prompt, Callback<AiImage> callback=null)
+        public Task<ImageGenerationResponse> CreateImage(string prompt, ImageSize size=ImageSize.SMALL, Callback<ImageGenerationResponse> callback=null)
         {
-            return CreateImage(prompt, Size.SMALL, callback);
+            return CreateImage(new ImageGenerationRequest { prompt=prompt, size=size }, callback);
         }
 
-        public Task<AiImage> CreateImage(string prompt, Size size, Callback<AiImage> callback=null)
-        {
-            string sizeString = SizeToString[size];
-            return CreateImage(prompt, sizeString, callback);
-        }
-
-        public Task<AiImage> CreateImage(string prompt, string size, Callback<AiImage> callback=null)
-        {
-            
-            AiImage.Request request = new AiImage.Request(prompt, size);
-            return CreateImage(request, callback);
-        }
-
-        public Task<AiImage> CreateImage(AiImage.Request request, Callback<AiImage> callback=null)
+        public Task<ImageGenerationResponse> CreateImage(ImageGenerationRequest request, Callback<ImageGenerationResponse> callback=null)
         {
             callback ??= value => {  };
-            var taskCompletion = new TaskCompletionSource<AiImage>();
-            Callback<AiImage> callbackIntercept = async image =>
+            var taskCompletion = new TaskCompletionSource<ImageGenerationResponse>();
+            Callback<ImageGenerationResponse> callbackIntercept = async image =>
             {
                 Texture2D[] textures = await GetAllImages(image);
                 for (int i = 0; i < textures.Length; i++)
                 {
-                    AiImage.Data data = image.data[i];
+                    ImageData data = image.data[i];
 
                     Texture2D texture = textures[i];
                     if (OpenAi.Configuration.SaveTempImages)
                     {
                         string num = i > 0 ? (" " + i) : "";
-                        texture = Utils.Image.SaveImageToFile(request.prompt + num, texture, false, Utils.Image.TempImageDirectory);
+                        texture = AiUtils.Image.SaveImageToFile(request.prompt + num, texture, false, AiUtils.Image.TempImageDirectory);
                     }
                     
                     data.texture = texture;
@@ -404,13 +387,13 @@ namespace OpenAi
         
         #endregion
         
-        private Task<Texture2D[]> GetAllImages(AiImage aiImage)
+        private Task<Texture2D[]> GetAllImages(ImageGenerationResponse aiImage)
         {
             List<Task<Texture2D>> getImageTasks = new List<Task<Texture2D>>{};
             
             for (int i = 0; i < aiImage.data.Length; i++)
             {
-                AiImage.Data data = aiImage.data[i];
+                ImageData data = aiImage.data[i];
                 if (data.url != "")
                 {
                     getImageTasks.Add(GetImageFromUrl(data.url));
@@ -447,19 +430,24 @@ namespace OpenAi
             return new Tuple<Task<T>, Callback<T>>(taskCompletion.Task, wrappedCallback);
         }
         
-        private Task<T> Post<T,R>(R requestBody, Callback<T> completionCallback=null) where T : IRequestable<T>, new() where R : IRequester
+        public Task<O> Post<I,O>(I request, Callback<O> completionCallback = null)
+            where I : ModelRequest<I>
+            where O : ModelResponse<O>, new()
         {
-            string url = requestBody.URL;
-            string bodyString = requestBody.JSON;
+            if (verbose)
+            {
+                Debug.Log($"Open AI API - Request Sent: \"{request.ToJson()}\"");                
+            }
+            
             completionCallback ??= value => {  };
 
-            (Task<T> task, Callback<T> taskCallback) = CallbackToTask(completionCallback);
-            Runner.StartCoroutine(Post(url, bodyString, taskCallback));
+            (Task<O> task, Callback<O> taskCallback) = CallbackToTask(completionCallback);
+            Runner.StartCoroutine(Post(request.Url, request.ToJson(), taskCallback));
 
             return task;
         }
 
-        private IEnumerator Post<T>(string url, string body, Callback<T> completionCallback) where T : IRequestable<T>, new()
+        private IEnumerator Post<O>(string url, string body, Callback<O> completionCallback) where O : ModelResponse<O>, new()
         {
             UnityWebRequest webRequest = new UnityWebRequest(url);
                 
@@ -486,15 +474,20 @@ namespace OpenAi
             
             LogRequestResult(body, webRequest);
             
-            T response;
+            O response;
             if (webRequest.result == UnityWebRequest.Result.Success)
             {
-                response = new T().FromJson(webRequest.downloadHandler.text);
+                response = new O().FromJson(webRequest.downloadHandler.text);
                 response.Result = webRequest.result;
+                
+                if (verbose)
+                {
+                    Debug.Log($"Open AI API - Request Successful: \"{JsonUtility.ToJson(JsonUtility.FromJson<O>(webRequest.downloadHandler.text), true)}\"");
+                }
             }
             else
             {
-                response = new T
+                response = new O
                 {
                     Result = webRequest.result
                 };
@@ -523,296 +516,6 @@ namespace OpenAi
                     "result: " + request.result + ": \n\n" +
                     "response: " + request.downloadHandler.text);
             }
-        }
-    }
-    
-    
-    public interface IRequestable<T>
-    {
-        UnityWebRequest.Result Result { set; get; }
-        T FromJson(string jsonString);
-    }
-
-    public interface IRequester
-    {
-        string URL { get; }
-        
-        string JSON { get; }
-    }
-    
-    
-    [Serializable]
-    public class AiText : IRequestable<AiText>
-    {
-        public string Text => choices.Length > 0 ? choices[0].text : default;
-
-        [Serializable]
-        public class Message
-        {
-            public string role;
-            public string content;
-
-            public Message(string role, string content)
-            {
-                this.role = role;
-                this.content = content;
-            }
-            
-            public Message(OpenAiApi.MessageRole role, string content)
-            {
-                this.role = OpenAiApi.MessageRoleToString[role];
-                this.content = content;
-            }
-        }
-        
-        [Serializable]
-        public class Request : IRequester
-        {
-            public string URL => IsChat ? "https://api.openai.com/v1/chat/completions" : "https://api.openai.com/v1/completions";
-            public string JSON {
-                get 
-                {
-                    Validate();
-                    
-                    string json = JsonUtility.ToJson(this);
-                    if (IsChat)
-                    {
-                        json = json.Replace("\"prompt\":\"\",", "");
-                    }
-                    else
-                    {
-                        json = json.Replace("\"messages\":[],", "");
-                    }
-                    return json;
-                }
-            }
-            private bool IsChat => OpenAiApi.isChat.ContainsKey(model);
-            
-            [TextArea(1,20)] 
-            public string prompt;
-            public Message[] messages; 
-            public string model;
-            public int n;
-            public float temperature;
-            public int max_tokens;
-            
-            private const int defaultMaxTokens = 1000;
-
-            public Request(string prompt, string model, int n=1, float temperature=.8f, int max_tokens=defaultMaxTokens)
-            {
-                Init(
-                    prompt,
-                    null,
-                    model,
-                    n,
-                    temperature,
-                    max_tokens
-                );
-            }
-
-            public Request(string prompt, OpenAiApi.Model model, int n=1, float temperature=.8f, int max_tokens=defaultMaxTokens)
-            {
-                Init(
-                    prompt,
-                    null,
-                    OpenAiApi.ModelToString[model],
-                    n,
-                    temperature,
-                    max_tokens
-                );
-            }
-
-            public Request(Message[] messages, string model, int n=1, float temperature=.8f, int max_tokens=defaultMaxTokens)
-            {
-                Init(
-                    null,
-                    messages,
-                    model,
-                    n,
-                    temperature,
-                    max_tokens
-                );
-            }
-
-            public Request(Message[] messages, OpenAiApi.Model model, int n=1, float temperature=.8f, int max_tokens=defaultMaxTokens)
-            {
-                Init(
-                    null,
-                    messages,
-                    OpenAiApi.ModelToString[model],
-                    n,
-                    temperature,
-                    max_tokens
-                );
-            }
-
-            private void Init(string prompt, Message[] messages, string model, int n=1, float temperature=.8f, int max_tokens=defaultMaxTokens)
-            {
-                this.prompt = prompt;
-                this.messages = messages;
-                this.model = model;
-                this.temperature = temperature;
-                this.n = n;
-                this.max_tokens = max_tokens;
-                
-                Validate();
-            }
-
-            private void Validate()
-            {
-                if (IsChat)
-                {
-                    if (messages == null)
-                    {
-                        messages = new Message[] { };
-                    }
-                    
-                    if (!prompt.IsNullOrEmpty())
-                    {
-                        messages = PromptToMessages(prompt).Concat(messages).ToArray();
-                        prompt = null;
-                    }
-                }
-                else
-                {
-                    if (messages != null)
-                    {
-                        if (prompt == null)
-                        {
-                            prompt = "";
-                        }
-                        
-                        prompt += MessagesToPrompt(messages);
-                        messages = null;
-                    }
-                }
-            }
-
-            private string MessagesToPrompt(Message[] messages)
-            {
-                string messageAsPrompt = "";
-
-                foreach (Message message in messages)
-                {
-                    messageAsPrompt += $"{message.role}: '{message.content}'\n";
-                }
-
-                return messageAsPrompt;
-            }
-
-            private Message[] PromptToMessages(string prompt)
-            {
-                return new Message[]
-                {
-                    new Message(OpenAiApi.MessageRole.USER, prompt)
-                };
-            }
-        }
-            
-        [Serializable]
-        public class Choice
-        {
-            public string text = "";
-            public Message message = new Message(OpenAiApi.MessageRole.USER, "");
-            public int index = 0;
-            public string logprobs;
-            public string finish_reason;
-        }
-
-        [Serializable]
-        public class Usage
-        {
-            public int prompt_tokens;
-            public int completion_tokens;
-            public int total_tokens;
-        }
-            
-        public string id;
-        public string obj;
-        public int created;
-        public string model;
-        public Choice[] choices = new Choice[] {};
-        public Usage usage;
-
-        public UnityWebRequest.Result Result { get; set; }
-
-        public AiText()
-        {
-            choices = new [] { new Choice() };
-        }
-        
-        public AiText FromJson(string jsonString)
-        {
-            jsonString = jsonString.Replace("\"object\":", "\"obj\":"); //Have to replace object since it's a reserved word. 
-            AiText aiText = JsonUtility.FromJson<AiText>(jsonString);
-            foreach (var choice in aiText.choices)
-            {
-                choice.text = choice.text.Trim();
-
-                if (choice.message.content != "")
-                {
-                    choice.text = choice.message.content;
-                }
-                else if (choice.text != "")
-                {
-                    choice.message.content = choice.text;
-                }
-            }
-            return aiText;
-        }
-    }
-    
-    [Serializable]
-    public class AiImage : IRequestable<AiImage>
-    {
-        public Texture2D Texture => data.Length > 0 ? data[0].texture : default;
-
-        [Serializable]
-        public class Request : IRequester
-        {
-            public string URL => "https://api.openai.com/v1/images/generations";
-            public string JSON => JsonUtility.ToJson(this);
-            public string prompt;
-            public string size;
-            public int n;
-        
-            public Request(string prompt, string size="256x256", int n=1)
-            {
-                this.prompt = prompt;
-                this.size = size;
-                this.n = n;
-            }
-        
-            public Request(string prompt, OpenAiApi.Size size=OpenAiApi.Size.SMALL, int n=1)
-            {
-                this.prompt = prompt;
-                this.size = OpenAiApi.SizeToString[size];
-                this.n = n;
-            }
-        }
-        
-        [Serializable]
-        public class Data
-        {
-            public string url;
-            public Texture2D texture;
-        }
-        
-        public int created;
-        public Data[] data = new Data[]{};
-
-        public UnityWebRequest.Result Result { get; set; }
-
-        public AiImage()
-        {
-            data = new [] { new Data
-                { url = "", texture = null } 
-            };
-        }
-            
-        public AiImage FromJson(string jsonString)
-        {
-            return JsonUtility.FromJson<AiImage>(jsonString);
         }
     }
 }

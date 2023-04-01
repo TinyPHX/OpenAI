@@ -1,4 +1,7 @@
-﻿using MyBox;
+﻿using System;
+using System.Threading.Tasks;
+using MyBox;
+using OpenAI.AiModels;
 using UnityEngine;
 
 namespace OpenAi
@@ -8,29 +11,33 @@ namespace OpenAi
         public Configuration configuration;
 
         [Separator("Text Completion")] 
-        public AiText.Request completionRequest;
-        public AiText aiTextResponse;
+        public CompletionRequest completionRequest;
+        public CompletionResponse completionResponse;
+
+        [Separator("Chat Completion")] 
+        public ChatCompletionRequest chatCompletionRequest;
+        public ChatCompletionResponse chatCompletionResponse;
 
         [Separator("Image Generation")] 
-        public AiImage.Request imageRequest;
-        
-        public AiImage aiImageResponse;
+        public ImageGenerationRequest imageRequest;
+        public ImageGenerationResponse imageResponse;
 
-        public async void SendCompletionRequest()
+        public async Task SendCompletionRequest()
         {
             OpenAiApi openai = new OpenAiApi();
-            aiTextResponse = await openai.CreateCompletion(completionRequest);
+            completionResponse = await openai.Send(completionRequest);
         }
 
-        public async void SendImageRequest()
+        public async Task SendChatCompletionRequest()
         {
             OpenAiApi openai = new OpenAiApi();
-            aiImageResponse = await openai.CreateImage(imageRequest);
+            chatCompletionResponse = await openai.Send(chatCompletionRequest);
         }
 
-        public void ReloadAuth()
+        public async Task SendImageRequest()
         {
-            Configuration.GlobalConfig = OpenAiApi.ReadConfigFromUserDirectory();
+            OpenAiApi openai = new OpenAiApi();
+            imageResponse = await openai.Send(imageRequest);
         }
     }
 }

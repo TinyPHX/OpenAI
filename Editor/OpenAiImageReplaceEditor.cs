@@ -61,12 +61,12 @@ namespace OpenAi
         {
             activeWidth = Screen.width / 2f - 35;
             EditorGUIUtility.labelWidth = Screen.width / 5;
-            EditorUtils.Horizontal(() => {
-                EditorUtils.Vertical(() => {
+            AiEditorUtils.Horizontal(() => {
+                AiEditorUtils.Vertical(() => {
                     DrawGroup1();
                 }, GUILayout.Width(activeWidth));
                 GUILayout.Space(20);
-                EditorUtils.Vertical(() => {
+                AiEditorUtils.Vertical(() => {
                     DrawGroup2();
                 }, GUILayout.Width(activeWidth));
             });
@@ -82,7 +82,7 @@ namespace OpenAi
 
         void DrawGroup2()
         {
-            EditorUtils.Horizontal(() => {
+            AiEditorUtils.Horizontal(() => {
                 GenerateImageButton();
                 GUILayout.Space(20);
                 SaveButton();
@@ -98,7 +98,7 @@ namespace OpenAi
             EditorGUI.BeginDisabledGroup(openAiImageReplace.requestPending);
             if (GUILayout.Button("Generate Image"))
             {
-                if (!EditorUtils.ApiKeyPromptCheck())
+                if (!AiEditorUtils.ApiKeyPromptCheck())
                 {
                     string assetPath = AssetDatabase.GetAssetPath(openAiImageReplace.gameObject);
                     isPrefab = assetPath != "";
@@ -125,7 +125,7 @@ namespace OpenAi
 
         void SaveButton()
         {
-            EditorUtils.Disable(openAiImageReplace.Texture == null, () => {
+            AiEditorUtils.Disable(openAiImageReplace.Texture == null, () => {
                 if (GUILayout.Button("Save to File"))
                 {
                     openAiImageReplace.SaveFinal();

@@ -2,6 +2,7 @@
 using System.Linq;
 using System;
 using MyBox;
+using OpenAI.AiModels;
 using TP.ExtensionMethods;
 using UnityEditor;
 using UnityEngine;
@@ -42,12 +43,12 @@ namespace OpenAi
         {
             activeWidth = Screen.width / 2f - 35;
             EditorGUIUtility.labelWidth = Screen.width / 5;
-            EditorUtils.Horizontal(() => {
-                EditorUtils.Vertical(() => {
+            AiEditorUtils.Horizontal(() => {
+                AiEditorUtils.Vertical(() => {
                     DrawGroup1();
                 }, GUILayout.Width(activeWidth));
                 GUILayout.Space(20);
-                EditorUtils.Vertical(() => {
+                AiEditorUtils.Vertical(() => {
                     DrawGroup2();
                 }, GUILayout.Width(activeWidth));
             });
@@ -75,7 +76,7 @@ namespace OpenAi
                 }
                 else if ("m_Script" == property.propertyPath)
                 {
-                    EditorUtils.Disable(true, () =>
+                    AiEditorUtils.Disable(true, () =>
                     {
                         EditorGUILayout.PropertyField(property);
                     });
@@ -93,7 +94,7 @@ namespace OpenAi
             {
                 if (GUILayout.Button("Create Component"))
                 {
-                    if (!EditorUtils.ApiKeyPromptCheck())
+                    if (!AiEditorUtils.ApiKeyPromptCheck())
                     {
                         openAiComponent.CreateComponent(() =>
                         {
@@ -122,7 +123,14 @@ namespace OpenAi
                     for (var index = 0; index < edits.Length; index++)
                     {
                         var edit = openAiComponent.scriptInstance.editsArray.edits[index];
-                        foldoutStates[index] = EditorUtils.Foldout(foldoutStates[index], edit.editPrompt, () =>
+
+                        int averageCharacterWidth = 7;
+                        int characterLimit = (int)(activeWidth / averageCharacterWidth);
+                        string foldoutName = edit.editPrompt;
+                        foldoutName = foldoutName.Length <= characterLimit ? 
+                            foldoutName : 
+                            foldoutName.Substring(0, characterLimit) + "...";
+                        foldoutStates[index] = AiEditorUtils.Foldout(foldoutStates[index], foldoutName, () =>
                         {
                             EditorGUILayout.TextField("script", edit.script);
                             EditorGUILayout.TextField("editPrompt", edit.editPrompt);
@@ -131,11 +139,11 @@ namespace OpenAi
                     }
                 }
 
-                EditorUtils.Disable(openAiComponent.editPrompt.IsNullOrEmpty(), () =>
+                AiEditorUtils.Disable(openAiComponent.editPrompt.IsNullOrEmpty(), () =>
                 {
                     if (GUILayout.Button("Create Edit"))
                     {
-                        if (!EditorUtils.ApiKeyPromptCheck())
+                        if (!AiEditorUtils.ApiKeyPromptCheck())
                         {
                             CreateEdit(openAiComponent);
                             GUI.FocusControl("");
@@ -152,7 +160,7 @@ namespace OpenAi
                 "environments. When using this it's a good idea to backup often.",
                 MessageType.Info
             );
-            EditorUtils.Disable(true, () => {
+            AiEditorUtils.Disable(true, () => {
                 EditorGUILayout.LabelField("Code");
                 EditorStyles.textField.wordWrap = true;
                 if (openAiComponent.script)
@@ -172,19 +180,24 @@ namespace OpenAi
 
             string scriptName = openAiComponent.script.name.Replace(".cs", "");
             
+            string postPromptWithVars = openAiComponent.postPrompt
+                .Replace("{unity_version}", Application.unityVersion)
+                .Replace("{script_name}", scriptName);
+            
             string fullPrompt = 
+                // openAiComponent.prePrompt + " " + openAiComponent.prompt + " " + postPromptWithVars + "\n" + 
                 openAiComponent.editPrePrompt + " '" + openAiComponent.editPrompt + "' " + openAiComponent.editPostPrompt + "\n\n" + 
-                openAiComponent.script.text;
+                openAiComponent.script.text + "\n\n\n Respond with the full the script and not just the edit. ";
 
-            var request = new AiText.Request(fullPrompt, OpenAiApi.Model.TEXT_DAVINCI_003, 1, .8f, max_tokens: 2048);
-            var codeCompletion = await openAi.CreateCompletion(request);
+            var request = new CompletionRequest{prompt=fullPrompt, model=ModelTypes.TextCompletion.TEXT_DAVINCI_003, max_tokens=2048};
+            var codeCompletion = await openAi.Send(request);
 
             if (codeCompletion.Result == UnityWebRequest.Result.Success)
             {
                 string scriptContents = codeCompletion.Text.Trim();
                 string directory = Path.GetDirectoryName(AssetDatabase.GetAssetPath(openAiComponent.script));
 
-                Utils.Script.CreateScript(scriptName, scriptContents, false, directory, true);
+                AiUtils.Script.CreateScript(scriptName, scriptContents, false, directory, true);
                 
                 AssetDatabase.Refresh();
                 
@@ -202,7 +215,7 @@ namespace OpenAi
 
         private static void AddNewScript(OpenAiComponent openAiComponent)
         {
-            if (openAiComponent.addOnReload == "" && scriptsDirty)
+            if (scriptsDirty && (openAiComponent.addOnReload == "" || openAiComponent.script == default))
             {
                 scriptsDirty = false;
             }
@@ -222,6 +235,7 @@ namespace OpenAi
                         }
                         else
                         {
+                            openAiComponent.gameObject.GetComponent<OpenAiMonoBehaviour>().BlowUp();;
                             openAiComponent.scriptInstance = openAiComponent.gameObject.AddComponent<OpenAiMonoBehaviour>();
                         }
                     }
@@ -234,6 +248,7 @@ namespace OpenAi
                         }
                         else
                         {
+                            openAiComponent.gameObject.GetComponent<OpenAiMonoBehaviour>().BlowUp();;
                             openAiComponent.gameObject.AddComponent<OpenAiMonoBehaviour>();
                         }
                     }

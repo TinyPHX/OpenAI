@@ -43,29 +43,29 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d71fd1c7e2064804b29cda72a6a0315c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  prompt: Bananna with legs doing a kickflip with a skateboard over a 10 stair
+  prompt: bananna with legs doing a kickflip down a 10-stair
   size: 0
-  texture: {fileID: 2800000, guid: 79d37b162bbdc864e8926c27f440f6f3, type: 3}
-  removeBackground: 0
-  textureNoBackground: {fileID: 2800000, guid: 9b8ef02e469f8de4fa7ef38687811a6a, type: 3}
+  texture: {fileID: 2800000, guid: 53ed76a6ef505ea418943ea4b219222b, type: 3}
+  removeBackground: 1
+  textureNoBackground: {fileID: 2800000, guid: 5ec153153b2de284aaf4b968df81c28b, type: 3}
   samplePoints:
     points:
-    - color: {r: 1, g: 1, b: 1, a: 1}
+    - color: {r: 0.90588236, g: 0.90588236, b: 0.90588236, a: 1}
       position: {x: 25.6, y: 25.6}
-      similarity: 0
-    - color: {r: 1, g: 1, b: 1, a: 1}
+      similarity: 0.08333333
+    - color: {r: 0.90588236, g: 0.90588236, b: 0.90588236, a: 1}
       position: {x: 25.6, y: 230.4}
-      similarity: 0
-    - color: {r: 1, g: 1, b: 1, a: 1}
+      similarity: 0.08333333
+    - color: {r: 0.90588236, g: 0.90588236, b: 0.90588236, a: 1}
       position: {x: 230.4, y: 25.6}
-      similarity: 0
-  colorSensitivity: 18
+      similarity: 0.08333333
+  colorSensitivity: 4
   continuous: 0
-  featherSize: 1
-  featherAmount: 60
-  wrap: 0
-  textureWrapped: {fileID: 2800000, guid: 0f7a2f2aa6d56504e92b012c736da454, type: 3}
-  wrapSize: 50
+  featherSize: 3
+  featherAmount: 71
+  wrap: 1
+  textureWrapped: {fileID: 2800000, guid: 982763e97222a9243857f9b9bbecf1cd, type: 3}
+  wrapSize: 9
   previewGrid: 4
   newTextureSize: 256x256
   WARNING: ONLY WORKS AS COMPONENT

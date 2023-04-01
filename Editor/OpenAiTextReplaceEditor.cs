@@ -18,7 +18,7 @@ namespace OpenAi
             
             if (GUILayout.Button("Generate Text"))
             {
-                if (!EditorUtils.ApiKeyPromptCheck())
+                if (!AiEditorUtils.ApiKeyPromptCheck())
                 {
                     openAiTextReplace.ReplaceText();
                 }

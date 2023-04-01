@@ -2,6 +2,7 @@
     using System.Collections;
     using System.Linq;
     using MyBox;
+    using OpenAI.AiModels;
     using UnityEngine;
     using UnityEngine.Networking;
     using UnityEngine.UI;
@@ -11,7 +12,7 @@
         public class OpenAiImageReplace : MonoBehaviour
         {
             [TextArea(1,20)] public string prompt;
-            public OpenAiApi.Size size;
+            public ImageSize size;
             [ReadOnly] public Texture2D texture;
             
             [Separator("Remove Background")] 
@@ -87,13 +88,13 @@
 
                 requestPending = true;
                 Coroutine requestPendingTimeoutRoutine = OpenAiApi.Runner.StartCoroutine(RequestPendingTimout());
-                AiImage aiImage = await openai.CreateImage(prompt, size);
+                ImageGenerationResponse aiImage = await openai.CreateImage(prompt, size);
                 OpenAiApi.Runner.StopCoroutine(requestPendingTimeoutRoutine);
                 requestPending = false;
 
                 if (aiImage.Result == UnityWebRequest.Result.Success)
                 {
-                    texture = aiImage.data[0].texture;
+                    texture = aiImage.Texture;
 
                     SelectSamplePoints();
                     RemoveBackground();
@@ -246,7 +247,7 @@
             {
                 if (texture)
                 {
-                    textureNoBackground = Utils.Image.RemoveBackground(
+                    textureNoBackground = AiUtils.Image.RemoveBackground(
                         texture,
                         (int)(colorSensitivity / 100f * 255f),
                         featherSize,
@@ -271,7 +272,7 @@
 
                 if (textureToWrap)
                 {
-                    textureWrapped = Utils.Image.WrapTexture(
+                    textureWrapped = AiUtils.Image.WrapTexture(
                         textureToWrap,
                         wrapSize
                     );
@@ -292,7 +293,7 @@
                 if (Configuration.SaveTempImages)
                 {
                     string fullName = prompt + "_temp_" + name;
-                    Texture2D tempImage = Utils.Image.SaveImageToFile(fullName, textureToSave, false, Utils.Image.TempImageDirectory, true);
+                    Texture2D tempImage = AiUtils.Image.SaveImageToFile(fullName, textureToSave, false, AiUtils.Image.TempImageDirectory, true);
                     return tempImage;
                 }
                 else
@@ -305,7 +306,7 @@
             {
                 if (Texture != null)
                 {   
-                    Utils.Image.SaveImageToFile(TextureName, Texture);   
+                    AiUtils.Image.SaveImageToFile(TextureName, Texture);   
                 }
             }
         }

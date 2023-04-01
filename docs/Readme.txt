@@ -23,7 +23,7 @@ Project Structure
     > OpenAiApiExample (UnityEngine.MonoScript) (MonoHebavior) Example script for simple OpenAiApi usage
     > OpenAiImageReplace (UnityEngine.MonoScript) (MonoHebavior) Simple replacement of text in a unity scene
     > OpenAiTextReplace (UnityEngine.MonoScript) (MonoHebavior) Complex exmaple of image generation and manipulation
-    > Utils (UnityEngine.MonoScript) Helpful utils used by other scripts.
+    > AiUtils (UnityEngine.MonoScript) Helpful utils used by other scripts.
 > Samples (UnityEngine.DefaultAsset) All files used in the sample scene. 
 
 Also note, these Tiny PHX dependencies imported to support OpenAI API here:

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using UnityEditor;
 using UnityEngine;
 
@@ -7,39 +8,77 @@ namespace OpenAi
     [CustomEditor(typeof(OpenAiApiExample)), CanEditMultipleObjects]
     public class OpenAiApiExampleEditor : EditorWidowOrInspector<OpenAiApiExampleEditor>
     {
+        private OpenAiApiExample openai;
+        
         public override void OnInspectorGUI()
         {
-            base.OnInspectorGUI();
+            openai = target as OpenAiApiExample;
 
-            GUILayout.Space(20);
+            AiEditorUtils.DrawDefaultWithEdits(serializedObject, new []
+            {
+                new AiEditorUtils.DrawEdit(nameof(openai.completionResponse), AiEditorUtils.DrawEdit.DrawType.AFTER, () =>
+                {
+                    DrawTextCompletionButton();
+                }),
+                new AiEditorUtils.DrawEdit(nameof(openai.chatCompletionResponse), AiEditorUtils.DrawEdit.DrawType.AFTER, () =>
+                {
+                    DrawChatCompletionButton();
+                }),
+                new AiEditorUtils.DrawEdit(nameof(openai.imageResponse), AiEditorUtils.DrawEdit.DrawType.AFTER, () =>
+                {
+                    DrawImageGenerationButton();
+                })
+            });
+        }
 
-            OpenAiApiExample openai = target as OpenAiApiExample;
+        private void DrawChatCompletionButton()
+        {
+            AiEditorUtils.Horizontal(() =>
+            {
+                if (GUILayout.Button("Chat Completion Request"))
+                {
+                    if (!AiEditorUtils.ApiKeyPromptCheck())
+                    {
+                        openai.SendChatCompletionRequest();
+                    }
+                }
+                if (GUILayout.Button("?", AiEditorUtils.smallButton))
+                {
+                    Application.OpenURL("https://platform.openai.com/docs/api-reference/chat/create");
+                }
+            });
+        }
 
-            EditorUtils.Horizontal(() =>
+        private void DrawTextCompletionButton()
+        {
+            AiEditorUtils.Horizontal(() =>
             {
                 if (GUILayout.Button("Text Completion Request"))
                 {
-                    if (!EditorUtils.ApiKeyPromptCheck())
+                    if (!AiEditorUtils.ApiKeyPromptCheck())
                     {
                         openai.SendCompletionRequest();
                     }
                 }
-                if (GUILayout.Button("?", EditorUtils.smallButton))
+                if (GUILayout.Button("?", AiEditorUtils.smallButton))
                 {
                     Application.OpenURL("https://platform.openai.com/docs/api-reference/completions");
                 }
             });
-            
-            EditorUtils.Horizontal(() =>
+        }
+
+        private void DrawImageGenerationButton()
+        {
+            AiEditorUtils.Horizontal(() =>
             {
                 if (GUILayout.Button("Image Generation Request"))
                 {
-                    if (!EditorUtils.ApiKeyPromptCheck())
+                    if (!AiEditorUtils.ApiKeyPromptCheck())
                     {
                         openai.SendImageRequest();
                     }
                 }
-                if (GUILayout.Button("?", EditorUtils.smallButton))
+                if (GUILayout.Button("?", AiEditorUtils.smallButton))
                 {
                     Application.OpenURL("https://platform.openai.com/docs/api-reference/images");
                 }

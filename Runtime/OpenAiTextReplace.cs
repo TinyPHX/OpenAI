@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using MyBox;
+using OpenAI.AiModels;
 using UnityEngine;
 using TMPro;
 
@@ -10,10 +11,10 @@ namespace OpenAi
         public TextMeshProUGUI textMesh;
         [TextArea(1,20)]
         public string prompt;
-        public OpenAiApi.Model model;
+        public ModelTypes.TextCompletion modelName;
         [TextArea(1,20), ReadOnly]
         public string response;
-        
+            
         [SerializeField, HideInInspector]
         private bool componentsInitialized = false;
         
@@ -21,7 +22,7 @@ namespace OpenAi
         {
             ShowPlaceholderText();
             OpenAiApi openai = new OpenAiApi();
-            var completion = await openai.CreateCompletion(prompt, model);
+            var completion = await openai.TextCompletion(prompt, modelName);
             response = completion.choices[0].text;
             if (textMesh != null)
             {

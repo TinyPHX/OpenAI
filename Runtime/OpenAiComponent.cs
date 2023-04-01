@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using MyBox;
+using OpenAI.AiModels;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Networking;
@@ -21,9 +22,9 @@ namespace OpenAi
             "Make sure to use UnityEngine PropertyAttributes to make the UI user friendly. Also this needs to be compatible with " +
             "Unity version {unity_version}. Lastly, the class name should be {script_name}. Don't ever try to load anything from the " +
             "resources folder unless the user prompt specifically calls for it. Add public fields for anything needed by the components. " +
-            "Make sure to include tooltip attributes for all public or serializable fields";
+            "Make sure to include tooltip attributes for all public or serializable fields. Only include code that compiles in your response.";
 
-        [ConditionalField(nameof(advanced)), TextArea(1, 20)] public string editPrePrompt = "Update the following script using this prompt. \n\nPrompt: ";
+        [ConditionalField(nameof(advanced)), TextArea(1, 20)] public string editPrePrompt = "Edit this script \n\nEdit: ";
         [ConditionalField(nameof(advanced)), TextArea(1,20)] public string editPostPrompt = "\n\nScript:\n";
             
         private readonly string namePrePrompt = "What's a good name for a C# Unity component that was generated using this prompt: ";
@@ -79,7 +80,7 @@ namespace OpenAi
             
             if (scriptName.IsNullOrEmpty())
             {
-                var nameCompletion = await openAi.CreateCompletion(namePrePrompt + " `" + prompt + "` " + namePostPrompt);
+                var nameCompletion = await openAi.TextCompletion(namePrePrompt + " `" + prompt + "` " + namePostPrompt);
                 scriptName = nameCompletion.Text;
             }
             scriptName = string.Concat(
@@ -89,12 +90,17 @@ namespace OpenAi
                     .Split(Path.GetInvalidFileNameChars()));
 
             string postPromptWithVars = postPrompt
-                .Replace("{unity_version}", Application.version)
+                .Replace("{unity_version}", Application.unityVersion)
                 .Replace("{script_name}", scriptName);
             string fullPrompt = prePrompt + " " + prompt + " " + postPromptWithVars;
 
-            var request = new AiText.Request(fullPrompt, OpenAiApi.Model.TEXT_DAVINCI_003, 1, .8f, max_tokens: 2048);
-            var codeCompletion = await openAi.CreateCompletion(request);
+            var request = new CompletionRequest
+            {
+                prompt = fullPrompt, 
+                model = ModelTypes.TextCompletion.TEXT_DAVINCI_003, 
+                max_tokens = 2048
+            };
+            var codeCompletion = await openAi.Send(request);
 
             if (codeCompletion.Result == UnityWebRequest.Result.Success)
             {
@@ -111,9 +117,15 @@ namespace OpenAi
                     scriptContents = "using OpenAiMonoBehaviour = OpenAi.OpenAiMonoBehaviour;\n" +
                                      scriptContents.Replace(monoBehaviourSearch, openAiMonoBehaviourReplace);
                 }
+
+                string unityEngineUsing = "using UnityEngine;";
+                if (!scriptContents.Contains(unityEngineUsing))
+                {
+                    scriptContents = unityEngineUsing + "\n" + scriptContents;
+                }
                 
                 addOnReload = scriptName;
-                script = Utils.Script.CreateScript(scriptName, scriptContents);
+                script = AiUtils.Script.CreateScript(scriptName, scriptContents);
                 callback();
             }
         }
