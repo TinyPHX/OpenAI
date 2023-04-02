@@ -41,191 +41,6 @@ namespace OpenAi
 
     public class OpenAiApi
     {
-        public enum ModelName
-        {
-            GPT_3,
-            GPT_3_5_TURBO,
-            GPT_3_5_TURBO_0301,
-            GPT_4,
-            GPT_4_0314,
-            ADA,
-            ADA_CODE_SEARCH_CODE,
-            ADA_CODE_SEARCH_TEXT,
-            ADA_SEARCH_DOCUMENT,
-            ADA_SEARCH_QUERY,
-            ADA_SIMILARITY,
-            ADA_2020_05_03,
-            BABBAGE,
-            BABBAGE_CODE_SEARCH_CODE,
-            BABBAGE_CODE_SEARCH_TEXT,
-            BABBAGE_SEARCH_DOCUMENT,
-            BABBAGE_SEARCH_QUERY,
-            BABBAGE_SIMILARITY,
-            BABBAGE_2020_05_03,
-            // CODE_CUSHMAN_001,
-            // CODE_DAVINCI_002,
-            // CODE_DAVINCI_EDIT_001,
-            CODE_SEARCH_ADA_CODE_001,
-            CODE_SEARCH_ADA_TEXT_001,
-            CODE_SEARCH_BABBAGE_CODE_001,
-            CODE_SEARCH_BABBAGE_TEXT_001,
-            CURIE,
-            CURIE_INSTRUCT_BETA,
-            CURIE_SEARCH_DOCUMENT,
-            CURIE_SEARCH_QUERY,
-            CURIE_SIMILARITY,
-            CURIE_2020_05_03,
-            CUSHMAN_2020_05_03,
-            DAVINCI,
-            DAVINCI_IF_3_0_0,
-            DAVINCI_INSTRUCT_BETA,
-            DAVINCI_INSTRUCT_BETA_2_0_0,
-            DAVINCI_SEARCH_DOCUMENT,
-            DAVINCI_SEARCH_QUERY,
-            DAVINCI_SIMILARITY,
-            DAVINCI_2020_05_03,
-            // IF_CURIE_V2,
-            // IF_DAVINCI_V2,
-            // IF_DAVINCI_3_0_0,
-            TEXT_ADA_001,
-            TEXT_ADA__001,
-            TEXT_BABBAGE_001,
-            TEXT_BABBAGE__001,
-            TEXT_CURIE_001,
-            TEXT_CURIE__001,
-            TEXT_DAVINCI_001,
-            TEXT_DAVINCI_002,
-            TEXT_DAVINCI_003,
-            TEXT_DAVINCI_EDIT_001,
-            TEXT_DAVINCI_INSERT_001,
-            TEXT_DAVINCI_INSERT_002,
-            TEXT_DAVINCI__001,
-            TEXT_EMBEDDING_ADA_002,
-            TEXT_SEARCH_ADA_DOC_001,
-            TEXT_SEARCH_ADA_QUERY_001,
-            TEXT_SEARCH_BABBAGE_DOC_001,
-            TEXT_SEARCH_BABBAGE_QUERY_001,
-            TEXT_SEARCH_CURIE_DOC_001,
-            TEXT_SEARCH_CURIE_QUERY_001,
-            TEXT_SEARCH_DAVINCI_DOC_001,
-            TEXT_SEARCH_DAVINCI_QUERY_001,
-            TEXT_SIMILARITY_ADA_001,
-            TEXT_SIMILARITY_BABBAGE_001,
-            TEXT_SIMILARITY_CURIE_001,
-            TEXT_SIMILARITY_DAVINCI_001,
-            // WHISPER_1
-        }
-        
-        public static readonly Dictionary<ModelName, string> ModelToString = new Dictionary<ModelName, string>()
-        {            
-            { ModelName.GPT_3, "text-davinci-003" },
-            { ModelName.GPT_3_5_TURBO, "gpt-3.5-turbo" },
-            { ModelName.GPT_3_5_TURBO_0301, "gpt-3.5-turbo-0301" },
-            { ModelName.GPT_4, "gpt-4" },
-            { ModelName.GPT_4_0314, "gpt-4-0314" },
-            { ModelName.ADA, "ada" },
-            { ModelName.ADA_CODE_SEARCH_CODE, "ada-code-search-code" },
-            { ModelName.ADA_CODE_SEARCH_TEXT, "ada-code-search-text" },
-            { ModelName.ADA_SEARCH_DOCUMENT, "ada-search-document" },
-            { ModelName.ADA_SEARCH_QUERY, "ada-search-query" },
-            { ModelName.ADA_SIMILARITY, "ada-similarity" },
-            { ModelName.ADA_2020_05_03, "ada:2020-05-03" },
-            { ModelName.BABBAGE, "babbage" },
-            { ModelName.BABBAGE_CODE_SEARCH_CODE, "babbage-code-search-code" },
-            { ModelName.BABBAGE_CODE_SEARCH_TEXT, "babbage-code-search-text" },
-            { ModelName.BABBAGE_SEARCH_DOCUMENT, "babbage-search-document" },
-            { ModelName.BABBAGE_SEARCH_QUERY, "babbage-search-query" },
-            { ModelName.BABBAGE_SIMILARITY, "babbage-similarity" },
-            { ModelName.BABBAGE_2020_05_03, "babbage:2020-05-03" },
-            // { ModelName.CODE_CUSHMAN_001, "code-cushman-001" },
-            // { ModelName.CODE_DAVINCI_002, "code-davinci-002" },
-            // { ModelName.CODE_DAVINCI_EDIT_001, "code-davinci-edit-001" },
-            { ModelName.CODE_SEARCH_ADA_CODE_001, "code-search-ada-code-001" },
-            { ModelName.CODE_SEARCH_ADA_TEXT_001, "code-search-ada-text-001" },
-            { ModelName.CODE_SEARCH_BABBAGE_CODE_001, "code-search-babbage-code-001" },
-            { ModelName.CODE_SEARCH_BABBAGE_TEXT_001, "code-search-babbage-text-001" },
-            { ModelName.CURIE, "curie" },
-            { ModelName.CURIE_INSTRUCT_BETA, "curie-instruct-beta" },
-            { ModelName.CURIE_SEARCH_DOCUMENT, "curie-search-document" },
-            { ModelName.CURIE_SEARCH_QUERY, "curie-search-query" },
-            { ModelName.CURIE_SIMILARITY, "curie-similarity" },
-            { ModelName.CURIE_2020_05_03, "curie:2020-05-03" },
-            { ModelName.CUSHMAN_2020_05_03, "cushman:2020-05-03" },
-            { ModelName.DAVINCI, "davinci" },
-            { ModelName.DAVINCI_IF_3_0_0, "davinci-if:3.0.0" },
-            { ModelName.DAVINCI_INSTRUCT_BETA, "davinci-instruct-beta" },
-            { ModelName.DAVINCI_INSTRUCT_BETA_2_0_0, "davinci-instruct-beta:2.0.0" },
-            { ModelName.DAVINCI_SEARCH_DOCUMENT, "davinci-search-document" },
-            { ModelName.DAVINCI_SEARCH_QUERY, "davinci-search-query" },
-            { ModelName.DAVINCI_SIMILARITY, "davinci-similarity" },
-            { ModelName.DAVINCI_2020_05_03, "davinci:2020-05-03" },
-            // { ModelName.IF_CURIE_V2, "if-curie-v2" },
-            // { ModelName.IF_DAVINCI_V2, "if-davinci-v2" },
-            // { ModelName.IF_DAVINCI_3_0_0, "if-davinci:3.0.0" },
-            { ModelName.TEXT_ADA_001, "text-ada-001" },
-            { ModelName.TEXT_ADA__001, "text-ada:001" },
-            { ModelName.TEXT_BABBAGE_001, "text-babbage-001" },
-            { ModelName.TEXT_BABBAGE__001, "text-babbage:001" },
-            { ModelName.TEXT_CURIE_001, "text-curie-001" },
-            { ModelName.TEXT_CURIE__001, "text-curie:001" },
-            { ModelName.TEXT_DAVINCI_001, "text-davinci-001" },
-            { ModelName.TEXT_DAVINCI_002, "text-davinci-002" },
-            { ModelName.TEXT_DAVINCI_003, "text-davinci-003" },
-            { ModelName.TEXT_DAVINCI_EDIT_001, "text-davinci-edit-001" },
-            { ModelName.TEXT_DAVINCI_INSERT_001, "text-davinci-insert-001" },
-            { ModelName.TEXT_DAVINCI_INSERT_002, "text-davinci-insert-002" },
-            { ModelName.TEXT_DAVINCI__001, "text-davinci:001" },
-            { ModelName.TEXT_EMBEDDING_ADA_002, "text-embedding-ada-002" },
-            { ModelName.TEXT_SEARCH_ADA_DOC_001, "text-search-ada-doc-001" },
-            { ModelName.TEXT_SEARCH_ADA_QUERY_001, "text-search-ada-query-001" },
-            { ModelName.TEXT_SEARCH_BABBAGE_DOC_001, "text-search-babbage-doc-001" },
-            { ModelName.TEXT_SEARCH_BABBAGE_QUERY_001, "text-search-babbage-query-001" },
-            { ModelName.TEXT_SEARCH_CURIE_DOC_001, "text-search-curie-doc-001" },
-            { ModelName.TEXT_SEARCH_CURIE_QUERY_001, "text-search-curie-query-001" },
-            { ModelName.TEXT_SEARCH_DAVINCI_DOC_001, "text-search-davinci-doc-001" },
-            { ModelName.TEXT_SEARCH_DAVINCI_QUERY_001, "text-search-davinci-query-001" },
-            { ModelName.TEXT_SIMILARITY_ADA_001, "text-similarity-ada-001" },
-            { ModelName.TEXT_SIMILARITY_BABBAGE_001, "text-similarity-babbage-001" },
-            { ModelName.TEXT_SIMILARITY_CURIE_001, "text-similarity-curie-001" },
-            { ModelName.TEXT_SIMILARITY_DAVINCI_001, "text-similarity-davinci-001" },
-            // { ModelName.WHISPER_1, "whisper-1" }
-        };
-
-        public static readonly Dictionary<string, bool> isChat = new Dictionary<string, bool>()
-        {
-            { "gpt-3.5-turbo", true },
-            { "gpt-3.5-turbo-0301", true },
-            { "gpt-4", true }
-        };
-
-        public enum Size
-        {
-            SMALL,
-            MEDIUM,
-            LARGE
-        }
-
-        public static readonly Dictionary<Size, string> SizeToString = new Dictionary<Size, string>()
-        {
-            { Size.SMALL, "256x256" },
-            { Size.MEDIUM, "512x512" },
-            { Size.LARGE, "1024x1024" }
-        };
-
-        public enum MessageRole
-        {
-            SYSTEM,
-            ASSISTANT, 
-            USER
-        }
-
-        public static readonly Dictionary<MessageRole, string> MessageRoleToString = new Dictionary<MessageRole, string>()
-        {
-            { MessageRole.SYSTEM, "system" },
-            { MessageRole.ASSISTANT, "assistant" },
-            { MessageRole.USER, "user" }
-        };
-
         private Configuration config;
         private bool verbose = true;
         private static CoroutineRunner runner;
@@ -321,48 +136,92 @@ namespace OpenAi
         }
         
         public delegate void Callback<T>(T response=default);
+        
+        public Task<AiText> Send(AiTextRequest request, Callback<AiText> callback=null)
+        {
+            return Post(request, callback);
+        }
+        
+        public Task<AiChat> Send(AiChatRequest request, Callback<AiChat> callback=null)
+        {
+            return Post(request, callback);
+        }
+
+        public Task<AiImage> Send(AiImageRequest request, Callback<AiImage> callback=null)
+        {
+            return CreateImage(request, callback);
+        }
 
         #region Completions
         
-        public Task<CompletionResponse> TextCompletion(string prompt, ModelTypes.TextCompletion model=ModelTypes.TextCompletion.GPT_3, Callback<CompletionResponse> callback=null)
+        public Task<AiText> TextCompletion(string prompt, Callback<AiText> callback)
         {
-            return Post(new CompletionRequest{prompt=prompt, model=model}, callback);
+            return Post(new AiTextRequest{prompt=prompt}, callback);
         }
         
-        public Task<ChatCompletionResponse> ChatCompletion(Message[] messages, ModelTypes.ChatCompletion model=ModelTypes.ChatCompletion.GPT_4, Callback<ChatCompletionResponse> callback=null)
+        public Task<AiText> TextCompletion(string prompt, Models.Text model, Callback<AiText> callback)
         {
-            return Post(new ChatCompletionRequest{messages=messages, model=model}, callback);
+            return Post(new AiTextRequest{prompt=prompt}, callback);
         }
         
-        public Task<CompletionResponse> Send(CompletionRequest request, Callback<CompletionResponse> callback=null)
+        public Task<AiText> TextCompletion(string prompt, Models.Text model=Models.Text.GPT_3, int n=1, float temperature=.8f, int max_tokens=100, Callback<AiText> callback=null)
         {
-            return Post(request, callback);
+            return Post(new AiTextRequest
+            {
+                prompt = prompt, 
+                model = model,
+                n = n,
+                temperature = temperature,
+                max_tokens = max_tokens
+            }, callback);
         }
         
-        public Task<ChatCompletionResponse> Send(ChatCompletionRequest request, Callback<ChatCompletionResponse> callback=null)
+        public Task<AiChat> ChatCompletion(Message[] messages, Callback<AiChat> callback=null)
         {
-            return Post(request, callback);
+            return Post(new AiChatRequest{messages=messages}, callback);
         }
-
-        public Task<ImageGenerationResponse> Send(ImageGenerationRequest request, Callback<ImageGenerationResponse> callback=null)
+        
+        public Task<AiChat> ChatCompletion(Message[] messages, Models.Chat model, Callback<AiChat> callback=null)
         {
-            return CreateImage(request, callback);
+            return Post(new AiChatRequest{messages=messages, model=model}, callback);
+        }
+        
+        public Task<AiChat> ChatCompletion(Message[] messages, Models.Chat model=Models.Chat.GPT_4, int n=1, float temperature=.8f, int max_tokens=100, Callback<AiChat> callback=null)
+        {
+            return Post(new AiChatRequest
+            {
+                messages = messages, 
+                model = model,
+                n = n,
+                temperature = temperature,
+                max_tokens = max_tokens
+            }, callback);
         }
         
         #endregion
 
         #region Images
 
-        public Task<ImageGenerationResponse> CreateImage(string prompt, ImageSize size=ImageSize.SMALL, Callback<ImageGenerationResponse> callback=null)
+        public Task<AiImage> CreateImage(string prompt, Callback<AiImage> callback)
         {
-            return CreateImage(new ImageGenerationRequest { prompt=prompt, size=size }, callback);
+            return CreateImage(new AiImageRequest { prompt=prompt }, callback);
         }
 
-        public Task<ImageGenerationResponse> CreateImage(ImageGenerationRequest request, Callback<ImageGenerationResponse> callback=null)
+        public Task<AiImage> CreateImage(string prompt, ImageSize size, Callback<AiImage> callback)
+        {
+            return CreateImage(new AiImageRequest { prompt=prompt, size=size }, callback);
+        }
+
+        public Task<AiImage> CreateImage(string prompt, ImageSize size, int n=1, Callback<AiImage> callback=null)
+        {
+            return CreateImage(new AiImageRequest { prompt=prompt, size=size, n=n}, callback);
+        }
+
+        public Task<AiImage> CreateImage(AiImageRequest request, Callback<AiImage> callback=null)
         {
             callback ??= value => {  };
-            var taskCompletion = new TaskCompletionSource<ImageGenerationResponse>();
-            Callback<ImageGenerationResponse> callbackIntercept = async image =>
+            var taskCompletion = new TaskCompletionSource<AiImage>();
+            Callback<AiImage> callbackIntercept = async image =>
             {
                 Texture2D[] textures = await GetAllImages(image);
                 for (int i = 0; i < textures.Length; i++)
@@ -387,13 +246,13 @@ namespace OpenAi
         
         #endregion
         
-        private Task<Texture2D[]> GetAllImages(ImageGenerationResponse aiImage)
+        private Task<Texture2D[]> GetAllImages(AiImage aiAiImage)
         {
             List<Task<Texture2D>> getImageTasks = new List<Task<Texture2D>>{};
             
-            for (int i = 0; i < aiImage.data.Length; i++)
+            for (int i = 0; i < aiAiImage.data.Length; i++)
             {
-                ImageData data = aiImage.data[i];
+                ImageData data = aiAiImage.data[i];
                 if (data.url != "")
                 {
                     getImageTasks.Add(GetImageFromUrl(data.url));

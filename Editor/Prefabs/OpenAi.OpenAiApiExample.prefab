@@ -46,66 +46,79 @@ MonoBehaviour:
   configuration:
     apiKey: 
     organization: 
-  completionRequest:
-    model: 0
-    prompt: Are cats cool?
-    n: 1
-    max_tokens: 1000
+  aiTextRequest:
+    model: 2147482647
+    prompt: 'How much wood can a wood chuck chuck? '
+    n: 3
+    max_tokens: 100
     temperature: 0.8
-  completionResponse:
-    id: cmpl-70RsC9uDeDxzfjbJbOb25IrTQMOiO
+  aiText:
+    id: cmpl-70jwWH1DTTvfEHGyDRX6rbD9Asdm6
     obj: 
-    created: 1680341500
+    created: 1680410960
     model: 0
     choices:
     - text: '
 
 
-        That depends on the person. Some people find cats to be cool,
-        while others may not.'
+        There is no definitive answer to this question, since it
+        depends on the size, strength, and type of woodchuck.'
       index: 0
       logprobs: 
       finish_reason: stop
+    - text: '
+
+
+        A woodchuck cannot actually chuck wood, as it is not physically
+        capable of doing so.'
+      index: 1
+      logprobs: 
+      finish_reason: stop
+    - text: '
+
+
+        A wood chuck can chuck as much wood as it can carry.'
+      index: 2
+      logprobs: 
+      finish_reason: stop
     usage:
-      prompt_tokens: 4
-      completion_tokens: 21
-      total_tokens: 25
-  chatCompletionRequest:
-    model: 0
+      prompt_tokens: 10
+      completion_tokens: 63
+      total_tokens: 73
+  aiChatRequest:
+    model: 2147482649
     messages:
-    - role: 2
-      content: Hello
-    - role: 1
-      content: Hi
+    - role: 2147482649
+      content: 'How much wood can a wood chuck chuck? '
     n: 1
     temperature: 0.8
-    max_tokens: 1000
-  chatCompletionResponse:
-    id: chatcmpl-70RxMBtR5ohcXbjUQOvswsy2z2KoC
+    max_tokens: 100
+  aiChat:
+    id: chatcmpl-70jyHUey7TtD5As9aAqEkEGuW7NKx
     obj: 
-    created: 1680341820
+    created: 1680411069
     model: 0
     choices:
     - message:
         role: 0
-        content: How can I assist you today?
+        content: The phrase "how much wood would a woodchuck chuck" is a tongue twister
+          and does not have an actual answer. A woodchuck is a North American rodent,
+          also known as a groundhog, and it does not chuck, or throw, wood. However,
+          if you're asking about the amount of soil a woodchuck can move, it can
+          displace about 700 pounds of dirt while digging a burrow.
       index: 0
       logprobs: 
       finish_reason: stop
     usage:
-      prompt_tokens: 15
-      completion_tokens: 7
-      total_tokens: 22
-  imageRequest:
-    prompt: Image of a dog catching a frisbe
-    size: 0
-    n: 3
-  imageResponse:
-    created: 1680341796
+      prompt_tokens: 17
+      completion_tokens: 89
+      total_tokens: 106
+  aiImageRequest:
+    prompt: Wood chuck
+    size: 2147482647
+    n: 1
+  aiImageResponse:
+    created: 1680411312
     data:
-    - url: https://oaidalleapiprodscus.blob.core.windows.net/private/org-cRmD5luMV9W6CyQlXwIsHWim/user-0q1fQT1Wk0SPwDfhXjB2VtGv/img-DazXY3bf2SXN9B6vFJVlurQd.png?st=2023-04-01T08%3A36%3A36Z&se=2023-04-01T10%3A36%3A36Z&sp=r&sv=2021-08-06&sr=b&rscd=inline&rsct=image/png&skoid=6aaadede-4fb3-4698-a8f6-684d7786b067&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2023-04-01T09%3A24%3A54Z&ske=2023-04-02T09%3A24%3A54Z&sks=b&skv=2021-08-06&sig=QFxpcm2GGstO6F5dKfyPjH5rpytZ0fU8wWaS0lmkW2Q%3D
-      texture: {fileID: 2800000, guid: 404a1586a32d05646a363b504bef55fd, type: 3}
-    - url: https://oaidalleapiprodscus.blob.core.windows.net/private/org-cRmD5luMV9W6CyQlXwIsHWim/user-0q1fQT1Wk0SPwDfhXjB2VtGv/img-mkPazUTA560512KYE70BMyNn.png?st=2023-04-01T08%3A36%3A36Z&se=2023-04-01T10%3A36%3A36Z&sp=r&sv=2021-08-06&sr=b&rscd=inline&rsct=image/png&skoid=6aaadede-4fb3-4698-a8f6-684d7786b067&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2023-04-01T09%3A24%3A54Z&ske=2023-04-02T09%3A24%3A54Z&sks=b&skv=2021-08-06&sig=6SxQFZ2RBAP6LmObGXz5dTOOwDwgsV5oUqAKKZLa7%2BA%3D
-      texture: {fileID: 2800000, guid: 95b856648b89f08498a6fe3ebf82d12f, type: 3}
-    - url: https://oaidalleapiprodscus.blob.core.windows.net/private/org-cRmD5luMV9W6CyQlXwIsHWim/user-0q1fQT1Wk0SPwDfhXjB2VtGv/img-tWIHuMTB04EaEkPGhQfrApok.png?st=2023-04-01T08%3A36%3A36Z&se=2023-04-01T10%3A36%3A36Z&sp=r&sv=2021-08-06&sr=b&rscd=inline&rsct=image/png&skoid=6aaadede-4fb3-4698-a8f6-684d7786b067&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2023-04-01T09%3A24%3A54Z&ske=2023-04-02T09%3A24%3A54Z&sks=b&skv=2021-08-06&sig=rjbJhuuXdpHiQEctOTbhxU%2BxVgIwI/jAJR7NpRWc4LU%3D
-      texture: {fileID: 2800000, guid: 8235982e0bcf18147a1bfd8239f73481, type: 3}
+    - url: https://oaidalleapiprodscus.blob.core.windows.net/private/org-cRmD5luMV9W6CyQlXwIsHWim/user-0q1fQT1Wk0SPwDfhXjB2VtGv/img-I48NNS8EPOsz58RSle4yRX0C.png?st=2023-04-02T03%3A55%3A12Z&se=2023-04-02T05%3A55%3A12Z&sp=r&sv=2021-08-06&sr=b&rscd=inline&rsct=image/png&skoid=6aaadede-4fb3-4698-a8f6-684d7786b067&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2023-04-01T09%3A13%3A17Z&ske=2023-04-02T09%3A13%3A17Z&sks=b&skv=2021-08-06&sig=4VcS1ozTyLeN4ieQYPu50qd55z%2BIRPXDLIxmgyZKF7A%3D
+      texture: {fileID: 2800000, guid: 5a922e3987f5969459ab282f4b2fe698, type: 3}

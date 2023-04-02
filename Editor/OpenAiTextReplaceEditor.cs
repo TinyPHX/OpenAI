@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace OpenAi
 {
-    [CustomEditor(typeof(OpenAiTextReplace)), CanEditMultipleObjects]
+    [CustomEditor(typeof(OpenAiReplaceText)), CanEditMultipleObjects]
     public class OpenAiTextReplaceEditor : EditorWidowOrInspector<OpenAiTextReplaceEditor>
     {
         public override void OnInspectorGUI()
@@ -14,13 +14,13 @@ namespace OpenAi
             
             GUILayout.Space(20);
             
-            OpenAiTextReplace openAiTextReplace = target as OpenAiTextReplace;
+            OpenAiReplaceText openAiReplaceText = target as OpenAiReplaceText;
             
             if (GUILayout.Button("Generate Text"))
             {
                 if (!AiEditorUtils.ApiKeyPromptCheck())
                 {
-                    openAiTextReplace.ReplaceText();
+                    openAiReplaceText.ReplaceText();
                 }
             }
         }

@@ -94,10 +94,10 @@ namespace OpenAi
                 .Replace("{script_name}", scriptName);
             string fullPrompt = prePrompt + " " + prompt + " " + postPromptWithVars;
 
-            var request = new CompletionRequest
+            var request = new AiTextRequest
             {
                 prompt = fullPrompt, 
-                model = ModelTypes.TextCompletion.TEXT_DAVINCI_003, 
+                model = Models.Text.TEXT_DAVINCI_003, 
                 max_tokens = 2048
             };
             var codeCompletion = await openAi.Send(request);

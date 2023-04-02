@@ -9,9 +9,10 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2606718476774641721}
-  - component: {fileID: 74574930275458831}
+  - component: {fileID: -836908125849792889}
+  - component: {fileID: -502690733597179543}
   m_Layer: 0
-  m_Name: OpenAi.OpenAiTextReplace
+  m_Name: OpenAi.OpenAiReplaceText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -31,7 +32,40 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &74574930275458831
+--- !u!114 &-836908125849792889
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5236814685837551670}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2dac210a80c64f089652dec17dda8e47, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  fontColor: {r: 0, g: 0, b: 0, a: 1}
+  richTextTagMap: 
+  font: {fileID: 0}
+  fontSize: 0
+  iconBeingUsed: 1
+  useTackIcon: 1
+  readonlyMode: 0
+  activeSettings:
+    name: 
+    id: 
+    skin: 
+    fileName: 
+    redistributable: 0
+    lite: 0
+    priority: 0
+    type: 
+  allSettings: []
+  readmeData:
+    richText: 
+    textAreaObjectFields: []
+    objectIdPairs: []
+--- !u!114 &-502690733597179543
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -44,7 +78,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   textMesh: {fileID: 0}
-  prompt: 
-  modelName: 2147482648
-  response: 
+  prompt: Give me 100 sentences describing game assets I could use to generate sprites
+    or environment textures for a game
+  modelName: 2147482647
+  response: Generating...
   componentsInitialized: 1

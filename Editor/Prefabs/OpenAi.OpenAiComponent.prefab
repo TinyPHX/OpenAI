@@ -187,3 +187,22 @@ MonoBehaviour:
         }\n\n    private void Update() \n    {\n        _timePassed = Time.time -
         _previousTime;\n        Debug.Log(\"Time Passed: \" + _timePassed);\n       
         _previousTime = Time.time;\n    }\n}"
+    - script: "using OpenAiMonoBehaviour = OpenAi.OpenAiMonoBehaviour;\nusing UnityEngine;\n\n///
+        <summary>\n/// The Start function will log \"Hello World!\" to the debug
+        console \n/// </summary> \npublic class HelloWorld : OpenAiMonoBehaviour\n{\n   
+        private float _timePassed = 0;\n    private float _previousTime = 0;\n\n   
+        /// <summary>\n    /// Logs \"Hello World!\" to the debug console\n    ///
+        </summary>\n    void Start()\n    {\n        Debug.LogWarning(\"Hello World!\");\n   
+        }\n\n    private void Update() \n    {\n        _timePassed = Time.time -
+        _previousTime;\n        Debug.LogWarning(\"Time Passed: \" + _timePassed);\n       
+        _previousTime = Time.time;\n    }\n}"
+      editPrompt: 'Replace debug logs with debug log warnings. '
+      editedScript: "using OpenAiMonoBehaviour = OpenAi.OpenAiMonoBehaviour;\nusing
+        UnityEngine;\n\n/// <summary>\n/// The Start function will log \"Hello World!\"
+        to the debug console \n/// </summary> \npublic class HelloWorld : OpenAiMonoBehaviour\n{\n   
+        private float _timePassed = 0;\n    private float _previousTime = 0;\n\n   
+        /// <summary>\n    /// Logs \"Hello World!\" to the debug console\n    ///
+        </summary>\n    void Start()\n    {\n        Debug.LogWarning(\"Hello World!\");\n   
+        }\n\n    private void Update() \n    {\n        _timePassed = Time.time -
+        _previousTime;\n        Debug.LogWarning(\"Time Passed: \" + _timePassed);\n       
+        _previousTime = Time.time;\n    }\n}"

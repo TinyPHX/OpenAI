@@ -9,29 +9,84 @@ namespace OpenAi
     public class OpenAiApiExampleEditor : EditorWidowOrInspector<OpenAiApiExampleEditor>
     {
         private OpenAiApiExample openai;
+        private float activeWidth = 0;
         
         public override void OnInspectorGUI()
         {
             openai = target as OpenAiApiExample;
 
+            EditorStyles.textField.wordWrap = true;
+            
+            if (Screen.width < 500)
+            {
+                NarrowLayout();
+            }
+            else
+            {
+                WideLayout();   
+            }
+        }
+        
+        void NarrowLayout()
+        {
+            activeWidth = Screen.width - 25;
             AiEditorUtils.DrawDefaultWithEdits(serializedObject, new []
             {
-                new AiEditorUtils.DrawEdit(nameof(openai.completionResponse), AiEditorUtils.DrawEdit.DrawType.AFTER, () =>
+                new AiEditorUtils.DrawEdit(nameof(openai.configuration), AiEditorUtils.DrawEdit.DrawType.AFTER, () =>
                 {
-                    DrawTextCompletionButton();
+                    EditorGUILayout.LabelField("Configuration Setup Code");
+                    EditorGUILayout.TextArea(openai.GetConfigurationCode());
                 }),
-                new AiEditorUtils.DrawEdit(nameof(openai.chatCompletionResponse), AiEditorUtils.DrawEdit.DrawType.AFTER, () =>
+                new AiEditorUtils.DrawEdit(nameof(openai.aiText), AiEditorUtils.DrawEdit.DrawType.AFTER, () =>
                 {
-                    DrawChatCompletionButton();
+                    DrawAiTextButton();
+                    EditorGUILayout.LabelField("Ai Text Code");
+                    EditorGUILayout.TextArea(openai.GetAiTextRequestCode());
                 }),
-                new AiEditorUtils.DrawEdit(nameof(openai.imageResponse), AiEditorUtils.DrawEdit.DrawType.AFTER, () =>
+                new AiEditorUtils.DrawEdit(nameof(openai.aiChat), AiEditorUtils.DrawEdit.DrawType.AFTER, () =>
                 {
-                    DrawImageGenerationButton();
+                    DrawAiChatButton();
+                    EditorGUILayout.LabelField("Ai Chat Code");
+                    EditorGUILayout.TextArea(openai.GetAiChatRequestCode());
+                }),
+                new AiEditorUtils.DrawEdit(nameof(openai.aiImageResponse), AiEditorUtils.DrawEdit.DrawType.AFTER, () =>
+                {
+                    DrawAiImageButton();
+                    EditorGUILayout.LabelField("Ai Image Code");
+                    EditorGUILayout.TextArea(openai.GetAiImageRequestCode());
                 })
             });
         }
 
-        private void DrawChatCompletionButton()
+        void WideLayout()
+        {
+            activeWidth = Screen.width / 2f - 35;
+            AiEditorUtils.Horizontal(() =>
+            {
+                AiEditorUtils.Vertical(() =>
+                {
+                    AiEditorUtils.DrawDefaultWithEdits(serializedObject, new[]
+                    {
+                        new AiEditorUtils.DrawEdit(nameof(openai.aiText), AiEditorUtils.DrawEdit.DrawType.AFTER,
+                            () => { DrawAiTextButton(); }),
+                        new AiEditorUtils.DrawEdit(nameof(openai.aiChat), AiEditorUtils.DrawEdit.DrawType.AFTER,
+                            () => { DrawAiChatButton(); }),
+                        new AiEditorUtils.DrawEdit(nameof(openai.aiImageResponse), AiEditorUtils.DrawEdit.DrawType.AFTER, 
+                            () => { DrawAiImageButton(); })
+                    });
+                });
+                
+                AiEditorUtils.SmallSpace();
+                
+                AiEditorUtils.Vertical(() =>
+                {
+                    EditorGUILayout.LabelField("Sample Code");
+                    EditorGUILayout.TextArea(openai.GetFullCode(), GUILayout.MaxWidth(activeWidth));
+                });
+            });
+        }
+
+        private void DrawAiChatButton()
         {
             AiEditorUtils.Horizontal(() =>
             {
@@ -39,7 +94,7 @@ namespace OpenAi
                 {
                     if (!AiEditorUtils.ApiKeyPromptCheck())
                     {
-                        openai.SendChatCompletionRequest();
+                        openai.SendAiChatRequest();
                     }
                 }
                 if (GUILayout.Button("?", AiEditorUtils.smallButton))
@@ -49,7 +104,7 @@ namespace OpenAi
             });
         }
 
-        private void DrawTextCompletionButton()
+        private void DrawAiTextButton()
         {
             AiEditorUtils.Horizontal(() =>
             {
@@ -57,7 +112,7 @@ namespace OpenAi
                 {
                     if (!AiEditorUtils.ApiKeyPromptCheck())
                     {
-                        openai.SendCompletionRequest();
+                        openai.SendAiTextRequest();
                     }
                 }
                 if (GUILayout.Button("?", AiEditorUtils.smallButton))
@@ -67,7 +122,7 @@ namespace OpenAi
             });
         }
 
-        private void DrawImageGenerationButton()
+        private void DrawAiImageButton()
         {
             AiEditorUtils.Horizontal(() =>
             {
@@ -75,7 +130,7 @@ namespace OpenAi
                 {
                     if (!AiEditorUtils.ApiKeyPromptCheck())
                     {
-                        openai.SendImageRequest();
+                        openai.SendAiImageRequest();
                     }
                 }
                 if (GUILayout.Button("?", AiEditorUtils.smallButton))

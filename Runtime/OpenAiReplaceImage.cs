@@ -9,10 +9,10 @@
 
     namespace OpenAi
     {
-        public class OpenAiImageReplace : MonoBehaviour
+        public class OpenAiReplaceImage : MonoBehaviour
         {
             [TextArea(1,20)] public string prompt;
-            public ImageSize size;
+            public ImageSize size = ImageSize.SMALL;
             [ReadOnly] public Texture2D texture;
             
             [Separator("Remove Background")] 
@@ -88,13 +88,13 @@
 
                 requestPending = true;
                 Coroutine requestPendingTimeoutRoutine = OpenAiApi.Runner.StartCoroutine(RequestPendingTimout());
-                ImageGenerationResponse aiImage = await openai.CreateImage(prompt, size);
+                AiImage aiAiImage = await openai.CreateImage(prompt, size);
                 OpenAiApi.Runner.StopCoroutine(requestPendingTimeoutRoutine);
                 requestPending = false;
 
-                if (aiImage.Result == UnityWebRequest.Result.Success)
+                if (aiAiImage.Result == UnityWebRequest.Result.Success)
                 {
-                    texture = aiImage.Texture;
+                    texture = aiAiImage.Texture;
 
                     SelectSamplePoints();
                     RemoveBackground();

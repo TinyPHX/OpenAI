@@ -180,16 +180,16 @@ namespace OpenAi
 
             string scriptName = openAiComponent.script.name.Replace(".cs", "");
             
-            string postPromptWithVars = openAiComponent.postPrompt
-                .Replace("{unity_version}", Application.unityVersion)
-                .Replace("{script_name}", scriptName);
+            // string postPromptWithVars = openAiComponent.postPrompt
+            //     .Replace("{unity_version}", Application.unityVersion)
+            //     .Replace("{script_name}", scriptName);
             
             string fullPrompt = 
                 // openAiComponent.prePrompt + " " + openAiComponent.prompt + " " + postPromptWithVars + "\n" + 
                 openAiComponent.editPrePrompt + " '" + openAiComponent.editPrompt + "' " + openAiComponent.editPostPrompt + "\n\n" + 
                 openAiComponent.script.text + "\n\n\n Respond with the full the script and not just the edit. ";
 
-            var request = new CompletionRequest{prompt=fullPrompt, model=ModelTypes.TextCompletion.TEXT_DAVINCI_003, max_tokens=2048};
+            var request = new AiTextRequest{prompt=fullPrompt, model=Models.Text.TEXT_DAVINCI_003, max_tokens=2048};
             var codeCompletion = await openAi.Send(request);
 
             if (codeCompletion.Result == UnityWebRequest.Result.Success)

@@ -6,12 +6,12 @@ using TMPro;
 
 namespace OpenAi
 {
-    public class OpenAiTextReplace : MonoBehaviour
+    public class OpenAiReplaceText : MonoBehaviour
     {
         public TextMeshProUGUI textMesh;
         [TextArea(1,20)]
         public string prompt;
-        public ModelTypes.TextCompletion modelName;
+        public Models.Text modelName = Models.Text.GPT_3;
         [TextArea(1,20), ReadOnly]
         public string response;
             

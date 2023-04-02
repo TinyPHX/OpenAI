@@ -208,12 +208,12 @@ namespace OpenAi
 
              if (ActiveTab == (int)Tabs.text)
              {
-                 RenderInspector<OpenAiTextReplaceEditor, OpenAiTextReplace>();
+                 RenderInspector<OpenAiTextReplaceEditor, OpenAiReplaceText>();
              }
 
              if (ActiveTab == (int)Tabs.image)
              {
-                 RenderInspector<OpenAiImageReplaceEditor, OpenAiImageReplace>();
+                 RenderInspector<OpenAiImageReplaceEditor, OpenAiReplaceImage>();
              }
 
              if (ActiveTab == (int)Tabs.script)

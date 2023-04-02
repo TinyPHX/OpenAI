@@ -155,10 +155,10 @@ MonoBehaviour:
         height: 15
       absoluteFieldRect:
         serializedVersion: 2
-        x: 99999
-        y: 99999
-        width: 0
-        height: 0
+        x: 397
+        y: 213
+        width: 122
+        height: 15
       index: 410
       length: 17
     - name: OpenAI (9118835)
@@ -173,7 +173,7 @@ MonoBehaviour:
       absoluteFieldRect:
         serializedVersion: 2
         x: 40
-        y: 109
+        y: 277
         width: 120
         height: 15
       index: 476
@@ -190,7 +190,7 @@ MonoBehaviour:
       absoluteFieldRect:
         serializedVersion: 2
         x: 52
-        y: 124
+        y: 292
         width: 121
         height: 15
       index: 520
@@ -207,7 +207,7 @@ MonoBehaviour:
       absoluteFieldRect:
         serializedVersion: 2
         x: 52
-        y: 139
+        y: 307
         width: 124
         height: 15
       index: 566
@@ -224,7 +224,7 @@ MonoBehaviour:
       absoluteFieldRect:
         serializedVersion: 2
         x: 64
-        y: 154
+        y: 322
         width: 121
         height: 15
       index: 597
@@ -241,7 +241,7 @@ MonoBehaviour:
       absoluteFieldRect:
         serializedVersion: 2
         x: 64
-        y: 169
+        y: 337
         width: 124
         height: 15
       index: 685
@@ -258,7 +258,7 @@ MonoBehaviour:
       absoluteFieldRect:
         serializedVersion: 2
         x: 64
-        y: 184
+        y: 352
         width: 124
         height: 15
       index: 765
@@ -275,7 +275,7 @@ MonoBehaviour:
       absoluteFieldRect:
         serializedVersion: 2
         x: 64
-        y: 199
+        y: 367
         width: 125
         height: 15
       index: 830
@@ -292,7 +292,7 @@ MonoBehaviour:
       absoluteFieldRect:
         serializedVersion: 2
         x: 64
-        y: 214
+        y: 382
         width: 121
         height: 15
       index: 905
@@ -309,7 +309,7 @@ MonoBehaviour:
       absoluteFieldRect:
         serializedVersion: 2
         x: 64
-        y: 229
+        y: 397
         width: 123
         height: 15
       index: 972
@@ -326,7 +326,7 @@ MonoBehaviour:
       absoluteFieldRect:
         serializedVersion: 2
         x: 64
-        y: 244
+        y: 412
         width: 123
         height: 15
       index: 1038
@@ -343,7 +343,7 @@ MonoBehaviour:
       absoluteFieldRect:
         serializedVersion: 2
         x: 52
-        y: 259
+        y: 427
         width: 122
         height: 15
       index: 1115
@@ -360,7 +360,7 @@ MonoBehaviour:
       absoluteFieldRect:
         serializedVersion: 2
         x: 64
-        y: 274
+        y: 442
         width: 121
         height: 15
       index: 1146
@@ -377,9 +377,9 @@ MonoBehaviour:
       absoluteFieldRect:
         serializedVersion: 2
         x: 64
-        y: 289
+        y: 457
         width: 122
-        height: 15
+        height: 10
       index: 1244
       length: 17
     - name: Runtime (9547157)
@@ -393,10 +393,10 @@ MonoBehaviour:
         height: 15
       absoluteFieldRect:
         serializedVersion: 2
-        x: 52
-        y: 304
-        width: 121
-        height: 15
+        x: 99999
+        y: 99999
+        width: 0
+        height: 0
       index: 1348
       length: 17
     - name: CoroutineRunner (5322711)
@@ -410,10 +410,10 @@ MonoBehaviour:
         height: 15
       absoluteFieldRect:
         serializedVersion: 2
-        x: 64
-        y: 319
-        width: 120
-        height: 15
+        x: 99999
+        y: 99999
+        width: 0
+        height: 0
       index: 1378
       length: 17
     - name: OpenAiApi (9019339)
@@ -427,10 +427,10 @@ MonoBehaviour:
         height: 15
       absoluteFieldRect:
         serializedVersion: 2
-        x: 64
-        y: 334
-        width: 123
-        height: 15
+        x: 99999
+        y: 99999
+        width: 0
+        height: 0
       index: 1467
       length: 17
     - name: OpenAiApiExample (4465826)
@@ -444,10 +444,10 @@ MonoBehaviour:
         height: 15
       absoluteFieldRect:
         serializedVersion: 2
-        x: 64
-        y: 349
-        width: 123
-        height: 15
+        x: 99999
+        y: 99999
+        width: 0
+        height: 0
       index: 1570
       length: 17
     - name: OpenAiImageReplace (1300272)
@@ -461,10 +461,10 @@ MonoBehaviour:
         height: 15
       absoluteFieldRect:
         serializedVersion: 2
-        x: 64
-        y: 364
-        width: 123
-        height: 15
+        x: 99999
+        y: 99999
+        width: 0
+        height: 0
       index: 1664
       length: 17
     - name: OpenAiTextReplace (6512732)
@@ -478,10 +478,10 @@ MonoBehaviour:
         height: 15
       absoluteFieldRect:
         serializedVersion: 2
-        x: 64
-        y: 379
-        width: 121
-        height: 15
+        x: 99999
+        y: 99999
+        width: 0
+        height: 0
       index: 1760
       length: 17
     - name: AiUtils (5159916)
@@ -495,10 +495,10 @@ MonoBehaviour:
         height: 15
       absoluteFieldRect:
         serializedVersion: 2
-        x: 64
-        y: 394
-        width: 119
-        height: 15
+        x: 99999
+        y: 99999
+        width: 0
+        height: 0
       index: 1864
       length: 17
     - name: Samples (2564670)
@@ -512,10 +512,10 @@ MonoBehaviour:
         height: 15
       absoluteFieldRect:
         serializedVersion: 2
-        x: 52
-        y: 409
-        width: 123
-        height: 15
+        x: 99999
+        y: 99999
+        width: 0
+        height: 0
       index: 1927
       length: 17
     - name: Readme (4042200)
@@ -529,10 +529,10 @@ MonoBehaviour:
         height: 15
       absoluteFieldRect:
         serializedVersion: 2
-        x: 39
-        y: 454
-        width: 126
-        height: 13
+        x: 99999
+        y: 99999
+        width: 0
+        height: 0
       index: 2063
       length: 17
     - name: Shared (8123561)
