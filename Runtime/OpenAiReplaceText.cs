@@ -3,31 +3,40 @@ using MyBox;
 using OpenAI.AiModels;
 using UnityEngine;
 using TMPro;
+using UnityEngine.UI;
 
 namespace OpenAi
 {
     public class OpenAiReplaceText : MonoBehaviour
     {
         public TextMeshProUGUI textMesh;
+        public Text text;
         [TextArea(1,20)]
         public string prompt;
         public Models.Text modelName = Models.Text.GPT_3;
+        public bool stream = true;
         [TextArea(1,20), ReadOnly]
         public string response;
             
         [SerializeField, HideInInspector]
         private bool componentsInitialized = false;
         
-        public async void ReplaceText()
+        public void ReplaceText()
         {
             ShowPlaceholderText();
             OpenAiApi openai = new OpenAiApi();
-            var completion = await openai.TextCompletion(prompt, modelName);
-            response = completion.choices[0].text;
-            if (textMesh != null)
+            openai.TextCompletion(prompt, modelName, stream: stream, callback: completion =>
             {
-                textMesh.text = response;
-            }
+                response = completion.choices[0].text;
+                if (textMesh != null)
+                {
+                    textMesh.text = response;
+                }
+                if (text != null)
+                {
+                    text.text = response;
+                }
+            });
         }
 
         public void ShowPlaceholderText()
@@ -57,6 +66,7 @@ namespace OpenAi
             {
                 componentsInitialized = true;
                 textMesh = GetComponent<TextMeshProUGUI>();
+                text = GetComponent<Text>();
             }
         }
     }

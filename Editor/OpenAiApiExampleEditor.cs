@@ -1,6 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
-using UnityEditor;
+﻿using UnityEditor;
 using UnityEngine;
 
 namespace OpenAi

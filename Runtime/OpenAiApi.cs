@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using MyBox;
 using OpenAI;
 using OpenAI.AiModels;
 using UnityEngine;

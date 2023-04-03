@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections;
-using System.Linq;
+﻿using System.Linq;
 using UnityEditor;
 using UnityEngine;
-using UnityEngine.UI;
 
 namespace OpenAi
 {

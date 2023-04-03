@@ -78,9 +78,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   textMesh: {fileID: 0}
+  text: {fileID: 0}
   prompt: Give me 100 sentences describing game assets I could use to generate sprites
     or environment textures for a game
   modelName: 2147482647
+  stream: 1
   response: '1. Clear blue sky with white fluffy clouds
 
     2. Fiery orange and
