@@ -8,12 +8,14 @@ namespace OpenAi
     [CustomEditor(typeof(OpenAiApiExample)), CanEditMultipleObjects]
     public class OpenAiApiExampleEditor : EditorWidowOrInspector<OpenAiApiExampleEditor>
     {
-        private OpenAiApiExample openai;
+        private OpenAiApiExample example;
         private float activeWidth = 0;
         
         public override void OnInspectorGUI()
         {
-            openai = target as OpenAiApiExample;
+            example = target as OpenAiApiExample;
+
+            RequiresConstantRepaint();
 
             EditorStyles.textField.wordWrap = true;
             
@@ -32,28 +34,28 @@ namespace OpenAi
             activeWidth = Screen.width - 25;
             AiEditorUtils.DrawDefaultWithEdits(serializedObject, new []
             {
-                new AiEditorUtils.DrawEdit(nameof(openai.configuration), AiEditorUtils.DrawEdit.DrawType.AFTER, () =>
+                new AiEditorUtils.DrawEdit(nameof(example.configuration), AiEditorUtils.DrawEdit.DrawType.AFTER, () =>
                 {
                     EditorGUILayout.LabelField("Configuration Setup Code");
-                    EditorGUILayout.TextArea(openai.GetConfigurationCode());
+                    EditorGUILayout.TextArea(example.GetConfigurationCode());
                 }),
-                new AiEditorUtils.DrawEdit(nameof(openai.aiText), AiEditorUtils.DrawEdit.DrawType.AFTER, () =>
+                new AiEditorUtils.DrawEdit(nameof(example.aiText), AiEditorUtils.DrawEdit.DrawType.AFTER, () =>
                 {
                     DrawAiTextButton();
                     EditorGUILayout.LabelField("Ai Text Code");
-                    EditorGUILayout.TextArea(openai.GetAiTextRequestCode());
+                    EditorGUILayout.TextArea(example.GetAiTextRequestCode());
                 }),
-                new AiEditorUtils.DrawEdit(nameof(openai.aiChat), AiEditorUtils.DrawEdit.DrawType.AFTER, () =>
+                new AiEditorUtils.DrawEdit(nameof(example.aiChat), AiEditorUtils.DrawEdit.DrawType.AFTER, () =>
                 {
                     DrawAiChatButton();
                     EditorGUILayout.LabelField("Ai Chat Code");
-                    EditorGUILayout.TextArea(openai.GetAiChatRequestCode());
+                    EditorGUILayout.TextArea(example.GetAiChatRequestCode());
                 }),
-                new AiEditorUtils.DrawEdit(nameof(openai.aiImageResponse), AiEditorUtils.DrawEdit.DrawType.AFTER, () =>
+                new AiEditorUtils.DrawEdit(nameof(example.aiImageResponse), AiEditorUtils.DrawEdit.DrawType.AFTER, () =>
                 {
                     DrawAiImageButton();
                     EditorGUILayout.LabelField("Ai Image Code");
-                    EditorGUILayout.TextArea(openai.GetAiImageRequestCode());
+                    EditorGUILayout.TextArea(example.GetAiImageRequestCode());
                 })
             });
         }
@@ -67,11 +69,11 @@ namespace OpenAi
                 {
                     AiEditorUtils.DrawDefaultWithEdits(serializedObject, new[]
                     {
-                        new AiEditorUtils.DrawEdit(nameof(openai.aiText), AiEditorUtils.DrawEdit.DrawType.AFTER,
+                        new AiEditorUtils.DrawEdit(nameof(example.aiText), AiEditorUtils.DrawEdit.DrawType.AFTER,
                             () => { DrawAiTextButton(); }),
-                        new AiEditorUtils.DrawEdit(nameof(openai.aiChat), AiEditorUtils.DrawEdit.DrawType.AFTER,
+                        new AiEditorUtils.DrawEdit(nameof(example.aiChat), AiEditorUtils.DrawEdit.DrawType.AFTER,
                             () => { DrawAiChatButton(); }),
-                        new AiEditorUtils.DrawEdit(nameof(openai.aiImageResponse), AiEditorUtils.DrawEdit.DrawType.AFTER, 
+                        new AiEditorUtils.DrawEdit(nameof(example.aiImageResponse), AiEditorUtils.DrawEdit.DrawType.AFTER, 
                             () => { DrawAiImageButton(); })
                     });
                 });
@@ -81,7 +83,7 @@ namespace OpenAi
                 AiEditorUtils.Vertical(() =>
                 {
                     EditorGUILayout.LabelField("Sample Code");
-                    EditorGUILayout.TextArea(openai.GetFullCode(), GUILayout.MaxWidth(activeWidth));
+                    EditorGUILayout.TextArea(example.GetFullCode(), GUILayout.MaxWidth(activeWidth));
                 });
             });
         }
@@ -94,7 +96,7 @@ namespace OpenAi
                 {
                     if (!AiEditorUtils.ApiKeyPromptCheck())
                     {
-                        openai.SendAiChatRequest();
+                        example.SendAiChatRequest();
                     }
                 }
                 if (GUILayout.Button("?", AiEditorUtils.smallButton))
@@ -112,7 +114,7 @@ namespace OpenAi
                 {
                     if (!AiEditorUtils.ApiKeyPromptCheck())
                     {
-                        openai.SendAiTextRequest();
+                        example.SendAiTextRequest();
                     }
                 }
                 if (GUILayout.Button("?", AiEditorUtils.smallButton))
@@ -130,7 +132,7 @@ namespace OpenAi
                 {
                     if (!AiEditorUtils.ApiKeyPromptCheck())
                     {
-                        openai.SendAiImageRequest();
+                        example.SendAiImageRequest();
                     }
                 }
                 if (GUILayout.Button("?", AiEditorUtils.smallButton))

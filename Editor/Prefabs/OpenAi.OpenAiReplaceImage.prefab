@@ -95,29 +95,29 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   prompt: Banana with legs doing a kickflip down a 10 stair
   size: 2147482647
-  texture: {fileID: 2800000, guid: cd6742e939b93084db7827f1ff10cc34, type: 3}
+  texture: {fileID: 2800000, guid: f21c26fb764c54046b184b6fa1163e5b, type: 3}
   removeBackground: 0
-  textureNoBackground: {fileID: 0}
+  textureNoBackground: {fileID: 2800000, guid: 75167ecba09feba428e020fe8294678a, type: 3}
   samplePoints:
     points:
-    - color: {r: 0.39607844, g: 0.35686275, b: 0.32156864, a: 1}
-      position: {x: 230.4, y: 230.4}
-      similarity: 25.750002
-    - color: {r: 0.54901963, g: 0.42745098, b: 0.2901961, a: 1}
-      position: {x: 230.4, y: 25.6}
-      similarity: 25.750004
-    - color: {r: 0.5803922, g: 0.5294118, b: 0.49411765, a: 1}
+    - color: {r: 0.32156864, g: 0.31764707, b: 0.32156864, a: 1}
       position: {x: 25.6, y: 25.6}
-      similarity: 38.75
+      similarity: 57.583332
+    - color: {r: 0.32156864, g: 0.31764707, b: 0.32156864, a: 1}
+      position: {x: 230.4, y: 25.6}
+      similarity: 57.583332
+    - color: {r: 0.84705883, g: 0.8, b: 0.654902, a: 1}
+      position: {x: 230.4, y: 230.4}
+      similarity: 57.916664
   colorSensitivity: 25
   continuous: 1
   featherSize: 3
   featherAmount: 80
-  wrap: 0
-  textureWrapped: {fileID: 0}
-  wrapSize: 25
-  previewGrid: 2
-  newTextureSize: 
+  wrap: 1
+  textureWrapped: {fileID: 2800000, guid: b195a6f5a909232438e17457f93456df, type: 3}
+  wrapSize: 55
+  previewGrid: 3
+  newTextureSize: 128x128
   WARNING: ONLY WORKS AS COMPONENT
   replace: 0
   sprite:

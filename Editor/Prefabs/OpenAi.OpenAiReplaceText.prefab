@@ -81,5 +81,30 @@ MonoBehaviour:
   prompt: Give me 100 sentences describing game assets I could use to generate sprites
     or environment textures for a game
   modelName: 2147482647
-  response: Generating...
+  response: '1. Clear blue sky with white fluffy clouds
+
+    2. Fiery orange and
+    yellow sunset
+
+    3. Foggy green forest
+
+    4. Sandy beach with tropical palm
+    trees
+
+    5. Craggy rocky mountain range
+
+    6. Glittering snow-covered landscape
+
+    7.
+    Rustic wooden bridge over a river
+
+    8. Thicket of tangled thorns
+
+    9. Ancient
+    castle battlements
+
+    10. Mystic stone temple ruins
+
+    11. Sparkling waterfall
+    cascading over a cliff'
   componentsInitialized: 1

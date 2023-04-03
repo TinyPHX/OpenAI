@@ -49,70 +49,76 @@ MonoBehaviour:
   aiTextRequest:
     model: 2147482647
     prompt: 'How much wood can a wood chuck chuck? '
-    n: 3
-    max_tokens: 100
+    n: 2
+    max_tokens: 400
     temperature: 0.8
+    stream: 1
   aiText:
-    id: cmpl-70jwWH1DTTvfEHGyDRX6rbD9Asdm6
+    id: cmpl-716jhJ6k7hgdxLX9UNW2BmatRhSI9
     obj: 
-    created: 1680410960
+    created: 1680498577
     model: 0
     choices:
-    - text: '
-
-
-        There is no definitive answer to this question, since it
-        depends on the size, strength, and type of woodchuck.'
+    - text: A woodchuck can typically chuck around 35 cubic feet of wood in a day.
       index: 0
       logprobs: 
-      finish_reason: stop
-    - text: '
-
-
-        A woodchuck cannot actually chuck wood, as it is not physically
-        capable of doing so.'
+      finish_reason: 
+    - text: A woodchuck can typically chuck between 35 and 70 pounds of wood per
+        day.
       index: 1
       logprobs: 
-      finish_reason: stop
-    - text: '
-
-
-        A wood chuck can chuck as much wood as it can carry.'
-      index: 2
-      logprobs: 
-      finish_reason: stop
+      finish_reason: 
     usage:
-      prompt_tokens: 10
-      completion_tokens: 63
-      total_tokens: 73
+      prompt_tokens: 0
+      completion_tokens: 0
+      total_tokens: 0
   aiChatRequest:
     model: 2147482649
     messages:
     - role: 2147482649
       content: 'How much wood can a wood chuck chuck? '
-    n: 1
+    n: 2
     temperature: 0.8
     max_tokens: 100
+    stream: 1
   aiChat:
-    id: chatcmpl-70jyHUey7TtD5As9aAqEkEGuW7NKx
+    id: chatcmpl-716oDsUPPWetCoOvjtk7scOf3cO9V
     obj: 
-    created: 1680411069
+    created: 1680498857
     model: 0
     choices:
     - message:
-        role: 0
-        content: The phrase "how much wood would a woodchuck chuck" is a tongue twister
-          and does not have an actual answer. A woodchuck is a North American rodent,
-          also known as a groundhog, and it does not chuck, or throw, wood. However,
-          if you're asking about the amount of soil a woodchuck can move, it can
-          displace about 700 pounds of dirt while digging a burrow.
+        role: 2147482649
+        content: A wood chuck, also known as a groundhog, does not actually chuck
+          wood. The phrase "how much wood would a woodchuck chuck" is a tongue twister
+          and does not have a definitive answer. However, a wildlife biologist once
+          calculated that a woodchuck could move about 700 pounds of dirt while digging
+          a burrow, which is sometimes used as a playful answer to the question.
+      delta:
+        role: 2147482649
+        content: 
       index: 0
       logprobs: 
       finish_reason: stop
+    - message:
+        role: 2147482649
+        content: The phrase "how much wood can a woodchuck chuck" is a tongue twister
+          and doesn't have an actual answer, as woodchucks (also known as groundhogs)
+          do not actually chuck wood. However, a study by wildlife biologist Richard
+          Thomas found that if a woodchuck could chuck wood, it might chuck approximately
+          700 pounds of dirt to create its burrow. Using this information, one could
+          humorously estimate that a woodchuck could potentially chuck 700 pounds
+          of
+      delta:
+        role: 2147482649
+        content: 
+      index: 1
+      logprobs: 
+      finish_reason: length
     usage:
-      prompt_tokens: 17
-      completion_tokens: 89
-      total_tokens: 106
+      prompt_tokens: 0
+      completion_tokens: 0
+      total_tokens: 0
   aiImageRequest:
     prompt: Wood chuck
     size: 2147482647
@@ -120,5 +126,5 @@ MonoBehaviour:
   aiImageResponse:
     created: 1680411312
     data:
-    - url: https://oaidalleapiprodscus.blob.core.windows.net/private/org-cRmD5luMV9W6CyQlXwIsHWim/user-0q1fQT1Wk0SPwDfhXjB2VtGv/img-I48NNS8EPOsz58RSle4yRX0C.png?st=2023-04-02T03%3A55%3A12Z&se=2023-04-02T05%3A55%3A12Z&sp=r&sv=2021-08-06&sr=b&rscd=inline&rsct=image/png&skoid=6aaadede-4fb3-4698-a8f6-684d7786b067&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2023-04-01T09%3A13%3A17Z&ske=2023-04-02T09%3A13%3A17Z&sks=b&skv=2021-08-06&sig=4VcS1ozTyLeN4ieQYPu50qd55z%2BIRPXDLIxmgyZKF7A%3D
-      texture: {fileID: 2800000, guid: 5a922e3987f5969459ab282f4b2fe698, type: 3}
+    - texture: {fileID: 2800000, guid: 5a922e3987f5969459ab282f4b2fe698, type: 3}
+      url: https://oaidalleapiprodscus.blob.core.windows.net/private/org-cRmD5luMV9W6CyQlXwIsHWim/user-0q1fQT1Wk0SPwDfhXjB2VtGv/img-I48NNS8EPOsz58RSle4yRX0C.png?st=2023-04-02T03%3A55%3A12Z&se=2023-04-02T05%3A55%3A12Z&sp=r&sv=2021-08-06&sr=b&rscd=inline&rsct=image/png&skoid=6aaadede-4fb3-4698-a8f6-684d7786b067&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2023-04-01T09%3A13%3A17Z&ske=2023-04-02T09%3A13%3A17Z&sks=b&skv=2021-08-06&sig=4VcS1ozTyLeN4ieQYPu50qd55z%2BIRPXDLIxmgyZKF7A%3D

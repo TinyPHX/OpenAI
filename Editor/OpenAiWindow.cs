@@ -213,7 +213,7 @@ namespace OpenAi
 
              if (ActiveTab == (int)Tabs.image)
              {
-                 RenderInspector<OpenAiImageReplaceEditor, OpenAiReplaceImage>();
+                 RenderInspector<OpenAiReplaceImageEditor, OpenAiReplaceImage>();
              }
 
              if (ActiveTab == (int)Tabs.script)

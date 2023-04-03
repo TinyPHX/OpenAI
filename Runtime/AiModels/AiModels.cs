@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
 using System.Text.RegularExpressions;
-using UnityEditor.UIElements;
 using UnityEngine;
 using UnityEngine.Networking;
 
@@ -243,6 +241,7 @@ namespace OpenAI.AiModels
         public static readonly int max_tokens = 100;
         public static readonly float temperature = .8f;
         public static readonly ImageSize size = ImageSize.SMALL;
+        public static readonly bool stream = false;
     }
     
     [Serializable]
@@ -269,6 +268,7 @@ namespace OpenAI.AiModels
     public class ModelRequest<T> where T : class
     {
         public virtual string Url { get; }
+        public virtual bool Stream => false;
         
         public virtual string ToJson()
         {
@@ -281,6 +281,7 @@ namespace OpenAI.AiModels
     public class AiTextRequest : ModelRequest<AiTextRequest>
     {
         public override string Url => Endpoints.Completion;
+        public override bool Stream => stream;
         
         public Models.Text model = Models.Text.GPT_3;
         [TextArea(1,20)]
@@ -288,6 +289,7 @@ namespace OpenAI.AiModels
         public int n = AiModelDefaults.n;
         public int max_tokens = AiModelDefaults.max_tokens;
         public float temperature = AiModelDefaults.temperature;
+        public bool stream = AiModelDefaults.stream;
         
         public override string ToJson()
         {
@@ -321,12 +323,14 @@ namespace OpenAI.AiModels
     public class AiChatRequest : ModelRequest<AiChatRequest> 
     {
         public override string Url => Endpoints.ChatCompletion;
+        public override bool Stream => stream;
 
         public Models.Chat model = Models.Chat.GPT_4;
         public Message[] messages = AiModelDefaults.messages;
         public int n = AiModelDefaults.n;
         public float temperature = AiModelDefaults.temperature;
         public int max_tokens = AiModelDefaults.max_tokens;
+        public bool stream = AiModelDefaults.stream;
         
         public override string ToJson()
         {
@@ -372,6 +376,11 @@ namespace OpenAI.AiModels
         {
             return JsonUtility.FromJson<T>(jsonString);
         }
+
+        public virtual T AppendStreamResult(T streamResult)
+        {
+            return streamResult;
+        }
         
         public UnityWebRequest.Result Result { get; set; }
     }
@@ -387,6 +396,24 @@ namespace OpenAI.AiModels
         public Models.Text model;
         public Choice[] choices = new Choice[] {};
         public Usage usage;
+
+        public override AiText AppendStreamResult(AiText streamResult)
+        {
+            for (var i = 0; i < streamResult.choices.Length; i++)
+            {
+                Choice newChoice = streamResult.choices[i];
+                while (choices.Length < newChoice.index + 1)
+                {
+                    choices = choices.Append(new Choice()).ToArray();
+                }
+
+                string choice = choices[newChoice.index].text + newChoice.text;
+                choices[newChoice.index] = newChoice;
+                choices[newChoice.index].text = choice;
+            }
+
+            return this;
+        }
     }
 
     [Serializable]
@@ -401,6 +428,24 @@ namespace OpenAI.AiModels
         public Models.Chat model;
         public MessageChoice[] choices = new MessageChoice[] {};
         public Usage usage;
+
+        public override AiChat AppendStreamResult(AiChat streamResult)
+        {
+            for (var i = 0; i < streamResult.choices.Length; i++)
+            {
+                MessageChoice newChoice = streamResult.choices[i];
+                while (choices.Length < newChoice.index + 1)
+                {
+                    choices = choices.Append(new MessageChoice()).ToArray();
+                }
+
+                string content = choices[newChoice.index].message.content + newChoice.delta.content;
+                choices[newChoice.index] = newChoice;
+                choices[newChoice.index].message.content = content;
+            }
+
+            return this;
+        }
     }
 
     [Serializable]
@@ -478,6 +523,7 @@ namespace OpenAI.AiModels
     public class MessageChoice
     {
         public Message message = new Message("");
+        public Message delta = new Message(""); //for streaming only
         public int index = 0;
         public string logprobs;
         public string finish_reason;
@@ -487,13 +533,8 @@ namespace OpenAI.AiModels
     [Serializable]
     public class ImageData
     {
-        public override string ToString()
-        {
-            return "test";
-        }
-
-        public string url;
         public Texture2D texture;
+        public string url;
     }
 
     #endregion

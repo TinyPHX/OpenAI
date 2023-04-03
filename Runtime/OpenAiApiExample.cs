@@ -27,13 +27,20 @@ namespace OpenAi
         public async Task SendAiTextRequest()
         {
             OpenAiApi openai = new OpenAiApi(ConfigOrNull);
-            aiText = await openai.Send(aiTextRequest);
+            aiText = await openai.Send(aiTextRequest, callback: streamResult =>
+            {
+                aiText = streamResult;
+            });
+            Debug.Log("complete");
         }
 
         public async Task SendAiChatRequest()
         {
             OpenAiApi openai = new OpenAiApi(ConfigOrNull);
-            aiChat = await openai.Send(aiChatRequest);
+            aiChat = await openai.Send(aiChatRequest, callback: streamResult =>
+            {
+                aiChat = streamResult;
+            });
         }
 
         public async Task SendAiImageRequest()
@@ -83,12 +90,13 @@ OpenAiApi openai = new OpenAiApi();
             string N() => aiTextRequest.n == 1 ? "" : $", {returnTab}n:{aiTextRequest.n}";
             string Temperature() => aiTextRequest.temperature == .8f ? "" : $", {returnTab}temperature:{aiTextRequest.temperature}";
             string MaxTokens() => aiTextRequest.max_tokens == 100 ? "" : $", {returnTab}max_tokens:{aiTextRequest.max_tokens}";
+            string Stream() => !aiTextRequest.stream ? "" : $", {returnTab}stream:{aiTextRequest.stream}";
             string Callback() => $", {returnTab}" + (N() + Temperature() + MaxTokens() != "" ? "callback:" : "") + "aiText =>";
             
             return $@"
 // ------------ AI Text -----------
 
-openai.TextCompletion({Prompt()}{Model()}{N()}{Temperature()}{MaxTokens()}{Callback()}
+openai.TextCompletion({Prompt()}{Model()}{N()}{Temperature()}{MaxTokens()}{Stream()}{Callback()}
 {{
     Debug.Log(aiText.choices[0].text); // Do something with result!
 }});
@@ -131,12 +139,13 @@ openai.TextCompletion({Prompt()}{Model()}{N()}{Temperature()}{MaxTokens()}{Callb
             string N() => aiChatRequest.n == 1 ? "" : $", {returnTab}n:{aiChatRequest.n}";
             string Temperature() => aiChatRequest.temperature == .8f ? "" : $", {returnTab}temperature:{aiChatRequest.temperature}";
             string MaxTokens() => aiChatRequest.max_tokens == 100 ? "" : $", {returnTab}max_tokens:{aiChatRequest.max_tokens}";
+            string Stream() => !aiChatRequest.stream ? "" : $", {returnTab}stream:{aiChatRequest.stream}";
             string Callback() => $", {returnTab}" + (N() + Temperature() + MaxTokens() != "" ? "callback:" : "") + "aiChat =>";
             
             return $@"
 // ------------ AI Chat -----------
 
-openai.ChatCompletion({Messages()}{Model()}{N()}{Temperature()}{MaxTokens()}{Callback()}
+openai.ChatCompletion({Messages()}{Model()}{N()}{Temperature()}{MaxTokens()}{Stream()}{Callback()}
 {{
     Debug.Log(aiChat.choices[0].message.content); // Do something with result!
 }});

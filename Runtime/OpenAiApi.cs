@@ -139,7 +139,7 @@ namespace OpenAi
         
         public Task<AiText> Send(AiTextRequest request, Callback<AiText> callback=null)
         {
-            return Post(request, callback);
+            return TextCompletion(request, callback);
         }
         
         public Task<AiChat> Send(AiChatRequest request, Callback<AiChat> callback=null)
@@ -164,16 +164,37 @@ namespace OpenAi
             return Post(new AiTextRequest{prompt=prompt}, callback);
         }
         
-        public Task<AiText> TextCompletion(string prompt, Models.Text model=Models.Text.GPT_3, int n=1, float temperature=.8f, int max_tokens=100, Callback<AiText> callback=null)
+        public Task<AiText> TextCompletion(string prompt, Models.Text model=Models.Text.GPT_3, int n=1, float temperature=.8f, int max_tokens=100, bool stream=false, Callback<AiText> callback=null)
         {
-            return Post(new AiTextRequest
+            return TextCompletion(new AiTextRequest
             {
                 prompt = prompt, 
                 model = model,
                 n = n,
                 temperature = temperature,
-                max_tokens = max_tokens
+                max_tokens = max_tokens,
+                stream = stream
             }, callback);
+        }
+
+        public Task<AiText> TextCompletion(AiTextRequest request, Callback<AiText> callback=null)
+        {
+            callback ??= (value) => {  };
+            var taskCompletion = new TaskCompletionSource<AiText>();
+            Callback<AiText> callbackIntercept = async value =>
+            {
+                for (int i = 0; i < value.choices.Length; i++)
+                {
+                    value.choices[i].text = value.choices[i].text.Trim();
+                }
+                callback(value);
+                if (value.Result == UnityWebRequest.Result.Success)
+                {
+                    taskCompletion.SetResult(value);
+                }
+            };
+            Post(request, callbackIntercept);
+            return taskCompletion.Task;
         }
         
         public Task<AiChat> ChatCompletion(Message[] messages, Callback<AiChat> callback=null)
@@ -219,7 +240,7 @@ namespace OpenAi
 
         public Task<AiImage> CreateImage(AiImageRequest request, Callback<AiImage> callback=null)
         {
-            callback ??= value => {  };
+            callback ??= (value) => {  };
             var taskCompletion = new TaskCompletionSource<AiImage>();
             Callback<AiImage> callbackIntercept = async image =>
             {
@@ -238,7 +259,10 @@ namespace OpenAi
                     data.texture = texture;
                 }
                 callback(image);
-                taskCompletion.SetResult(image);
+                if (image.Result == UnityWebRequest.Result.Success)
+                {
+                    taskCompletion.SetResult(image);
+                }
             };
             Post(request, callbackIntercept);
             return taskCompletion.Task;
@@ -279,10 +303,28 @@ namespace OpenAi
         private static Tuple<Task<T>, Callback<T>> CallbackToTask<T>(Callback<T> callback=null)
         {
             var taskCompletion = new TaskCompletionSource<T>();
-            callback ??= value => {  };
+            callback ??= (value) => {  };
             Callback<T> wrappedCallback = value =>
             {
                 taskCompletion.SetResult(value);
+                callback(value);
+            };
+
+            return new Tuple<Task<T>, Callback<T>>(taskCompletion.Task, wrappedCallback);
+        }
+
+        private static Tuple<Task<T>, Callback<T>> ModelResponseCallbackToTask<T>(Callback<T> callback=null)
+            where T : ModelResponse<T>
+        {
+            var taskCompletion = new TaskCompletionSource<T>();
+            callback ??= (value) => {  };
+            Callback<T> wrappedCallback = value =>
+            {
+                if (value.Result == UnityWebRequest.Result.Success)
+                {
+                    taskCompletion.SetResult(value);
+                }
+
                 callback(value);
             };
 
@@ -298,16 +340,17 @@ namespace OpenAi
                 Debug.Log($"Open AI API - Request Sent: \"{request.ToJson()}\"");                
             }
             
-            completionCallback ??= value => {  };
-
-            (Task<O> task, Callback<O> taskCallback) = CallbackToTask(completionCallback);
-            Runner.StartCoroutine(Post(request.Url, request.ToJson(), taskCallback));
+            completionCallback ??= (value) => {  };
+            (Task<O> task, Callback<O> taskCallback) = ModelResponseCallbackToTask(completionCallback);
+            Runner.StartCoroutine(Post(request.Url, request.ToJson(), request.Stream, taskCallback));
 
             return task;
         }
-
-        private IEnumerator Post<O>(string url, string body, Callback<O> completionCallback) where O : ModelResponse<O>, new()
+                
+        private IEnumerator Post<O>(string url, string body, bool stream, Callback<O> completionCallback) where O : ModelResponse<O>, new()
         {
+            O response = null;
+            
             UnityWebRequest webRequest = new UnityWebRequest(url);
                 
             Dictionary<string, string> headers = new Dictionary<string, string>()
@@ -322,9 +365,27 @@ namespace OpenAi
             }
             
             byte[] bodyByteArray = System.Text.Encoding.UTF8.GetBytes(body);
-            
+
             webRequest.uploadHandler = new UploadHandlerRaw(bodyByteArray);
-            webRequest.downloadHandler = new DownloadHandlerBuffer();
+            if (stream)
+            {
+                webRequest.downloadHandler = new OpenAiDownloadHandler<O>(streamResponse =>
+                {
+                    response = streamResponse;
+                    response.Result = UnityWebRequest.Result.InProgress;
+                
+                    if (verbose)
+                    {
+                        Debug.Log($"Open AI API - Stream Request Successful: \"{JsonUtility.ToJson(response, true)}\"");
+                    }
+                    
+                    completionCallback(response);
+                });
+            }
+            else
+            {
+                webRequest.downloadHandler = new DownloadHandlerBuffer();
+            }
             webRequest.disposeUploadHandlerOnDispose = true;
             webRequest.disposeDownloadHandlerOnDispose = true;
             webRequest.method = UnityWebRequest.kHttpVerbPOST;
@@ -332,29 +393,35 @@ namespace OpenAi
             yield return webRequest.SendWebRequest();
             
             LogRequestResult(body, webRequest);
-            
-            O response;
-            if (webRequest.result == UnityWebRequest.Result.Success)
+
+            if (stream)
             {
-                response = new O().FromJson(webRequest.downloadHandler.text);
-                response.Result = webRequest.result;
-                
-                if (verbose)
-                {
-                    Debug.Log($"Open AI API - Request Successful: \"{JsonUtility.ToJson(JsonUtility.FromJson<O>(webRequest.downloadHandler.text), true)}\"");
-                }
+                completionCallback(response);
             }
             else
             {
-                response = new O
+                if (webRequest.result == UnityWebRequest.Result.Success)
                 {
-                    Result = webRequest.result
-                };
+                    response = JsonUtility.FromJson<O>(webRequest.downloadHandler.text);
+                    response.Result = webRequest.result;
+
+                    if (verbose)
+                    {
+                        Debug.Log($"Open AI API - Request Successful: \"{JsonUtility.ToJson(response, true)}\"");
+                    }
+                }
+                else
+                {
+                    response = new O
+                    {
+                        Result = webRequest.result
+                    };
+                }
+            
+                completionCallback(response);
             }
-            
+                
             webRequest.Dispose();
-            
-            completionCallback(response);
         }
 
         private void LogRequestResult(string body, UnityWebRequest request)
@@ -375,6 +442,71 @@ namespace OpenAi
                     "result: " + request.result + ": \n\n" +
                     "response: " + request.downloadHandler.text);
             }
+        }
+    }
+
+    public class OpenAiDownloadHandler<T> : DownloadHandlerScript where T : ModelResponse<T> {
+        public delegate void Callback(T response);
+
+        private Callback streamCallback;
+
+        private string rawText = "";
+        private T combinedResult = null;
+
+        // Standard scripted download handler - allocates memory on each ReceiveData callback
+        public OpenAiDownloadHandler(Callback streamCallback): base()
+        {
+            this.streamCallback = streamCallback;
+        }
+
+        // Pre-allocated scripted download handler
+        // reuses the supplied byte array to deliver data.
+        // Eliminates memory allocation.
+        public OpenAiDownloadHandler(byte[] buffer): base(buffer) {
+        }
+
+        protected override byte[] GetData() { return null; }
+
+        // Called once per frame when data has been received from the network.
+        protected override bool ReceiveData(byte[] data, int dataLength) {
+            if(data == null || data.Length < 1) {
+                return false;
+            }
+            
+            T response = null;
+
+            string text = System.Text.Encoding.UTF8.GetString(data);
+            string[] textArray = text.Split('\n').Where(x => !string.IsNullOrWhiteSpace(x)).ToArray();
+
+            foreach (string textEntry in textArray)
+            {
+                string streamText = textEntry.Substring("data: ".Length);
+                
+                if (streamText != "[DONE]")
+                {
+                    T streamResponse = JsonUtility.FromJson<T>(streamText);
+                    if (combinedResult == null)
+                    {
+                        combinedResult = streamResponse;
+                    }
+                    else
+                    {
+                        combinedResult = combinedResult.AppendStreamResult(streamResponse);
+                    }
+                }
+            }
+            
+            streamCallback(combinedResult);
+            
+            return true;
+        }
+
+        protected override void CompleteContent() {
+            // Debug.Log("LoggingDownloadHandler :: CompleteContent - DOWNLOAD COMPLETE!");
+        }
+        
+        protected override void ReceiveContentLength(int contentLength) {
+            // Debug.Log(string.Format("LoggingDownloadHandler :: ReceiveContentLength - length {0}", contentLength));
         }
     }
 }

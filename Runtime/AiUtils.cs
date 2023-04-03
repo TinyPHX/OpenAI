@@ -137,7 +137,8 @@ namespace OpenAi.AiUtils
             
             Color Get(int x, int y)
             {
-                return pixels[CoordsToIndex(x, y, size)];
+                int index = CoordsToIndex(x, y, size);
+                return index < pixels.Length ? pixels[index] : default;
             }
 
             void Set(int x, int y)
