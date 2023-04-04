@@ -33,12 +33,12 @@ namespace OpenAi
          
          private static Dictionary<Tabs, string> tabNames = new Dictionary<Tabs, string>()
          {
-             { Tabs.raw, "Raw Requests" },
-             { Tabs.text, "Text Completion" },
-             { Tabs.image, "Image Generation" },
-             { Tabs.script, "Script (Beta)" },
-             { Tabs.creds, "Credentials" },
-             { Tabs.help, "Readme" }
+             { Tabs.raw, "☷ Raw Requests" },
+             { Tabs.text, "❡ Text Completion" },
+             { Tabs.image, "✎ Image Generation" },
+             { Tabs.script, "{} Script (Beta)" },
+             { Tabs.creds, "✱ Credentials" },
+             { Tabs.help, "❤ Readme" }
          };
          
          private static Dictionary<Tabs, string> shortTabNames = new Dictionary<Tabs, string>()
@@ -55,7 +55,7 @@ namespace OpenAi
          private static Dictionary<Type, Object> Editors = new Dictionary<Type, Object>();
          private static Dictionary<Type, GameObject> Prefabs = new Dictionary<Type, GameObject>();
 
-         private void RenderInspector<T,P>() 
+         private void RenderInspector<T,P>()
              where T : EditorWidowOrInspector<T>
              where P : MonoBehaviour
          {

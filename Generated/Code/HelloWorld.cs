@@ -17,6 +17,9 @@ public class HelloWorld : OpenAiMonoBehaviour
         Debug.LogWarning("Hello World!");
     }
 
+    /// <summary>
+    /// Keeps track of the time passed since the previous frame 
+    /// </summary>
     private void Update() 
     {
         _timePassed = Time.time - _previousTime;

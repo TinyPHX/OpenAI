@@ -1,12 +1,15 @@
 ﻿using System.IO;
 using System.Linq;
 using System;
+using Ardenfall.UnityCodeEditor;
 using MyBox;
 using OpenAI.AiModels;
 using TP.ExtensionMethods;
+using uCodeEditor;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Networking;
+using CodeEditor = Ardenfall.UnityCodeEditor.CodeEditor;
 
 namespace OpenAi
 {
@@ -14,7 +17,9 @@ namespace OpenAi
     public class OpenAiComponentEditor : EditorWidowOrInspector<OpenAiComponentEditor>
     {
         private OpenAiComponent openAiComponent;
+        private string codeWithEdits;
         private float activeWidth = 0;
+        private CodeEditor codeEditor;
         
         [SerializeField] private bool[] foldoutStates = new bool[] { };
         private static bool scriptsDirty = false; 
@@ -165,7 +170,9 @@ namespace OpenAi
                 EditorStyles.textField.wordWrap = true;
                 if (openAiComponent.script)
                 {
-                    EditorGUILayout.TextArea(openAiComponent.script.text);
+                    codeEditor = new CodeEditor("CodeEditor", new DefaultTheme());
+                    codeEditor.highlighter = ShaderHighlighter.Highlight;
+                    codeEditor.Draw(openAiComponent.script.text, new GUIStyle(EditorStyles.textArea));
                 }
                 else
                 {

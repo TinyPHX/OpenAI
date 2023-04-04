@@ -11,9 +11,20 @@ namespace OpenAi
     [ExecuteInEditMode, Serializable]
     public class OpenAiComponent : MonoBehaviour
     {
+        public enum FileType
+        {
+            SHADER,
+            CS,
+            SCENE,
+            PREFAB,
+            SCRIPTABLE_OBJECT,
+            MATERIAL,
+            OBJ
+        }
+        
         [TextArea(1,20)] public string prompt;
         
-        [Separator("Advanced")]  
+        [Separator("Advanced")]
         [OverrideLabel("")] public bool advanced;
         [ConditionalField(nameof(advanced))] public string scriptName;
         [ConditionalField(nameof(advanced))] public bool useOpenAiMonoBehaviour = true; 

@@ -319,6 +319,29 @@ namespace OpenAI.AiModels
         public string user;
     }
     
+    // https://platform.openai.com/docs/api-reference/completions/create
+    [Serializable]
+    public class AiTextEditRequest : ModelRequest<AiTextEditRequest>
+    {
+        public override string Url => Endpoints.Completion;
+        public override bool Stream => stream;
+        
+        public Models.Text model = Models.Text.GPT_3;
+        [TextArea(1,20)]
+        public string prompt = AiModelDefaults.prompt;
+        public int n = AiModelDefaults.n;
+        public int max_tokens = AiModelDefaults.max_tokens;
+        public float temperature = AiModelDefaults.temperature;
+        public bool stream = AiModelDefaults.stream;
+        
+        public override string ToJson()
+        {
+            string json = JsonUtility.ToJson(this, true);
+            json = AiModelJson.ReplaceEnum<Models.Text>(json, nameof(model), Models.TextToString);
+            return json;
+        }
+    }
+    
     [Serializable]
     public class AiChatRequest : ModelRequest<AiChatRequest> 
     {

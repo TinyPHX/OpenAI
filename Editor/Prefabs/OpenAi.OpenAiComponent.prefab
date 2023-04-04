@@ -206,3 +206,44 @@ MonoBehaviour:
         }\n\n    private void Update() \n    {\n        _timePassed = Time.time -
         _previousTime;\n        Debug.LogWarning(\"Time Passed: \" + _timePassed);\n       
         _previousTime = Time.time;\n    }\n}"
+    - script: "using OpenAiMonoBehaviour = OpenAi.OpenAiMonoBehaviour;\nusing UnityEngine;\n\n///
+        <summary>\n/// The Start function will log \"Hello World!\" to the debug
+        console \n/// </summary> \npublic class HelloWorld : OpenAiMonoBehaviour\n{\n   
+        private float _timePassed = 0;\n    private float _previousTime = 0;\n\n   
+        /// <summary>\n    /// Logs \"Hello World!\" to the debug console\n    ///
+        </summary>\n    void Start()\n    {\n        Debug.LogWarning(\"Hello World!\");\n   
+        }\n\n    private void Update() \n    {\n        // Comment added to the update
+        function.\n        _timePassed = Time.time - _previousTime;\n        Debug.LogWarning(\"Time
+        Passed: \" + _timePassed);\n        _previousTime = Time.time;\n    }\n}"
+      editPrompt: Add a comment to the update function
+      editedScript: "using OpenAiMonoBehaviour = OpenAi.OpenAiMonoBehaviour;\nusing
+        UnityEngine;\n\n/// <summary>\n/// The Start function will log \"Hello World!\"
+        to the debug console \n/// </summary> \npublic class HelloWorld : OpenAiMonoBehaviour\n{\n   
+        private float _timePassed = 0;\n    private float _previousTime = 0;\n\n   
+        /// <summary>\n    /// Logs \"Hello World!\" to the debug console\n    ///
+        </summary>\n    void Start()\n    {\n        Debug.LogWarning(\"Hello World!\");\n   
+        }\n\n    private void Update() \n    {\n        // Comment added to the update
+        function.\n        _timePassed = Time.time - _previousTime;\n        Debug.LogWarning(\"Time
+        Passed: \" + _timePassed);\n        _previousTime = Time.time;\n    }\n}"
+    - script: "using OpenAiMonoBehaviour = OpenAi.OpenAiMonoBehaviour;\nusing UnityEngine;\n\n///
+        <summary>\n/// The Start function will log \"Hello World!\" to the debug
+        console \n/// </summary> \npublic class HelloWorld : OpenAiMonoBehaviour\n{\n   
+        private float _timePassed = 0;\n    private float _previousTime = 0;\n\n   
+        /// <summary>\n    /// Logs \"Hello World!\" to the debug console\n    ///
+        </summary>\n    void Start()\n    {\n        Debug.LogWarning(\"Hello World!\");\n   
+        }\n\n    /// <summary>\n    /// Keeps track of the time passed since the
+        previous frame \n    /// </summary>\n    private void Update() \n    {\n       
+        _timePassed = Time.time - _previousTime;\n        Debug.LogWarning(\"Time
+        Passed: \" + _timePassed);\n        _previousTime = Time.time;\n    }\n}"
+      editPrompt: Remove comment from inside update function. Add javadoc comment
+        outside of Update() fucntion
+      editedScript: "using OpenAiMonoBehaviour = OpenAi.OpenAiMonoBehaviour;\nusing
+        UnityEngine;\n\n/// <summary>\n/// The Start function will log \"Hello World!\"
+        to the debug console \n/// </summary> \npublic class HelloWorld : OpenAiMonoBehaviour\n{\n   
+        private float _timePassed = 0;\n    private float _previousTime = 0;\n\n   
+        /// <summary>\n    /// Logs \"Hello World!\" to the debug console\n    ///
+        </summary>\n    void Start()\n    {\n        Debug.LogWarning(\"Hello World!\");\n   
+        }\n\n    /// <summary>\n    /// Keeps track of the time passed since the
+        previous frame \n    /// </summary>\n    private void Update() \n    {\n       
+        _timePassed = Time.time - _previousTime;\n        Debug.LogWarning(\"Time
+        Passed: \" + _timePassed);\n        _previousTime = Time.time;\n    }\n}"
