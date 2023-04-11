@@ -95,25 +95,25 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   prompt: Banana with legs doing a kickflip down a 10 stair
   size: 2147482647
-  texture: {fileID: 2800000, guid: f21c26fb764c54046b184b6fa1163e5b, type: 3}
+  texture: {fileID: 2800000, guid: df8fa4edc02ce2740943a07d588d3a15, type: 3}
   removeBackground: 0
-  textureNoBackground: {fileID: 2800000, guid: 75167ecba09feba428e020fe8294678a, type: 3}
+  textureNoBackground: {fileID: 0}
   samplePoints:
     points:
-    - color: {r: 0.32156864, g: 0.31764707, b: 0.32156864, a: 1}
+    - color: {r: 1, g: 1, b: 1, a: 1}
       position: {x: 25.6, y: 25.6}
-      similarity: 57.583332
-    - color: {r: 0.32156864, g: 0.31764707, b: 0.32156864, a: 1}
+      similarity: 0
+    - color: {r: 1, g: 1, b: 1, a: 1}
+      position: {x: 25.6, y: 230.4}
+      similarity: 0
+    - color: {r: 1, g: 1, b: 1, a: 1}
       position: {x: 230.4, y: 25.6}
-      similarity: 57.583332
-    - color: {r: 0.84705883, g: 0.8, b: 0.654902, a: 1}
-      position: {x: 230.4, y: 230.4}
-      similarity: 57.916664
+      similarity: 0
   colorSensitivity: 25
   continuous: 1
   featherSize: 3
   featherAmount: 80
-  wrap: 1
+  wrap: 0
   textureWrapped: {fileID: 2800000, guid: b195a6f5a909232438e17457f93456df, type: 3}
   wrapSize: 55
   previewGrid: 3

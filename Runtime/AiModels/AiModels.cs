@@ -1,9 +1,13 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Networking;
+using OpenAi;
+using Image = OpenAi.AiUtils.Image;
 
 namespace OpenAI.AiModels
 {
@@ -11,7 +15,6 @@ namespace OpenAI.AiModels
     {
         public const string Completion = "https://api.openai.com/v1/completions";
         public const string ChatCompletion = "https://api.openai.com/v1/chat/completions";
-        public const string Edits = "https://api.openai.com/v1/edits";
         public const string ImageGenerations = "https://api.openai.com/v1/images/generations";
         public const string ImageEdits = "https://api.openai.com/v1/images/edits";
         public const string ImageVariations = "https://api.openai.com/v1/images/variations";
@@ -231,6 +234,19 @@ namespace OpenAI.AiModels
             
             return json;
         }
+        
+        public static readonly Dictionary<Enum, string> ImageSizeToString = new Dictionary<Enum, string>()
+        {
+            { ImageSize.SMALL, "256x256" }, 
+            { ImageSize.MEDIUM, "512x512" }, 
+            { ImageSize.LARGE, "1024x1024" }
+        };
+        
+        public static readonly Dictionary<Enum, string> ImageResponseFormatToString = new Dictionary<Enum, string>()
+        {
+            { ImageResponseFormat.URL, "url" }, 
+            { ImageResponseFormat.B64_JSON, "b64_json" }, 
+        };
     }
     
     public static class AiModelDefaults
@@ -242,6 +258,7 @@ namespace OpenAI.AiModels
         public static readonly float temperature = .8f;
         public static readonly ImageSize size = ImageSize.SMALL;
         public static readonly bool stream = false;
+        public static readonly ImageResponseFormat response_format = ImageResponseFormat.B64_JSON;
     }
     
     [Serializable]
@@ -269,10 +286,16 @@ namespace OpenAI.AiModels
     {
         public virtual string Url { get; }
         public virtual bool Stream => false;
+        public virtual bool UseForm => false;
         
         public virtual string ToJson()
         {
             return JsonUtility.ToJson(this as T, true);
+        }
+
+        public virtual WWWForm ToForm()
+        {
+            return default;
         }
     }
     
@@ -372,20 +395,75 @@ namespace OpenAI.AiModels
         public string prompt = AiModelDefaults.prompt;
         public ImageSize size = AiModelDefaults.size;
         public int n = AiModelDefaults.n;
+        [HideInInspector] public ImageResponseFormat response_format = AiModelDefaults.response_format;
         
         public override string ToJson()
         {
             string json = JsonUtility.ToJson(this, true);
-            json = AiModelJson.ReplaceEnum<ImageSize>(json, nameof(size), ImageSizeToString);
+            json = AiModelJson.ReplaceEnum<ImageSize>(json, nameof(size), AiModelJson.ImageSizeToString);
+            json = AiModelJson.ReplaceEnum<ImageResponseFormat>(json, nameof(response_format), AiModelJson.ImageResponseFormatToString);
             return json;
         }
-        
-        private static readonly Dictionary<Enum, string> ImageSizeToString = new Dictionary<Enum, string>()
+    }
+    
+    [Serializable]
+    public class AiImageEditRequest : ModelRequest<AiImageEditRequest>
+    {
+        public override string Url => Endpoints.ImageEdits;
+        public override bool UseForm => true;
+
+        public Texture2D image;
+        public Texture2D mask;
+        public string prompt = AiModelDefaults.prompt;
+        public ImageSize size = AiModelDefaults.size;
+        public int n = AiModelDefaults.n;
+        [HideInInspector] public ImageResponseFormat response_format = AiModelDefaults.response_format;
+
+        //TODO TODO TODO TODO TODO TODO TODO  
+        public List<IMultipartFormSection> ToFormTest()
         {
-            { ImageSize.SMALL, "256x256" }, 
-            { ImageSize.MEDIUM, "512x512" }, 
-            { ImageSize.LARGE, "1024x1024" }
-        };
+            List<IMultipartFormSection> formData = new List<IMultipartFormSection>();
+            formData.Add(new MultipartFormDataSection("field1=foo&field2=bar"));
+            formData.Add(new MultipartFormFileSection("my file data", "myfile.txt"));
+            return formData;
+        }
+        
+        public override WWWForm ToForm()
+        {
+            WWWForm form = new WWWForm();
+            byte[] imageData = ImageConversion.EncodeToPNG(image);
+            byte[] maskData = ImageConversion.EncodeToPNG(mask);
+            form.AddBinaryData(nameof(image), imageData, "AiImageEditRequest-" + nameof(image) + ".png");
+            form.AddBinaryData(nameof(mask), maskData, "AiImageEditRequest-" + nameof(mask) + ".png");
+            form.AddField(nameof(prompt), prompt);
+            form.AddField(nameof(size), AiModelJson.ImageSizeToString[size]);
+            form.AddField(nameof(n), n);
+            form.AddField(nameof(response_format), AiModelJson.ImageResponseFormatToString[response_format]);
+            return form;
+        }
+    }
+    
+    [Serializable]
+    public class AiImageVariationRequest : ModelRequest<AiImageVariationRequest>
+    {
+        public override string Url => Endpoints.ImageVariations;
+        public override bool UseForm => true;
+
+        public Texture2D image;
+        public ImageSize size = AiModelDefaults.size;
+        public int n = AiModelDefaults.n;
+        [HideInInspector] public ImageResponseFormat response_format = AiModelDefaults.response_format;
+        
+        public override WWWForm ToForm()
+        {
+            WWWForm form = new WWWForm();
+            byte[] imageData = ImageConversion.EncodeToPNG(image);
+            form.AddBinaryData(nameof(image), imageData);
+            form.AddField(nameof(size), AiModelJson.ImageSizeToString[size]);
+            form.AddField(nameof(n), n);
+            form.AddField(nameof(response_format), AiModelJson.ImageResponseFormatToString[response_format]);
+            return form;
+        }
     }
     
     #endregion Request Types
@@ -403,6 +481,12 @@ namespace OpenAI.AiModels
         public virtual T AppendStreamResult(T streamResult)
         {
             return streamResult;
+        }
+
+        public virtual Task ResponseCallback<R>(ModelRequest<R> request)
+            where R : class
+        {
+            return Task.CompletedTask;
         }
         
         public UnityWebRequest.Result Result { get; set; }
@@ -436,6 +520,16 @@ namespace OpenAI.AiModels
             }
 
             return this;
+        }
+
+        public override Task ResponseCallback<R>(ModelRequest<R> request)
+        {
+            for (int i = 0; i < choices.Length; i++)
+            {
+                choices[i].text = choices[i].text.Trim(); //Trim the response because it often has whitespace.
+            }
+            
+            return base.ResponseCallback(request);
         }
     }
 
@@ -475,9 +569,116 @@ namespace OpenAI.AiModels
     public class AiImage : ModelResponse<AiImage>
     {
         public Texture2D Texture => data.Length > 0 ? data[0].texture : default;
-        
+
         public int created;
         public ImageData[] data = new ImageData[]{};
+
+        public override async Task ResponseCallback<T>(ModelRequest<T> request)
+        {
+            string name = "";
+            ImageResponseFormat response_format = AiModelDefaults.response_format;
+            if (request is AiImageRequest)
+            {
+                AiImageRequest imageRequest = request as AiImageRequest;
+                response_format = imageRequest.response_format;
+                name = imageRequest.prompt;
+            } 
+            else if (request is AiImageEditRequest)
+            {
+                AiImageEditRequest imageRequest = request as AiImageEditRequest;
+                response_format = imageRequest.response_format;
+                name = imageRequest.prompt;
+            }
+            else if (request is AiImageVariationRequest)
+            {
+                AiImageVariationRequest imageRequest = request as AiImageVariationRequest;
+                response_format = imageRequest.response_format;
+                name = imageRequest.image.name + "_variant";
+            }
+            else
+            {
+                DateTime epochStart = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+                int currentEpochTime = (int)(DateTime.UtcNow - epochStart).TotalSeconds;
+                name = currentEpochTime.ToString();
+            }
+
+            if (response_format == ImageResponseFormat.B64_JSON)
+            {
+                foreach (ImageData dataElement in data)
+                {
+                    byte[] imageDate = Convert.FromBase64String(dataElement.b64_json);
+                    dataElement.texture = new Texture2D(1,1);
+                    dataElement.texture.LoadImage(imageDate);
+                }
+            }
+            else if (response_format == ImageResponseFormat.URL)
+            {
+                Texture2D[] textures = await GetAllImages(this);
+                for (int i = 0; i < textures.Length; i++)
+                {
+                    ImageData dataElement = data[i];
+
+                    Texture2D texture = textures[i];
+                    if (Configuration.SaveTempImages)
+                    {
+                        string num = (i + 1).ToString();
+                        if (name != "")
+                        {
+                            num = i == 0 ? "" : "_" + num;
+                        }
+
+                        Image.SaveTempImageToFile(name + num, texture, false);
+                    }
+
+                    dataElement.texture = texture;
+                }
+            }
+        }
+        
+        public static Task<Texture2D[]> GetAllImages(AiImage aiAiImage)
+        {
+            List<Task<Texture2D>> getImageTasks = new List<Task<Texture2D>>{};
+            
+            for (int i = 0; i < aiAiImage.data.Length; i++)
+            {
+                ImageData data = aiAiImage.data[i];
+                if (data.url != "")
+                {
+                    getImageTasks.Add(GetImageFromUrl(data.url));
+                }
+            }
+
+            return Task.WhenAll(getImageTasks);
+        }
+
+        public delegate void Callback<T>(T response=default);
+        private static Task<Texture2D> GetImageFromUrl(string url)
+        {
+            (Task<Texture2D> task, Callback<Texture2D> callback) = CallbackToTask<Texture2D>();
+            OpenAiApi.Runner.StartCoroutine(GetImageFromUrl(url, callback));
+            return task;
+        }
+
+        private static IEnumerator GetImageFromUrl(string url, Callback<Texture2D> callback) {
+            UnityWebRequest webRequest = UnityWebRequestTexture.GetTexture(url);
+            webRequest.SetRequestHeader("Access-Control-Allow-Origin", "*");
+            yield return webRequest.SendWebRequest();
+            Texture2D texture = DownloadHandlerTexture.GetContent(webRequest);
+            callback(texture);
+        }
+
+        private static Tuple<Task<T>, Callback<T>> CallbackToTask<T>(Callback<T> callback=null)
+        {
+            var taskCompletion = new TaskCompletionSource<T>();
+            callback ??= (value) => {  };
+            Callback<T> wrappedCallback = value =>
+            {
+                taskCompletion.SetResult(value);
+                callback(value);
+            };
+
+            return new Tuple<Task<T>, Callback<T>>(taskCompletion.Task, wrappedCallback);
+        }
     }
 
     #endregion Response Types
@@ -490,6 +691,12 @@ namespace OpenAI.AiModels
         MEDIUM, 
         LARGE
     };
+
+    public enum ImageResponseFormat
+    {
+        URL = Int32.MaxValue-1000,
+        B64_JSON
+    }
 
     [Serializable]
     public class Choice
@@ -557,7 +764,8 @@ namespace OpenAI.AiModels
     public class ImageData
     {
         public Texture2D texture;
-        public string url;
+        [HideInInspector] public string b64_json;
+        [HideInInspector] public string url;
     }
 
     #endregion

@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using OpenAI;
 using OpenAI.AiModels;
 using UnityEngine;
+using UnityEngine.AI;
 using UnityEngine.Networking;
 
 namespace OpenAi
@@ -151,6 +152,16 @@ namespace OpenAi
             return CreateImage(request, callback);
         }
 
+        public Task<AiImage> Send(AiImageEditRequest request, Callback<AiImage> callback=null)
+        {
+            return CreateImageEdit(request, callback);
+        }
+
+        public Task<AiImage> Send(AiImageVariationRequest aiImageVariationRequest, Callback<AiImage> callback=null)
+        {
+            return CreateImageVariant(aiImageVariationRequest, callback);
+        }
+
         #region Completions
         
         public Task<AiText> TextCompletion(string prompt, Callback<AiText> callback)
@@ -178,22 +189,7 @@ namespace OpenAi
 
         public Task<AiText> TextCompletion(AiTextRequest request, Callback<AiText> callback=null)
         {
-            callback ??= (value) => {  };
-            var taskCompletion = new TaskCompletionSource<AiText>();
-            Callback<AiText> callbackIntercept = async value =>
-            {
-                for (int i = 0; i < value.choices.Length; i++)
-                {
-                    value.choices[i].text = value.choices[i].text.Trim();
-                }
-                callback(value);
-                if (value.Result == UnityWebRequest.Result.Success)
-                {
-                    taskCompletion.SetResult(value);
-                }
-            };
-            Post(request, callbackIntercept);
-            return taskCompletion.Task;
+            return ResponseWrapper(request, callback);
         }
         
         public Task<AiChat> ChatCompletion(Message[] messages, Callback<AiChat> callback=null)
@@ -206,22 +202,30 @@ namespace OpenAi
             return Post(new AiChatRequest{messages=messages, model=model}, callback);
         }
         
-        public Task<AiChat> ChatCompletion(Message[] messages, Models.Chat model=Models.Chat.GPT_4, int n=1, float temperature=.8f, int max_tokens=100, Callback<AiChat> callback=null)
+        public Task<AiChat> ChatCompletion(Message[] messages, Models.Chat model=Models.Chat.GPT_4, int n=1, float temperature=.8f, int max_tokens=100, bool stream=false, Callback<AiChat> callback=null)
         {
-            return Post(new AiChatRequest
+            return ChatCompletion(new AiChatRequest
             {
                 messages = messages, 
                 model = model,
                 n = n,
                 temperature = temperature,
-                max_tokens = max_tokens
+                max_tokens = max_tokens,
+                stream = stream
             }, callback);
+        }
+
+        public Task<AiChat> ChatCompletion(AiChatRequest request, Callback<AiChat> callback=null)
+        {
+            return ResponseWrapper(request, callback);
         }
         
         #endregion
 
         #region Images
 
+        // CreateImage
+        
         public Task<AiImage> CreateImage(string prompt, Callback<AiImage> callback)
         {
             return CreateImage(new AiImageRequest { prompt=prompt }, callback);
@@ -239,28 +243,69 @@ namespace OpenAi
 
         public Task<AiImage> CreateImage(AiImageRequest request, Callback<AiImage> callback=null)
         {
-            callback ??= (value) => {  };
-            var taskCompletion = new TaskCompletionSource<AiImage>();
-            Callback<AiImage> callbackIntercept = async image =>
-            {
-                Texture2D[] textures = await GetAllImages(image);
-                for (int i = 0; i < textures.Length; i++)
-                {
-                    ImageData data = image.data[i];
+            return ResponseWrapper(request, callback);
+        }
 
-                    Texture2D texture = textures[i];
-                    if (OpenAi.Configuration.SaveTempImages)
-                    {
-                        string num = i > 0 ? (" " + i) : "";
-                        texture = AiUtils.Image.SaveImageToFile(request.prompt + num, texture, false, AiUtils.Image.TempImageDirectory);
-                    }
-                    
-                    data.texture = texture;
-                }
-                callback(image);
-                if (image.Result == UnityWebRequest.Result.Success)
+        // CreateImageEdit
+        
+        public Task<AiImage> CreateImageEdit(Texture2D image, Texture2D mask, string prompt, Callback<AiImage> callback)
+        {
+            return CreateImageEdit(new AiImageEditRequest { image=image, mask=mask, prompt=prompt }, callback);
+        }
+
+        public Task<AiImage> CreateImageEdit(Texture2D image, Texture2D mask, string prompt, ImageSize size, Callback<AiImage> callback)
+        {
+            return CreateImageEdit(new AiImageEditRequest { image=image, mask=mask, prompt=prompt, size=size }, callback);
+        }
+
+        public Task<AiImage> CreateImageEdit(Texture2D image, Texture2D mask, string prompt, ImageSize size, int n=1, Callback<AiImage> callback=null)
+        {
+            return CreateImageEdit(new AiImageEditRequest { image=image, mask=mask, prompt=prompt, size=size, n=n}, callback);
+        }
+
+        public Task<AiImage> CreateImageEdit(AiImageEditRequest request, Callback<AiImage> callback=null)
+        {
+            return ResponseWrapper(request, callback);
+        }
+
+        // CreateImageVariant
+        
+        public Task<AiImage> CreateImageVariant(Texture2D image, Callback<AiImage> callback)
+        {
+            return CreateImageVariant(new AiImageVariationRequest { image=image }, callback);
+        }
+
+        public Task<AiImage> CreateImageVariant(Texture2D image, ImageSize size, Callback<AiImage> callback)
+        {
+            return CreateImageVariant(new AiImageVariationRequest { image=image, size=size }, callback);
+        }
+
+        public Task<AiImage> CreateImageVariant(Texture2D image, ImageSize size, int n=1, Callback<AiImage> callback=null)
+        {
+            return CreateImageVariant(new AiImageVariationRequest { image=image, size=size, n=n}, callback);
+        }
+
+        public Task<AiImage> CreateImageVariant(AiImageVariationRequest request, Callback<AiImage> callback=null)
+        {
+            return ResponseWrapper(request, callback);
+        }
+
+        // Calls ResponseCallback on the modelRequest object so we can customize what hallpends post response for different types.
+        public Task<O> ResponseWrapper<I,O>(I request, Callback<O> callback=null)
+            where I : ModelRequest<I>
+            where O : ModelResponse<O>, new()
+        {
+            callback ??= (value) => {  };
+            var taskCompletion = new TaskCompletionSource<O>();
+            Callback<O> callbackIntercept = async response =>
+            {
+                await response.ResponseCallback(request);
+                
+                callback(response);
+                
+                if (response.Result == UnityWebRequest.Result.Success)
                 {
-                    taskCompletion.SetResult(image);
+                    taskCompletion.SetResult(response);
                 }
             };
             Post(request, callbackIntercept);
@@ -269,47 +314,27 @@ namespace OpenAi
         
         #endregion
         
-        private Task<Texture2D[]> GetAllImages(AiImage aiAiImage)
+        public Task<O> Post<I,O>(I request, Callback<O> completionCallback = null)
+            where I : ModelRequest<I>
+            where O : ModelResponse<O>, new()
         {
-            List<Task<Texture2D>> getImageTasks = new List<Task<Texture2D>>{};
-            
-            for (int i = 0; i < aiAiImage.data.Length; i++)
+            if (verbose)
             {
-                ImageData data = aiAiImage.data[i];
-                if (data.url != "")
-                {
-                    getImageTasks.Add(GetImageFromUrl(data.url));
-                }
+                Debug.Log($"Open AI API - Request Sent: \"{request.ToJson()}\"");                
+            }
+            
+            completionCallback ??= (value) => {  };
+            (Task<O> task, Callback<O> taskCallback) = ModelResponseCallbackToTask(completionCallback);
+            if (request.UseForm)
+            {
+                Runner.StartCoroutine(PostForm(request.Url, request.ToForm(), request.Stream, taskCallback));
+            }
+            else
+            {
+                Runner.StartCoroutine(Post(request.Url, request.ToJson(), request.Stream, taskCallback));
             }
 
-            return Task.WhenAll(getImageTasks);
-        }
-
-        private Task<Texture2D> GetImageFromUrl(string url)
-        {
-            (Task<Texture2D> task, Callback<Texture2D> callback) = CallbackToTask<Texture2D>();
-            Runner.StartCoroutine(GetImageFromUrl(url, callback));
             return task;
-        }
-
-        static IEnumerator GetImageFromUrl(string url, Callback<Texture2D> callback) {
-            UnityWebRequest webRequest = UnityWebRequestTexture.GetTexture(url);
-            yield return webRequest.SendWebRequest();
-            Texture2D texture = DownloadHandlerTexture.GetContent(webRequest);
-            callback(texture);
-        }
-
-        private static Tuple<Task<T>, Callback<T>> CallbackToTask<T>(Callback<T> callback=null)
-        {
-            var taskCompletion = new TaskCompletionSource<T>();
-            callback ??= (value) => {  };
-            Callback<T> wrappedCallback = value =>
-            {
-                taskCompletion.SetResult(value);
-                callback(value);
-            };
-
-            return new Tuple<Task<T>, Callback<T>>(taskCompletion.Task, wrappedCallback);
         }
 
         private static Tuple<Task<T>, Callback<T>> ModelResponseCallbackToTask<T>(Callback<T> callback=null)
@@ -330,22 +355,6 @@ namespace OpenAi
             return new Tuple<Task<T>, Callback<T>>(taskCompletion.Task, wrappedCallback);
         }
         
-        public Task<O> Post<I,O>(I request, Callback<O> completionCallback = null)
-            where I : ModelRequest<I>
-            where O : ModelResponse<O>, new()
-        {
-            if (verbose)
-            {
-                Debug.Log($"Open AI API - Request Sent: \"{request.ToJson()}\"");                
-            }
-            
-            completionCallback ??= (value) => {  };
-            (Task<O> task, Callback<O> taskCallback) = ModelResponseCallbackToTask(completionCallback);
-            Runner.StartCoroutine(Post(request.Url, request.ToJson(), request.Stream, taskCallback));
-
-            return task;
-        }
-                
         private IEnumerator Post<O>(string url, string body, bool stream, Callback<O> completionCallback) where O : ModelResponse<O>, new()
         {
             O response = null;
@@ -379,6 +388,9 @@ namespace OpenAi
                     }
                     
                     completionCallback(response);
+                }, errorCallback =>
+                {
+                    Debug.LogWarning(errorCallback);
                 });
             }
             else
@@ -415,10 +427,72 @@ namespace OpenAi
                     {
                         Result = webRequest.result
                     };
+                
+                    if (verbose)
+                    {
+                        Debug.LogWarning("Web request not successful: " +webRequest.result + ": " + webRequest.error);
+                    }
                 }
             
                 completionCallback(response);
             }
+                
+            webRequest.Dispose();
+        }
+
+        private IEnumerator PostForm<O>(string url, WWWForm form, bool stream, Callback<O> completionCallback) where O : ModelResponse<O>, new()
+        {
+            O response = null;
+            
+            UnityWebRequest webRequest = UnityWebRequest.Post(url, form);
+                
+            Dictionary<string, string> headers = new Dictionary<string, string>()
+            {
+                { "Authorization", "Bearer " + ApiKey },
+                { "OpenAI-Organization", Organization },
+            };
+            
+            foreach (var entry in headers)
+            {
+                webRequest.SetRequestHeader(entry.Key, entry.Value);
+            }
+            
+            foreach (var entry in form.headers)
+            {
+                webRequest.SetRequestHeader(entry.Key, entry.Value);
+            }   
+            
+            webRequest.downloadHandler = new DownloadHandlerBuffer();
+            webRequest.disposeUploadHandlerOnDispose = true;
+            webRequest.disposeDownloadHandlerOnDispose = true;
+            webRequest.method = UnityWebRequest.kHttpVerbPOST;
+            
+            yield return webRequest.SendWebRequest();
+            
+            if (webRequest.result == UnityWebRequest.Result.Success)
+            {
+                response = JsonUtility.FromJson<O>(webRequest.downloadHandler.text);
+                response.Result = webRequest.result;
+            
+                if (verbose)
+                {
+                    Debug.Log($"Open AI API - Request Successful: \"{JsonUtility.ToJson(response, true)}\"");
+                }
+            }
+            else
+            {
+                response = new O
+                {
+                    Result = webRequest.result
+                };
+                
+                if (verbose)
+                {
+                    Debug.LogWarning("Web request not successful: " +webRequest.result + ": " + webRequest.error);
+                }
+            }
+            
+            completionCallback(response);
                 
             webRequest.Dispose();
         }
@@ -446,16 +520,16 @@ namespace OpenAi
 
     public class OpenAiDownloadHandler<T> : DownloadHandlerScript where T : ModelResponse<T> {
         public delegate void Callback(T response);
-
         private Callback streamCallback;
-
-        private string rawText = "";
+        public delegate void ErrorCallback(string response);
+        private ErrorCallback errorCallback;
         private T combinedResult = null;
 
         // Standard scripted download handler - allocates memory on each ReceiveData callback
-        public OpenAiDownloadHandler(Callback streamCallback): base()
+        public OpenAiDownloadHandler(Callback streamCallback, ErrorCallback errorCallback = null): base()
         {
             this.streamCallback = streamCallback;
+            this.errorCallback = errorCallback;
         }
 
         // Pre-allocated scripted download handler
@@ -471,41 +545,52 @@ namespace OpenAi
             if(data == null || data.Length < 1) {
                 return false;
             }
-            
-            T response = null;
 
             string text = System.Text.Encoding.UTF8.GetString(data);
             string[] textArray = text.Split('\n').Where(x => !string.IsNullOrWhiteSpace(x)).ToArray();
 
+            string dataLabel = "data: ";
+            string dataCompleteTag = "[DONE]";
+
+            bool error = false;
+            string errorMessage = "";
+            
             foreach (string textEntry in textArray)
             {
-                string streamText = textEntry.Substring("data: ".Length);
-                
-                if (streamText != "[DONE]")
+                if (textEntry.StartsWith(dataLabel) && !error)
                 {
-                    T streamResponse = JsonUtility.FromJson<T>(streamText);
-                    if (combinedResult == null)
+                    string streamText = textEntry.Substring(dataLabel.Length);
+
+                    if (streamText != dataCompleteTag)
                     {
-                        combinedResult = streamResponse;
-                    }
-                    else
-                    {
-                        combinedResult = combinedResult.AppendStreamResult(streamResponse);
+                        T streamResponse = JsonUtility.FromJson<T>(streamText);
+                        if (combinedResult == null)
+                        {
+                            combinedResult = streamResponse;
+                        }
+                        else
+                        {
+                            combinedResult = combinedResult.AppendStreamResult(streamResponse);
+                        }
                     }
                 }
+                else
+                {
+                    error = true;
+                    errorMessage += textEntry + "\n";
+                }
             }
-            
-            streamCallback(combinedResult);
-            
-            return true;
-        }
 
-        protected override void CompleteContent() {
-            // Debug.Log("LoggingDownloadHandler :: CompleteContent - DOWNLOAD COMPLETE!");
-        }
-        
-        protected override void ReceiveContentLength(int contentLength) {
-            // Debug.Log(string.Format("LoggingDownloadHandler :: ReceiveContentLength - length {0}", contentLength));
+            if (!error)
+            {
+                streamCallback(combinedResult);
+            }
+            else
+            {
+                errorCallback(errorMessage);
+            }
+
+            return true;
         }
     }
 }

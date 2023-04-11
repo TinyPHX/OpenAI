@@ -208,18 +208,18 @@
                 }
             }
 
-            private void ReplaceMeshTexture(MeshRenderer mesh, Texture2D texutre)
+            private void ReplaceMeshTexture(MeshRenderer mesh, Texture2D texture)
             {
                 if (mesh)
                 {
                     if (Application.isPlaying)
                     {
-                        mesh.material.mainTexture = texutre;
+                        mesh.material.mainTexture = texture;
                     }
                     else
                     {
                         Material newMaterial = new Material(mesh.sharedMaterial);
-                        newMaterial.mainTexture = texutre;
+                        newMaterial.mainTexture = texture;
                         mesh.sharedMaterial = newMaterial;
                     }
                 }
@@ -293,7 +293,7 @@
                 if (Configuration.SaveTempImages)
                 {
                     string fullName = prompt + "_temp_" + name;
-                    Texture2D tempImage = AiUtils.Image.SaveImageToFile(fullName, textureToSave, false, AiUtils.Image.TempImageDirectory, true);
+                    Texture2D tempImage = AiUtils.Image.SaveTempImageToFile(fullName, textureToSave, false, true);
                     return tempImage;
                 }
                 else

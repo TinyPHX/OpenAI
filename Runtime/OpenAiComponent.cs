@@ -11,6 +11,7 @@ namespace OpenAi
     [ExecuteInEditMode, Serializable]
     public class OpenAiComponent : MonoBehaviour
     {
+        #if UNITY_EDITOR
         public enum FileType
         {
             SHADER,
@@ -33,11 +34,11 @@ namespace OpenAi
             "Make sure to use UnityEngine PropertyAttributes to make the UI user friendly. Also this needs to be compatible with " +
             "Unity version {unity_version}. Lastly, the class name should be {script_name}. Don't ever try to load anything from the " +
             "resources folder unless the user prompt specifically calls for it. Add public fields for anything needed by the components. " +
-            "Make sure to include tooltip attributes for all public or serializable fields. Only include code that compiles in your response.";
+            "Make sure to include tooltip attributes when appropriate. Only include code that compiles in your response.";
 
         [ConditionalField(nameof(advanced)), TextArea(1, 20)] public string editPrePrompt = "Edit this script \n\nEdit: ";
         [ConditionalField(nameof(advanced)), TextArea(1,20)] public string editPostPrompt = "\n\nScript:\n";
-            
+
         private readonly string namePrePrompt = "What's a good name for a C# Unity component that was generated using this prompt: ";
         private readonly string namePostPrompt = "Don't include any punctuation or file extensions";
 
@@ -155,5 +156,7 @@ namespace OpenAi
         //             EditorApplication.Exit(-1);
         //     }
         // }
+        
+        #endif
     }
 }

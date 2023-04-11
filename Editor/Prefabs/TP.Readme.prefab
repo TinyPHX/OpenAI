@@ -158,10 +158,10 @@ MonoBehaviour:
         height: 15
       absoluteFieldRect:
         serializedVersion: 2
-        x: 99999
-        y: 99999
-        width: 0
-        height: 0
+        x: 397
+        y: 213
+        width: 122
+        height: 15
       index: 410
       length: 17
     - name: OpenAI (9118835)
@@ -175,10 +175,10 @@ MonoBehaviour:
         height: 15
       absoluteFieldRect:
         serializedVersion: 2
-        x: 99999
-        y: 99999
-        width: 0
-        height: 0
+        x: 40
+        y: 277
+        width: 120
+        height: 15
       index: 476
       length: 17
     - name: docs (6965888)
@@ -192,10 +192,10 @@ MonoBehaviour:
         height: 15
       absoluteFieldRect:
         serializedVersion: 2
-        x: 99999
-        y: 99999
-        width: 0
-        height: 0
+        x: 52
+        y: 292
+        width: 121
+        height: 15
       index: 520
       length: 17
     - name: Editor (5702074)
@@ -209,10 +209,10 @@ MonoBehaviour:
         height: 15
       absoluteFieldRect:
         serializedVersion: 2
-        x: 99999
-        y: 99999
-        width: 0
-        height: 0
+        x: 52
+        y: 307
+        width: 124
+        height: 15
       index: 566
       length: 17
     - name: Prefabs (2280912)
@@ -226,10 +226,10 @@ MonoBehaviour:
         height: 15
       absoluteFieldRect:
         serializedVersion: 2
-        x: 99999
-        y: 99999
-        width: 0
-        height: 0
+        x: 64
+        y: 322
+        width: 121
+        height: 15
       index: 597
       length: 17
     - name: AiEditorUtils (6654049)
@@ -243,10 +243,10 @@ MonoBehaviour:
         height: 15
       absoluteFieldRect:
         serializedVersion: 2
-        x: 99999
-        y: 99999
-        width: 0
-        height: 0
+        x: 64
+        y: 337
+        width: 124
+        height: 15
       index: 685
       length: 17
     - name: OpenAiApiExampleEditor (7034825)
@@ -260,10 +260,10 @@ MonoBehaviour:
         height: 15
       absoluteFieldRect:
         serializedVersion: 2
-        x: 99999
-        y: 99999
-        width: 0
-        height: 0
+        x: 64
+        y: 352
+        width: 124
+        height: 15
       index: 765
       length: 17
     - name: OpenAiCredentialsWindow (7003548)
@@ -277,10 +277,10 @@ MonoBehaviour:
         height: 15
       absoluteFieldRect:
         serializedVersion: 2
-        x: 99999
-        y: 99999
-        width: 0
-        height: 0
+        x: 64
+        y: 367
+        width: 125
+        height: 15
       index: 830
       length: 17
     - name: OpenAiReplaceImageEditor (7945512)
@@ -294,10 +294,10 @@ MonoBehaviour:
         height: 15
       absoluteFieldRect:
         serializedVersion: 2
-        x: 99999
-        y: 99999
-        width: 0
-        height: 0
+        x: 64
+        y: 382
+        width: 121
+        height: 15
       index: 905
       length: 17
     - name: OpenAiReplaceTextEditor (7748310)
@@ -311,10 +311,10 @@ MonoBehaviour:
         height: 15
       absoluteFieldRect:
         serializedVersion: 2
-        x: 99999
-        y: 99999
-        width: 0
-        height: 0
+        x: 64
+        y: 397
+        width: 123
+        height: 15
       index: 972
       length: 17
     - name: OpenAiWindow (5424295)
@@ -328,10 +328,10 @@ MonoBehaviour:
         height: 15
       absoluteFieldRect:
         serializedVersion: 2
-        x: 99999
-        y: 99999
-        width: 0
-        height: 0
+        x: 64
+        y: 412
+        width: 123
+        height: 15
       index: 1038
       length: 17
     - name: Generated (6368968)
@@ -345,10 +345,10 @@ MonoBehaviour:
         height: 15
       absoluteFieldRect:
         serializedVersion: 2
-        x: 99999
-        y: 99999
-        width: 0
-        height: 0
+        x: 52
+        y: 427
+        width: 122
+        height: 15
       index: 1115
       length: 17
     - name: Code (6166784)
@@ -362,10 +362,10 @@ MonoBehaviour:
         height: 15
       absoluteFieldRect:
         serializedVersion: 2
-        x: 99999
-        y: 99999
-        width: 0
-        height: 0
+        x: 64
+        y: 442
+        width: 121
+        height: 15
       index: 1146
       length: 17
     - name: Images (518314)
@@ -379,10 +379,10 @@ MonoBehaviour:
         height: 15
       absoluteFieldRect:
         serializedVersion: 2
-        x: 99999
-        y: 99999
-        width: 0
-        height: 0
+        x: 64
+        y: 457
+        width: 122
+        height: 10
       index: 1244
       length: 17
     - name: Runtime (9547157)

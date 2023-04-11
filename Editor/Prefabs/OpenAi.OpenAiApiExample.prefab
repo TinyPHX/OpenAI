@@ -49,23 +49,19 @@ MonoBehaviour:
   aiTextRequest:
     model: 2147482647
     prompt: 'How much wood can a wood chuck chuck? '
-    n: 2
+    n: 1
     max_tokens: 400
-    temperature: 0.8
+    temperature: 1
     stream: 1
   aiText:
-    id: cmpl-716jhJ6k7hgdxLX9UNW2BmatRhSI9
+    id: cmpl-73rANS6zpuaE5o4bfTmJ2bonyakaH
     obj: 
-    created: 1680498577
+    created: 1681153711
     model: 0
     choices:
-    - text: A woodchuck can typically chuck around 35 cubic feet of wood in a day.
+    - text: There is no definitive answer for this question as the size and strength
+        of a wood chuck can vary greatly.
       index: 0
-      logprobs: 
-      finish_reason: 
-    - text: A woodchuck can typically chuck between 35 and 70 pounds of wood per
-        day.
-      index: 1
       logprobs: 
       finish_reason: 
     usage:
@@ -77,23 +73,24 @@ MonoBehaviour:
     messages:
     - role: 2147482649
       content: 'How much wood can a wood chuck chuck? '
-    n: 2
-    temperature: 0.8
+    n: 6
+    temperature: 1.2
     max_tokens: 100
     stream: 1
   aiChat:
-    id: chatcmpl-716oDsUPPWetCoOvjtk7scOf3cO9V
+    id: chatcmpl-73rBTn41jJcjieAJH8ccov1MsqyYh
     obj: 
-    created: 1680498857
+    created: 1681153779
     model: 0
     choices:
     - message:
         role: 2147482649
-        content: A wood chuck, also known as a groundhog, does not actually chuck
-          wood. The phrase "how much wood would a woodchuck chuck" is a tongue twister
-          and does not have a definitive answer. However, a wildlife biologist once
-          calculated that a woodchuck could move about 700 pounds of dirt while digging
-          a burrow, which is sometimes used as a playful answer to the question.
+        content: A study by wildlife biologist Richard Thomas found that a woodchuck
+          could chuck approximately 700 pounds of dirt while digging a burrow. In
+          lieu of this information, if "wood" were to replace "dirt," then a wood
+          chuck could potentially chuck around 700 pounds of wood. However, it is
+          important to note that woodchucks don't actually chuck wood; the phrase
+          is just a tongue twister.
       delta:
         role: 2147482649
         content: 
@@ -102,29 +99,130 @@ MonoBehaviour:
       finish_reason: stop
     - message:
         role: 2147482649
-        content: The phrase "how much wood can a woodchuck chuck" is a tongue twister
-          and doesn't have an actual answer, as woodchucks (also known as groundhogs)
-          do not actually chuck wood. However, a study by wildlife biologist Richard
-          Thomas found that if a woodchuck could chuck wood, it might chuck approximately
-          700 pounds of dirt to create its burrow. Using this information, one could
-          humorously estimate that a woodchuck could potentially chuck 700 pounds
-          of
+        content: A woodchuck (groundhog) does not actually chuck wood, as "woodchuck"
+          is just a name. The phrase "how much wood would a woodchuck chuck" is an
+          American English tongue twister. However, in a humorous study by a New
+          York fish and wildlife technician Richard Thomas, he calculated that a
+          woodchuck could theoretically chuck about 700 pounds of wood if it could
+          move wood like it does soil when digging its burrows.
       delta:
         role: 2147482649
         content: 
       index: 1
       logprobs: 
-      finish_reason: length
+      finish_reason: stop
+    - message:
+        role: 2147482649
+        content: A study by wildlife biologist Richard Thomas found that a woodchuck
+          can chuck approximately 700 pounds of dirt while digging a burrow, which
+          would be roughly equivalent to the volume of dirt in a hole six meters
+          long and two meters wide. This is often the basis for the riddle, although,
+          technically, woodchucks (also known as groundhogs) don't actually chuck,
+          or throw any wood.
+      delta:
+        role: 2147482649
+        content: 
+      index: 2
+      logprobs: 
+      finish_reason: stop
+    - message:
+        role: 2147482649
+        content: The phrase "how much wood can a woodchuck chuck" is from a popular
+          tongue twister and has no real answer, as woodchucks (groundhogs) do not
+          actually chuck wood. It is simply a playful question based on the name.
+          A study by wildlife biologist Richard Thomas found that a woodchuck could
+          move about 700 pounds of dirt when digging a burrow, but this is not related
+          to chucking wood.
+      delta:
+        role: 2147482649
+        content: 
+      index: 3
+      logprobs: 
+      finish_reason: stop
+    - message:
+        role: 2147482649
+        content: A wood chuck can't actually chuck wood, as "woodchuck" is a colloquial
+          term for a groundhog (Marmota monax), which is a burrowing rodent species
+          found in North America. The phrase originates from a tongue-twister or
+          a riddle and is not based on the animal's ability to chuck wood. However,
+          it has been humorously estimated that a wood chuck could chuck about 700
+          pounds of wood if it could.
+      delta:
+        role: 2147482649
+        content: 
+      index: 4
+      logprobs: 
+      finish_reason: stop
+    - message:
+        role: 2147482649
+        content: A popular tongue twister is "how much wood would a woodchuck chuck
+          if a woodchuck could chuck wood?" A study by wildlife biologist Richard
+          Thomas found that a woodchuck could chuck approximately 700 pounds (317.5
+          kilograms) of dirt while excavating a burrow. However, woodchucks, also
+          known as groundhogs, do not actually chuck wood.
+      delta:
+        role: 2147482649
+        content: 
+      index: 5
+      logprobs: 
+      finish_reason: stop
     usage:
       prompt_tokens: 0
       completion_tokens: 0
       total_tokens: 0
   aiImageRequest:
     prompt: Wood chuck
-    size: 2147482647
+    size: 2147482648
     n: 1
+    response_format: 2147482648
   aiImageResponse:
-    created: 1680411312
+    created: 1681169543
     data:
-    - texture: {fileID: 2800000, guid: 5a922e3987f5969459ab282f4b2fe698, type: 3}
-      url: https://oaidalleapiprodscus.blob.core.windows.net/private/org-cRmD5luMV9W6CyQlXwIsHWim/user-0q1fQT1Wk0SPwDfhXjB2VtGv/img-I48NNS8EPOsz58RSle4yRX0C.png?st=2023-04-02T03%3A55%3A12Z&se=2023-04-02T05%3A55%3A12Z&sp=r&sv=2021-08-06&sr=b&rscd=inline&rsct=image/png&skoid=6aaadede-4fb3-4698-a8f6-684d7786b067&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2023-04-01T09%3A13%3A17Z&ske=2023-04-02T09%3A13%3A17Z&sks=b&skv=2021-08-06&sig=4VcS1ozTyLeN4ieQYPu50qd55z%2BIRPXDLIxmgyZKF7A%3D
+    - texture: {fileID: 2800000, guid: 2644cf1b2840da2459ce8895191aa2f8, type: 3}
+      b64_json: 
+      url: https://oaidalleapiprodscus.blob.core.windows.net/private/org-cRmD5luMV9W6CyQlXwIsHWim/user-0q1fQT1Wk0SPwDfhXjB2VtGv/img-mtC31RlAphJzkpydJfHWoOyK.png?st=2023-04-10T22%3A32%3A23Z&se=2023-04-11T00%3A32%3A23Z&sp=r&sv=2021-08-06&sr=b&rscd=inline&rsct=image/png&skoid=6aaadede-4fb3-4698-a8f6-684d7786b067&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2023-04-10T20%3A22%3A24Z&ske=2023-04-11T20%3A22%3A24Z&sks=b&skv=2021-08-06&sig=mLMPNfhdZJluxk49c%2B/JJZFnYrFCEZpvZcpbbqRF0oo%3D
+  aiImageEditRequest:
+    image: {fileID: 2800000, guid: ef20f7c86b688bf4c9cbb70d3729105d, type: 3}
+    mask: {fileID: 0}
+    prompt: extend the bounds of this banana skateboarding
+    size: 2147482647
+    n: 5
+    response_format: 2147482648
+  aiImageEditResponse:
+    created: 1681053628
+    data:
+    - texture: {fileID: 2800000, guid: 9ed373453b421364fa31218417bd53f7, type: 3}
+      b64_json: 
+      url: https://oaidalleapiprodscus.blob.core.windows.net/private/org-cRmD5luMV9W6CyQlXwIsHWim/user-0q1fQT1Wk0SPwDfhXjB2VtGv/img-1HRlQRcrd8qBOQRmZLOznABW.png?st=2023-04-09T14%3A20%3A28Z&se=2023-04-09T16%3A20%3A28Z&sp=r&sv=2021-08-06&sr=b&rscd=inline&rsct=image/png&skoid=6aaadede-4fb3-4698-a8f6-684d7786b067&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2023-04-09T14%3A37%3A35Z&ske=2023-04-10T14%3A37%3A35Z&sks=b&skv=2021-08-06&sig=W2bbXACMxgapA0nno1FdMW9Pjszf0bXmI%2BcuRsXbz0Y%3D
+    - texture: {fileID: 2800000, guid: a65c933a2983fa5449ec0ba73dc55b23, type: 3}
+      b64_json: 
+      url: https://oaidalleapiprodscus.blob.core.windows.net/private/org-cRmD5luMV9W6CyQlXwIsHWim/user-0q1fQT1Wk0SPwDfhXjB2VtGv/img-fGDwaQtd24AvkwoTGMpbXgyg.png?st=2023-04-09T14%3A20%3A28Z&se=2023-04-09T16%3A20%3A28Z&sp=r&sv=2021-08-06&sr=b&rscd=inline&rsct=image/png&skoid=6aaadede-4fb3-4698-a8f6-684d7786b067&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2023-04-09T14%3A37%3A35Z&ske=2023-04-10T14%3A37%3A35Z&sks=b&skv=2021-08-06&sig=CWNCf2Wcls1ZKuwd%2BcbbX9fMDo4ilYANkvUUNQvK6Ak%3D
+    - texture: {fileID: 2800000, guid: a8ae5db753644f947ae8a325b81af8f9, type: 3}
+      b64_json: 
+      url: https://oaidalleapiprodscus.blob.core.windows.net/private/org-cRmD5luMV9W6CyQlXwIsHWim/user-0q1fQT1Wk0SPwDfhXjB2VtGv/img-kNtALmLv2VeUYCEXPc9IcJXK.png?st=2023-04-09T14%3A20%3A28Z&se=2023-04-09T16%3A20%3A28Z&sp=r&sv=2021-08-06&sr=b&rscd=inline&rsct=image/png&skoid=6aaadede-4fb3-4698-a8f6-684d7786b067&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2023-04-09T14%3A37%3A35Z&ske=2023-04-10T14%3A37%3A35Z&sks=b&skv=2021-08-06&sig=C%2BN4CapuwTp/TzNyQuj33lvdgBQeQZ%2Bt6FFasxepMco%3D
+    - texture: {fileID: 2800000, guid: cb3974f8523c0e7468369094b459f8e8, type: 3}
+      b64_json: 
+      url: https://oaidalleapiprodscus.blob.core.windows.net/private/org-cRmD5luMV9W6CyQlXwIsHWim/user-0q1fQT1Wk0SPwDfhXjB2VtGv/img-DBFmjTb0GH95OwvUmn4CUYDY.png?st=2023-04-09T14%3A20%3A28Z&se=2023-04-09T16%3A20%3A28Z&sp=r&sv=2021-08-06&sr=b&rscd=inline&rsct=image/png&skoid=6aaadede-4fb3-4698-a8f6-684d7786b067&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2023-04-09T14%3A37%3A35Z&ske=2023-04-10T14%3A37%3A35Z&sks=b&skv=2021-08-06&sig=QoRe%2BBXgFVxnV5ggTsVQ/1g/o0aOcueNvQLOuwd//zs%3D
+    - texture: {fileID: 2800000, guid: 7ac6552b4296802448d4a3d0420a2376, type: 3}
+      b64_json: 
+      url: https://oaidalleapiprodscus.blob.core.windows.net/private/org-cRmD5luMV9W6CyQlXwIsHWim/user-0q1fQT1Wk0SPwDfhXjB2VtGv/img-cOEwquYoZhQn3g6CTRbMZOt3.png?st=2023-04-09T14%3A20%3A28Z&se=2023-04-09T16%3A20%3A28Z&sp=r&sv=2021-08-06&sr=b&rscd=inline&rsct=image/png&skoid=6aaadede-4fb3-4698-a8f6-684d7786b067&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2023-04-09T14%3A37%3A35Z&ske=2023-04-10T14%3A37%3A35Z&sks=b&skv=2021-08-06&sig=9Abz7qUA5yoISwVhXJhbs1WEFk83ZVhqQ9%2BToNHl18Q%3D
+  aiImageVariationRequest:
+    image: {fileID: 2800000, guid: ac94795bbc77d8f488cdddc760559f38, type: 3}
+    size: 2147482647
+    n: 4
+    response_format: 2147482648
+  aiImageVariationResponse:
+    created: 1681138814
+    data:
+    - texture: {fileID: 2800000, guid: 021c648f180482447ac76eec64320558, type: 3}
+      b64_json: 
+      url: https://oaidalleapiprodscus.blob.core.windows.net/private/org-cRmD5luMV9W6CyQlXwIsHWim/user-0q1fQT1Wk0SPwDfhXjB2VtGv/img-fts25aqDswxvmxTLy6Yl1obm.png?st=2023-04-10T14%3A00%3A14Z&se=2023-04-10T16%3A00%3A14Z&sp=r&sv=2021-08-06&sr=b&rscd=inline&rsct=image/png&skoid=6aaadede-4fb3-4698-a8f6-684d7786b067&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2023-04-10T11%3A37%3A37Z&ske=2023-04-11T11%3A37%3A37Z&sks=b&skv=2021-08-06&sig=7u00uLUJfQ8UlYgl404VyGw%2BU2XtLJSpj1kqipU5QVc%3D
+    - texture: {fileID: 2800000, guid: 231092a5daed72e4ba8dc4e5dca637b3, type: 3}
+      b64_json: 
+      url: https://oaidalleapiprodscus.blob.core.windows.net/private/org-cRmD5luMV9W6CyQlXwIsHWim/user-0q1fQT1Wk0SPwDfhXjB2VtGv/img-q9kEeq48EZwJXcsteXl7avuM.png?st=2023-04-10T14%3A00%3A14Z&se=2023-04-10T16%3A00%3A14Z&sp=r&sv=2021-08-06&sr=b&rscd=inline&rsct=image/png&skoid=6aaadede-4fb3-4698-a8f6-684d7786b067&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2023-04-10T11%3A37%3A37Z&ske=2023-04-11T11%3A37%3A37Z&sks=b&skv=2021-08-06&sig=HdS7oAzUNBBWoIjDCfd%2BURm7pToAXYshJ/6LDv%2BT6/o%3D
+    - texture: {fileID: 2800000, guid: c8429a1d67c303b40a66f31732cfe94a, type: 3}
+      b64_json: 
+      url: https://oaidalleapiprodscus.blob.core.windows.net/private/org-cRmD5luMV9W6CyQlXwIsHWim/user-0q1fQT1Wk0SPwDfhXjB2VtGv/img-O42dn3UxH3nJp5zNkMj2e6WQ.png?st=2023-04-10T14%3A00%3A14Z&se=2023-04-10T16%3A00%3A14Z&sp=r&sv=2021-08-06&sr=b&rscd=inline&rsct=image/png&skoid=6aaadede-4fb3-4698-a8f6-684d7786b067&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2023-04-10T11%3A37%3A37Z&ske=2023-04-11T11%3A37%3A37Z&sks=b&skv=2021-08-06&sig=C3XtiHoKhfXQcR4LVRtqXCb5VmOrd4WluJLowqpjh0w%3D
+    - texture: {fileID: 2800000, guid: e124e22b6b59afd41b820c3d14105b53, type: 3}
+      b64_json: 
+      url: https://oaidalleapiprodscus.blob.core.windows.net/private/org-cRmD5luMV9W6CyQlXwIsHWim/user-0q1fQT1Wk0SPwDfhXjB2VtGv/img-MxoVZ5IjyUzhtt9lyRX4bN1O.png?st=2023-04-10T14%3A00%3A14Z&se=2023-04-10T16%3A00%3A14Z&sp=r&sv=2021-08-06&sr=b&rscd=inline&rsct=image/png&skoid=6aaadede-4fb3-4698-a8f6-684d7786b067&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2023-04-10T11%3A37%3A37Z&ske=2023-04-11T11%3A37%3A37Z&sks=b&skv=2021-08-06&sig=uVApkTxMsLhfRK2jzwNA6mNUx3Dk%2BK%2B9Cyfv5CsN74w%3D

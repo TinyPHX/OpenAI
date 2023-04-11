@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -10,82 +11,185 @@ using UnityEditor;
 
 namespace OpenAi.AiUtils
 {
+    public static class AiAssets {
+        // private static Dictionary<Object, string> fileToPathMap = new Dictionary<Object, string>() { };
+        public static string ResourcesDirectory = Application.dataPath + "/Packages/TP/OpenAI/Resources";
+        public static string DefaultImageDirectory => Application.dataPath + "/Packages/TP/OpenAI/Resources/Images";
+        public static string TempImageDirectory => Application.dataPath + "/Packages/TP/OpenAI/Resources/Images/Temp";
+        
+        //Assets\Packages\TP\OpenAI\Resources\Images\Temp
+        // public static string ResourcesDirectory = Application.dataPath + "/Resources";
+        // public static string DefaultImageDirectory => Application.dataPath + "/Resources/Images";
+        // public static string TempImageDirectory => Application.dataPath + "/Resources/Images/Temp";
+
+        public static void Refresh()
+        {
+            #if UNITY_EDITOR
+            AssetDatabase.Refresh();
+            #endif
+        }
+
+        public static Texture2D Save(Texture2D texture, string path)
+        {
+            MakeTextureReadable(texture);
+                
+            //Create new texture to avoid error, Texture2D::EncodeTo functions do not support compressed texture formats.
+            Color[] pixels = {};
+            try
+            {
+                pixels = texture.GetPixels(0, 0, texture.width, texture.height, 0);
+            }
+            catch (UnityException)
+            {
+                Debug.LogError(
+                    $"Unable to read pixels from image, {texture}. Make sure it's readable. In the inspector for the Image, check 'Advanced > Read/Write Enabled'.");
+                return texture;
+            }
+            Texture2D uncompressedTexture = new Texture2D(texture.width, texture.height);
+            uncompressedTexture.SetPixels(0, 0, texture.width, texture.height, pixels, 0);
+            uncompressedTexture.Apply();
+
+            byte[] bytes = uncompressedTexture.EncodeToPNG();
+            if (bytes != null)
+            {
+                File.WriteAllBytes(path, bytes);
+            }
+            
+            Refresh();
+
+            Texture2D returnTexture = Load<Texture2D>(path);
+            
+            MakeTextureReadable(returnTexture);
+
+            return texture;
+        }
+            
+        public static T Load<T>(string path)
+            where T : Object
+        {
+            #if UNITY_EDITOR
+                T loaded = null;
+                string relativePath = "";
+                if (path.StartsWith(ResourcesDirectory)) {
+                    relativePath = path.Substring(ResourcesDirectory.Length + 1).Replace(".png", "");
+                    loaded = Resources.Load<T>(relativePath);
+                }
+                else if (path.StartsWith(Application.dataPath)) {
+                    relativePath = "Assets" + path.Substring(Application.dataPath.Length);
+                    loaded = AssetDatabase.LoadAssetAtPath<T>(relativePath);
+                }
+                else
+                {
+                    loaded = AssetDatabase.LoadAssetAtPath<T>(path);
+                }
+
+                return loaded;
+            #else
+                string relativePath = "";
+                if (path.StartsWith(ResourcesDirectory)) {
+                    relativePath = path.Substring(ResourcesDirectory.Length + 1).Replace(".png", "");
+                }
+                
+                T loaded = Resources.Load<T>(relativePath);
+
+                return loaded;
+            #endif
+        }
+        
+        public static void MakeTextureReadable(Texture2D texture)
+        {
+            #if UNITY_EDITOR
+                if (texture != null)
+                {
+                    string assetPath = AssetDatabase.GetAssetPath(texture);
+                    TextureImporter textureImporter = AssetImporter.GetAtPath(assetPath) as TextureImporter;
+                    if (textureImporter != null && assetPath != "")
+                    {
+                        textureImporter.textureType = TextureImporterType.Default;
+                        textureImporter.isReadable = true;
+                        textureImporter.textureCompression = TextureImporterCompression.Uncompressed;
+                        AssetDatabase.ImportAsset(assetPath);
+                        AssetDatabase.Refresh();
+                    }
+                }
+            #endif
+        }
+    }
+    
     public static class Script
     {
         private static string lastScriptSaveFileLocation = "";
         private static string DefaultScriptDirectory => Application.dataPath + "/Packages/TP/OpenAI/Generated/Code";
 
+        #if UNITY_EDITOR
         public static MonoScript CreateScript(string name, string contents, bool showDialogue=true, string directory="", bool overwrite=false)
         {
-            #if UNITY_EDITOR
-                if (!Directory.Exists(DefaultScriptDirectory)) { Directory.CreateDirectory(DefaultScriptDirectory); }
+            if (!Directory.Exists(DefaultScriptDirectory)) { Directory.CreateDirectory(DefaultScriptDirectory); }
+        
+            string fileName = name;
+            char[] invalids = Path.GetInvalidFileNameChars();
+            fileName = String.Join("_", fileName.Split(invalids, StringSplitOptions.RemoveEmptyEntries)) .TrimEnd('.');
+            fileName = fileName.Replace(" ", "_");
+            string extension = "cs";
+            if (directory == "")
+            {
+                if (lastScriptSaveFileLocation != "")
+                {
+                    directory = lastScriptSaveFileLocation;
+                }
+                else
+                {
+                    directory = DefaultScriptDirectory;
+                }
+            }
+
+            string newFullPath = directory + "/" + fileName + "." + extension;
+            string adjustedFileName = fileName;
+            int fileCount = 1;
+            while (File.Exists(newFullPath) && !overwrite)
+            {
+                adjustedFileName = string.Format("{0}_{1}", fileName, fileCount++);
+                newFullPath = directory + "/" + adjustedFileName + "." + extension;
+            }
+
+            string path = newFullPath;
+
+            if (showDialogue)
+            {
+                path = EditorUtility.SaveFilePanel("Save Script", directory, adjustedFileName, extension);
+                if (path.Length == 0)
+                {
+                    return default; //Canceled
+                }
+
+                lastScriptSaveFileLocation = Path.GetDirectoryName(path);
+            }
             
-                string fileName = name;
-                char[] invalids = Path.GetInvalidFileNameChars();
-                fileName = String.Join("_", fileName.Split(invalids, StringSplitOptions.RemoveEmptyEntries)) .TrimEnd('.');
-                fileName = fileName.Replace(" ", "_");
-                string extension = "cs";
-                if (directory == "")
-                {
-                    if (lastScriptSaveFileLocation != "")
-                    {
-                        directory = lastScriptSaveFileLocation;
-                    }
-                    else
-                    {
-                        directory = DefaultScriptDirectory;
-                    }
-                }
+            string finalFileName = Path.GetFileNameWithoutExtension(path);
+            if (finalFileName != name)
+            {
+                contents = contents.Replace(name, finalFileName);
+            }
+            
+            File.WriteAllText(path, contents);
+            
+            AiAssets.Refresh();
+            
+            string assetPath = "";
+            if (path.StartsWith(Application.dataPath)) {
+                assetPath = "Assets" + path.Substring(Application.dataPath.Length);
+            }
 
-                string newFullPath = directory + "/" + fileName + "." + extension;
-                string adjustedFileName = fileName;
-                int fileCount = 1;
-                while (File.Exists(newFullPath) && !overwrite)
-                {
-                    adjustedFileName = string.Format("{0}_{1}", fileName, fileCount++);
-                    newFullPath = directory + "/" + adjustedFileName + "." + extension;
-                }
+            MonoScript newScript = AiAssets.Load<MonoScript>(assetPath);
 
-                string path = newFullPath;
+            if (showDialogue)
+            {
+                System.Threading.Thread.Sleep(1000); // Stupid hack: https://forum.unity.com/threads/endlayoutgroup-beginlayoutgroup-must-be-called-first.523209/#post-3652876
+            }
 
-                if (showDialogue)
-                {
-                    path = EditorUtility.SaveFilePanel("Save Script", directory, adjustedFileName, extension);
-                    if (path.Length == 0)
-                    {
-                        return default; //Canceled
-                    }
-
-                    lastScriptSaveFileLocation = Path.GetDirectoryName(path);
-                }
-                
-                string finalFileName = Path.GetFileNameWithoutExtension(path);
-                if (finalFileName != name)
-                {
-                    contents = contents.Replace(name, finalFileName);
-                }
-                
-                File.WriteAllText(path, contents);
-                
-                AssetDatabase.Refresh();
-                
-                string assetPath = "";
-                if (path.StartsWith(Application.dataPath)) {
-                    assetPath = "Assets" + path.Substring(Application.dataPath.Length);
-                }
-
-                MonoScript newScript = AssetDatabase.LoadAssetAtPath<MonoScript>(assetPath);
-
-                if (showDialogue)
-                {
-                    System.Threading.Thread.Sleep(1000); // Stupid hack: https://forum.unity.com/threads/endlayoutgroup-beginlayoutgroup-must-be-called-first.523209/#post-3652876
-                }
-
-                return newScript;
-            #else
-                return default;
-            #endif
+            return newScript;
         }
+        #endif
     }
 
     public static class Image
@@ -201,8 +305,7 @@ namespace OpenAi.AiUtils
 
             return pixels;
         }
-
-
+        
         public static Texture2D RemoveBackground(Texture2D image, int colorSensitivity, int feather, int featherAmount, SamplePoint[] samples, bool continuous = true)
         {
             Color[] sourcePixels = image.GetPixels(0, 0, image.width, image.height, 0);
@@ -434,16 +537,19 @@ namespace OpenAi.AiUtils
 
             return modifiedTexture;
         }
-
+        
         private static string lastImageSaveFileLocation = "";
-        private static string DefaultImageDirectory => Application.dataPath + "/Packages/TP/OpenAI/Generated/Images";
-        public static string TempImageDirectory => Application.dataPath + "/Packages/TP/OpenAI/Generated/Images/Temp";
+
+        public static Texture2D SaveTempImageToFile(string name, Texture2D texture, bool showDialogue = true, bool overwrite = false)
+        {
+            return SaveImageToFile(name, texture, showDialogue, AiAssets.TempImageDirectory, overwrite);
+        }
 
         public static Texture2D SaveImageToFile(string name, Texture2D texture, bool showDialogue=true, string directory="", bool overwrite=false)
         {
             #if UNITY_EDITOR
-                if (!Directory.Exists(DefaultImageDirectory)) { Directory.CreateDirectory(DefaultImageDirectory); }
-                if (!Directory.Exists(TempImageDirectory)) { Directory.CreateDirectory(TempImageDirectory); }
+                if (!Directory.Exists(AiAssets.DefaultImageDirectory)) { Directory.CreateDirectory(AiAssets.DefaultImageDirectory); }
+                if (!Directory.Exists(AiAssets.TempImageDirectory)) { Directory.CreateDirectory(AiAssets.TempImageDirectory); }
             
                 string fileName = name;
                 char[] invalids = Path.GetInvalidFileNameChars();
@@ -458,7 +564,7 @@ namespace OpenAi.AiUtils
                     }
                     else
                     {
-                        directory = DefaultImageDirectory;
+                        directory = AiAssets.DefaultImageDirectory;
                     }
                 }
 
@@ -484,29 +590,9 @@ namespace OpenAi.AiUtils
 
                     lastImageSaveFileLocation = Path.GetDirectoryName(path);
                 }
-                
-                //Create new texture to avoid error, Texture2D::EncodeTo functions do not support compressed texture formats.
-                Color[] pixels = texture.GetPixels(0, 0, texture.width, texture.height, 0);
-                Texture2D uncompressedTexture = new Texture2D(texture.width, texture.height);
-                uncompressedTexture.SetPixels(0, 0, texture.width, texture.height, pixels, 0);
-                uncompressedTexture.Apply();
 
-                byte[] bytes = uncompressedTexture.EncodeToPNG();
-                if (bytes != null)
-                {
-                    File.WriteAllBytes(path, bytes);
-                }
+                Texture2D newTexture = AiAssets.Save(texture, path);
                 
-                AssetDatabase.Refresh();
-                
-                string assetPath = "";
-                if (path.StartsWith(Application.dataPath)) {
-                    assetPath = "Assets" + path.Substring(Application.dataPath.Length);
-                }
-
-                Texture2D newTexture = AssetDatabase.LoadAssetAtPath<Texture2D>(assetPath);
-                MakeTextureReadable(newTexture);
-
                 if (showDialogue)
                 {
                     System.Threading.Thread.Sleep(1000); // Stupid hack: https://forum.unity.com/threads/endlayoutgroup-beginlayoutgroup-must-be-called-first.523209/#post-3652876
@@ -517,22 +603,6 @@ namespace OpenAi.AiUtils
             #else
                 return texture;
             #endif
-        }
-        
-        public static void MakeTextureReadable(Texture2D texture)
-        {
-            if (texture != null)
-            {
-                string assetPath = AssetDatabase.GetAssetPath(texture);
-                TextureImporter textureImporter = AssetImporter.GetAtPath(assetPath) as TextureImporter;
-                if (textureImporter != null)
-                {
-                    textureImporter.textureType = TextureImporterType.Default;
-                    textureImporter.isReadable = true;
-                    AssetDatabase.ImportAsset(assetPath);
-                    AssetDatabase.Refresh();
-                }
-            }
         }
     }
 }

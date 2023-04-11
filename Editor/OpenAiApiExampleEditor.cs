@@ -1,4 +1,6 @@
-﻿using UnityEditor;
+﻿using MyBox;
+using OpenAI.AiModels;
+using UnityEditor;
 using UnityEngine;
 
 namespace OpenAi
@@ -35,25 +37,37 @@ namespace OpenAi
                 new AiEditorUtils.DrawEdit(nameof(example.configuration), AiEditorUtils.DrawEdit.DrawType.AFTER, () =>
                 {
                     EditorGUILayout.LabelField("Configuration Setup Code");
-                    EditorGUILayout.TextArea(example.GetConfigurationCode());
+                    EditorGUILayout.TextArea(GetConfigurationCode());
                 }),
                 new AiEditorUtils.DrawEdit(nameof(example.aiText), AiEditorUtils.DrawEdit.DrawType.AFTER, () =>
                 {
                     DrawAiTextButton();
                     EditorGUILayout.LabelField("Ai Text Code");
-                    EditorGUILayout.TextArea(example.GetAiTextRequestCode());
+                    EditorGUILayout.TextArea(GetAiTextRequestCode());
                 }),
                 new AiEditorUtils.DrawEdit(nameof(example.aiChat), AiEditorUtils.DrawEdit.DrawType.AFTER, () =>
                 {
                     DrawAiChatButton();
                     EditorGUILayout.LabelField("Ai Chat Code");
-                    EditorGUILayout.TextArea(example.GetAiChatRequestCode());
+                    EditorGUILayout.TextArea(GetAiChatRequestCode());
                 }),
                 new AiEditorUtils.DrawEdit(nameof(example.aiImageResponse), AiEditorUtils.DrawEdit.DrawType.AFTER, () =>
                 {
                     DrawAiImageButton();
                     EditorGUILayout.LabelField("Ai Image Code");
-                    EditorGUILayout.TextArea(example.GetAiImageRequestCode());
+                    EditorGUILayout.TextArea(GetAiImageRequestCode());
+                }),
+                new AiEditorUtils.DrawEdit(nameof(example.aiImageEditResponse), AiEditorUtils.DrawEdit.DrawType.AFTER, () =>
+                {
+                    DrawAiImageEditButton();
+                    EditorGUILayout.LabelField("Ai Image Edit Code");
+                    EditorGUILayout.TextArea(GetAiImageEditRequestCode());
+                }),
+                new AiEditorUtils.DrawEdit(nameof(example.aiImageVariationResponse), AiEditorUtils.DrawEdit.DrawType.AFTER, () =>
+                {
+                    DrawAiImageVariationButton();
+                    EditorGUILayout.LabelField("Ai Image Variant Code");
+                    EditorGUILayout.TextArea(GetAiImageVariantRequestCode());
                 })
             });
         }
@@ -72,7 +86,11 @@ namespace OpenAi
                         new AiEditorUtils.DrawEdit(nameof(example.aiChat), AiEditorUtils.DrawEdit.DrawType.AFTER,
                             () => { DrawAiChatButton(); }),
                         new AiEditorUtils.DrawEdit(nameof(example.aiImageResponse), AiEditorUtils.DrawEdit.DrawType.AFTER, 
-                            () => { DrawAiImageButton(); })
+                            () => { DrawAiImageButton(); }),
+                        new AiEditorUtils.DrawEdit(nameof(example.aiImageEditResponse), AiEditorUtils.DrawEdit.DrawType.AFTER, 
+                            () => { DrawAiImageEditButton(); }),
+                        new AiEditorUtils.DrawEdit(nameof(example.aiImageVariationResponse), AiEditorUtils.DrawEdit.DrawType.AFTER, 
+                            () => { DrawAiImageVariationButton(); })
                     });
                 });
                 
@@ -81,7 +99,7 @@ namespace OpenAi
                 AiEditorUtils.Vertical(() =>
                 {
                     EditorGUILayout.LabelField("Sample Code");
-                    EditorGUILayout.TextArea(example.GetFullCode(), GUILayout.MaxWidth(activeWidth));
+                    EditorGUILayout.TextArea(GetFullCode(), GUILayout.MaxWidth(activeWidth));
                 });
             });
         }
@@ -138,6 +156,247 @@ namespace OpenAi
                     Application.OpenURL("https://platform.openai.com/docs/api-reference/images");
                 }
             });
+        }
+
+        private void DrawAiImageEditButton()
+        {
+            AiEditorUtils.Horizontal(() =>
+            {
+                if (GUILayout.Button("Image Edit Request"))
+                {
+                    if (!AiEditorUtils.ApiKeyPromptCheck())
+                    {
+                        example.SendAiImageEditRequest();
+                    }
+                }
+                if (GUILayout.Button("?", AiEditorUtils.smallButton))
+                {
+                    Application.OpenURL("https://platform.openai.com/docs/api-reference/images/create-edit");
+                }
+            });
+        }
+        
+        private void DrawAiImageVariationButton()
+        {
+            AiEditorUtils.Horizontal(() =>
+            {
+                if (GUILayout.Button("Image Variation Request"))
+                {
+                    if (!AiEditorUtils.ApiKeyPromptCheck())
+                    {
+                        example.SendAiImageVariationRequest();
+                    }
+                }
+                if (GUILayout.Button("?", AiEditorUtils.smallButton))
+                {
+                    Application.OpenURL("https://platform.openai.com/docs/api-reference/images/create-variation");
+                }
+            });
+        }
+        
+        public string GetFullCode()
+        {
+            return GetConfigurationCode() + "\n\n" +
+                   GetAiTextRequestCode() + "\n\n" + 
+                   GetAiChatRequestCode() + "\n\n" + 
+                   GetAiImageRequestCode() + "\n\n" + 
+                   GetAiImageEditRequestCode() + "\n\n" + 
+                   GetAiImageVariantRequestCode();
+        }
+
+        public string GetConfigurationCode()
+        {
+            string code = "";
+            if (!example.configuration.ApiKey.IsNullOrEmpty() || !example.configuration.Organization.IsNullOrEmpty())
+            {
+                code = $@"
+
+// ------------ Required imports -----------
+
+/* The code below requires these imports:
+using OpenAi;
+using OpenAI.AiModels;
+using UnityEditor;
+*/
+
+// ------------ Configuration -----------
+
+Configuration configuration = new Configuration(""{example.configuration.ApiKey}"", ""{example.configuration.Organization}"");
+OpenAiApi openai = new OpenAiApi(configuration);
+".Trim();
+            }
+            else
+            {
+                code = $@"
+// ------------ Configuration -----------
+
+//No configuration. Using config stored in Users/username/.openai/auth.json.
+OpenAiApi openai = new OpenAiApi();
+".Trim();
+            }
+
+            return code;
+        }
+
+        public string GetAiTextRequestCode()
+        {
+            string returnTab = "\n    ";
+            string Prompt() => $"\"{example.aiTextRequest.prompt.Replace("\n", "\\n")}\"";
+            string Model() => $", {returnTab}Models.Text.{example.aiTextRequest.model.ToString()}";
+            string N() => example.aiTextRequest.n == 1 ? "" : $", {returnTab}n:{example.aiTextRequest.n}";
+            string Temperature() => example.aiTextRequest.temperature == .8f ? "" : $", {returnTab}temperature:{example.aiTextRequest.temperature}f";
+            string MaxTokens() => example.aiTextRequest.max_tokens == 100 ? "" : $", {returnTab}max_tokens:{example.aiTextRequest.max_tokens}";
+            string Stream() => !example.aiTextRequest.stream ? "" : $", {returnTab}stream:true";
+            string Callback() => $", {returnTab}" + (N() + Temperature() + MaxTokens() != "" ? "callback:" : "") + "aiText =>";
+            
+            return $@"
+// ------------ AI Text -----------
+
+openai.TextCompletion({Prompt()}{Model()}{N()}{Temperature()}{MaxTokens()}{Stream()}{Callback()}
+{{
+    Debug.Log(aiText.choices[0].text); // Do something with result!
+}});
+".Trim();
+        }
+
+        public string GetAiChatRequestCode()
+        {
+            string returnTab = "\n    ";
+            string returnTabTab = "\n        ";
+            string Messages() {
+                string messages = "new []{ ";
+                for (var index = 0; index < example.aiChatRequest.messages.Length; index++)
+                {
+                    if (index > 0)
+                    {
+                        messages += ", ";
+                    }
+                    if (example.aiChatRequest.messages.Length > 1)
+                    {
+                        messages += returnTabTab;
+                    }
+                    
+                    var message = example.aiChatRequest.messages[index];
+                    
+                    string Content() => $"\"{message.content.Replace("\n", "\\n")}\"";
+                    string Role() => message.role == Message.Role.USER ? "" : $", Message.Role.{message.role.ToString()}";
+
+                    messages += $"new Message({Content()}{Role()})";
+                }
+                if (example.aiChatRequest.messages.Length > 1)
+                {
+                    messages += returnTab;
+                }
+                messages += " }";
+
+                return messages;
+            }
+            string Model() => $", {returnTab}Models.Chat.{example.aiChatRequest.model.ToString()}";
+            string N() => example.aiChatRequest.n == 1 ? "" : $", {returnTab}n:{example.aiChatRequest.n}";
+            string Temperature() => example.aiChatRequest.temperature == .8f ? "" : $", {returnTab}temperature:{example.aiChatRequest.temperature}f";
+            string MaxTokens() => example.aiChatRequest.max_tokens == 100 ? "" : $", {returnTab}max_tokens:{example.aiChatRequest.max_tokens}";
+            string Stream() => !example.aiChatRequest.stream ? "" : $", {returnTab}stream:true";
+            string Callback() => $", {returnTab}" + (N() + Temperature() + MaxTokens() != "" ? "callback:" : "") + "aiChat =>";
+            
+            return $@"
+// ------------ AI Chat -----------
+
+openai.ChatCompletion({Messages()}{Model()}{N()}{Temperature()}{MaxTokens()}{Stream()}{Callback()}
+{{
+    Debug.Log(aiChat.choices[0].message.content); // Do something with result!
+}});
+".Trim();
+        }
+        
+        public string GetAiImageRequestCode()
+        {
+            string returnTab = "\n    ";
+            string Prompt() => $"\"{example.aiImageRequest.prompt.Replace("\n", "\\n")}\"";
+            string Size() => $", {returnTab}ImageSize.{example.aiImageRequest.size.ToString()}";
+            string N() => example.aiImageRequest.n == 1 ? "" : $", {returnTab}n:{example.aiImageRequest.n}";
+            string Callback() => ", aiImage =>";
+            
+            return $@"
+// ------------ AI Image -----------
+
+openai.CreateImage({Prompt()}{Size()}{N()}{Callback()}
+{{
+    Debug.Log(aiImage.data[0].texture); // Do something with result!
+}});
+".Trim();
+        }
+        
+        public string GetAiImageEditRequestCode()
+        {
+            string returnTab = "\n    ";
+            string VarSetup()
+            {
+                string imagePath = AssetDatabase.GetAssetPath(example.aiImageEditRequest.image);
+                string imageSource = imagePath == "" ? 
+                    "Texture2D.blackTexture; //TODO: add reference to your texture." :
+                    $"AssetDatabase.LoadAssetAtPath<Texture2D>(\"{imagePath}\");";
+                string maskPath = AssetDatabase.GetAssetPath(example.aiImageEditRequest.mask);
+                string maskSource = maskPath == "" ? 
+                    "Texture2D.blackTexture; //TODO: add reference to your texture." :
+                    $"AssetDatabase.LoadAssetAtPath<Texture2D>(\"{maskPath}\");";
+
+                return $"Texture2D imageToEdit = {imageSource}\nTexture2D imageMask = {maskSource}";
+            }
+            string Image()
+            {
+                return "imageToEdit";
+            }
+            string Mask()
+            {
+                return ", imageMask";
+            }
+            string Prompt() => $", \"{example.aiImageEditRequest.prompt.Replace("\n", "\\n")}\"";
+            string Size() => $", {returnTab}ImageSize.{example.aiImageEditRequest.size.ToString()}";
+            string N() => example.aiImageEditRequest.n == 1 ? "" : $", {returnTab}n:{example.aiImageEditRequest.n}";
+            string Callback() => ", aiImage =>";
+            
+            return $@"
+// ------------ AI Image Edit -----------
+
+{VarSetup()}
+
+openai.CreateImageEdit({Image()}{Mask()}{Prompt()}{Size()}{N()}{Callback()}
+{{
+    Debug.Log(aiImage.data[0].texture); // Do something with result!
+}});
+".Trim();
+        }
+        
+        public string GetAiImageVariantRequestCode()
+        {
+            string returnTab = "\n    ";
+            string VarSetup()
+            {
+                string imagePath = AssetDatabase.GetAssetPath(example.aiImageVariationRequest.image);
+                string imageSource = imagePath == "" ? 
+                    "Texture2D.blackTexture; //TODO: add reference to your texture." :
+                    $"AssetDatabase.LoadAssetAtPath<Texture2D>(\"{imagePath}\");";
+
+                return $"Texture2D imageToVary = {imageSource}";
+            }
+            string Image()
+            {
+                return "imageToVary";
+            }
+            string Size() => $", {returnTab}ImageSize.{example.aiImageVariationRequest.size.ToString()}";
+            string N() => example.aiImageVariationRequest.n == 1 ? "" : $", {returnTab}n:{example.aiImageVariationRequest.n}";
+            string Callback() => ", aiImage =>";
+            
+            return $@"
+// ------------ AI Image Variant -----------
+
+{VarSetup()}
+
+openai.CreateImageVariant({Image()}{Size()}{N()}{Callback()}
+{{
+    Debug.Log(aiImage.data[0].texture); // Do something with result!
+}});
+".Trim();
         }
     }
 }
