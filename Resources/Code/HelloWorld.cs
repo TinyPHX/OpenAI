@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class HelloWorld : OpenAiMonoBehaviour
 {
-    private float _timePassed = 0;
+    private float _ellapsed = 0;
     private float _previousTime = 0;
 
     void Start()
@@ -13,8 +13,8 @@ public class HelloWorld : OpenAiMonoBehaviour
 
     private void Update() 
     {
-        _timePassed = Time.time - _previousTime;
-        Debug.LogWarning("Time Passed: " + _timePassed);
+        _ellapsed = Time.time - _previousTime;
+        Debug.LogWarning("Time Passed: " + _ellapsed);
         _previousTime = Time.time;
     }
 }

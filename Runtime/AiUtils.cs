@@ -12,15 +12,9 @@ using UnityEditor;
 namespace OpenAi.AiUtils
 {
     public static class AiAssets {
-        // private static Dictionary<Object, string> fileToPathMap = new Dictionary<Object, string>() { };
         public static string ResourcesDirectory = Application.dataPath + "/Packages/TP/OpenAI/Resources";
         public static string DefaultImageDirectory => Application.dataPath + "/Packages/TP/OpenAI/Resources/Images";
         public static string TempImageDirectory => Application.dataPath + "/Packages/TP/OpenAI/Resources/Images/Temp";
-        
-        //Assets\Packages\TP\OpenAI\Resources\Images\Temp
-        // public static string ResourcesDirectory = Application.dataPath + "/Resources";
-        // public static string DefaultImageDirectory => Application.dataPath + "/Resources/Images";
-        // public static string TempImageDirectory => Application.dataPath + "/Resources/Images/Temp";
 
         public static void Refresh()
         {
@@ -61,7 +55,11 @@ namespace OpenAi.AiUtils
             
             MakeTextureReadable(returnTexture);
 
+            #if UNITY_EDITOR
+            return returnTexture;
+            #else
             return texture;
+            #endif
         }
             
         public static T Load<T>(string path)
@@ -105,11 +103,17 @@ namespace OpenAi.AiUtils
                     TextureImporter textureImporter = AssetImporter.GetAtPath(assetPath) as TextureImporter;
                     if (textureImporter != null && assetPath != "")
                     {
-                        textureImporter.textureType = TextureImporterType.Default;
-                        textureImporter.isReadable = true;
-                        textureImporter.textureCompression = TextureImporterCompression.Uncompressed;
-                        AssetDatabase.ImportAsset(assetPath);
-                        AssetDatabase.Refresh();
+                        if (textureImporter.textureType != TextureImporterType.Default ||
+                            !textureImporter.isReadable ||
+                            textureImporter.textureCompression != TextureImporterCompression.Uncompressed)
+                        {
+                            textureImporter.textureType = TextureImporterType.Default;
+                            textureImporter.isReadable = true;
+                            textureImporter.textureCompression = TextureImporterCompression.Uncompressed;
+                            textureImporter.SaveAndReimport();
+                            AssetDatabase.ImportAsset(assetPath);
+                            AssetDatabase.Refresh();
+                        }
                     }
                 }
             #endif
@@ -119,7 +123,7 @@ namespace OpenAi.AiUtils
     public static class Script
     {
         private static string lastScriptSaveFileLocation = "";
-        private static string DefaultScriptDirectory => Application.dataPath + "/Packages/TP/OpenAI/Generated/Code";
+        private static string DefaultScriptDirectory => Application.dataPath + "/Packages/TP/OpenAI/Resources/Code";
 
         #if UNITY_EDITOR
         public static MonoScript CreateScript(string name, string contents, bool showDialogue=true, string directory="", bool overwrite=false)
@@ -537,6 +541,32 @@ namespace OpenAi.AiUtils
 
             return modifiedTexture;
         }
+
+        public static Texture2D ExtendTexture(Texture2D image, int extend, Color backgroundColor)
+        {
+            int oldSize = image.width;
+            int newSize = oldSize + extend;
+            Color[] blankPixels = Enumerable.Repeat(new Color(1, 1, 1, 0), newSize * newSize).ToArray(); 
+            Texture2D modifiedTexture = new Texture2D(newSize, newSize);
+            modifiedTexture.SetPixels(0, 0, newSize, newSize, blankPixels, 0);
+            modifiedTexture.Apply();
+            
+            Color[] oldPixels = image.GetPixels();
+            for (var index = 0; index < oldPixels.Length; index++)
+            {
+                if (oldPixels[index].a == 0)
+                {
+                    oldPixels[index] = backgroundColor;
+                }
+            }
+
+            int position = newSize / 2 - oldSize / 2;
+            modifiedTexture.SetPixels(position, position, oldSize, oldSize, oldPixels);
+            
+            modifiedTexture.Apply();
+
+            return modifiedTexture;
+        }
         
         private static string lastImageSaveFileLocation = "";
 
@@ -550,8 +580,8 @@ namespace OpenAi.AiUtils
             #if UNITY_EDITOR
                 if (!Directory.Exists(AiAssets.DefaultImageDirectory)) { Directory.CreateDirectory(AiAssets.DefaultImageDirectory); }
                 if (!Directory.Exists(AiAssets.TempImageDirectory)) { Directory.CreateDirectory(AiAssets.TempImageDirectory); }
-            
-                string fileName = name;
+
+                string fileName = name.Substring(0, Math.Min(name.Length, 100));
                 char[] invalids = Path.GetInvalidFileNameChars();
                 fileName = String.Join("_", fileName.Split(invalids, StringSplitOptions.RemoveEmptyEntries)) .TrimEnd('.');
                 fileName = fileName.Replace(" ", "_");

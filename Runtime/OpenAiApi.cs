@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 using OpenAI;
 using OpenAI.AiModels;
 using UnityEngine;
-using UnityEngine.AI;
 using UnityEngine.Networking;
 
 namespace OpenAi
@@ -511,7 +510,7 @@ namespace OpenAi
                 Debug.LogError(
                     "Method: " + request.method + "\n" + 
                     "URL: " + request.uri + ": \n" +
-                    "body: " + body.Take(1000) + "..." + ": \n\n" +
+                    "body: " + body.Substring(0, 1000) + "..." + ": \n\n" +
                     "result: " + request.result + ": \n\n" +
                     "response: " + request.downloadHandler.text);
             }

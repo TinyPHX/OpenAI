@@ -14,6 +14,7 @@
             [TextArea(1,20)] public string prompt;
             public ImageSize size = ImageSize.SMALL;
             [ReadOnly] public Texture2D texture;
+            [ReadOnly] public Texture2D textureVariant;
             
             [Separator("Remove Background")] 
             [OverrideLabel("")] public bool removeBackground;
@@ -31,6 +32,15 @@
             [ConditionalField(nameof(wrap)), Range(1, 10)] public int previewGrid = 2;
             [ConditionalField(nameof(wrap)), ReadOnly] public string newTextureSize = "";
 
+            [Separator("Extend Bounds")] 
+            [OverrideLabel("")] public bool extendBounds;
+            [ConditionalField(nameof(extendBounds)), ReadOnly] public Texture2D textureExtended;
+            [ConditionalField(nameof(extendBounds)), Range(0, 100)] public int extended = 25;
+            [ConditionalField(nameof(extendBounds)), ReadOnly] public ImageSize extendedSize = ImageSize.MEDIUM;
+            
+            [Separator("Edit")] 
+            [OverrideLabel("")] public bool edit;
+
             [Separator("Replace In Scene")] 
             [ConditionalField(nameof(isEditorWindow)), ReadOnly]
             public string WARNING = "ONLY WORKS AS COMPONENT";
@@ -38,7 +48,6 @@
             [ConditionalField(nameof(replace))] public SpriteRenderers sprite = new SpriteRenderers();
             [ConditionalField(nameof(replace))] public MeshRenderers mesh = new MeshRenderers();
             [ConditionalField(nameof(replace))] public UiImage uiImage = new UiImage();
-            
             
             [Separator("")] 
             [ReadOnly] public bool requestPending = false;
@@ -82,20 +91,45 @@
                 requestPending = false;
             }
             
-            public async void ReplaceImage(Callback callback=null)
+            public enum ReplaceType
+            {
+                CREATE,
+                EDIT,
+                VARIANT
+            }
+            
+            public async void ReplaceImage(Callback callback=null, ReplaceType type = ReplaceType.CREATE)
             {
                 OpenAiApi openai = new OpenAiApi();
 
                 requestPending = true;
                 Coroutine requestPendingTimeoutRoutine = OpenAiApi.Runner.StartCoroutine(RequestPendingTimout());
-                AiImage aiAiImage = await openai.CreateImage(prompt, size);
+                
+                AiImage aiAiImage = null;
+                if (type == ReplaceType.CREATE)
+                {
+                    aiAiImage = await openai.CreateImage(prompt, size);
+                    texture = aiAiImage.Texture;
+                    textureVariant = null;
+                }
+                else if (type == ReplaceType.EDIT)
+                {
+                    size = extendedSize;
+                    aiAiImage = await openai.CreateImageEdit(textureExtended, textureExtended, prompt + " extend the bounds", size);
+                    texture = aiAiImage.Texture;
+                    textureVariant = null;
+                }
+                else if (type == ReplaceType.VARIANT)
+                {
+                    aiAiImage = await openai.CreateImageVariant(texture, size);
+                    textureVariant = aiAiImage.Texture;
+                }
+                
                 OpenAiApi.Runner.StopCoroutine(requestPendingTimeoutRoutine);
                 requestPending = false;
 
-                if (aiAiImage.Result == UnityWebRequest.Result.Success)
+                if (aiAiImage != null && aiAiImage.Result == UnityWebRequest.Result.Success)
                 {
-                    texture = aiAiImage.Texture;
-
                     SelectSamplePoints();
                     RemoveBackground();
 
@@ -103,6 +137,8 @@
                     {
                         WrapTexture();
                     }
+
+                    extendBounds = false;
 
                     callback?.Invoke();
                 }
@@ -145,18 +181,15 @@
             {
                 get
                 {
-                    Texture2D resultTexture = texture;
-
-                    if (textureNoBackground != null && removeBackground)
+                    Texture2D resultTexture = new []
                     {
-                        resultTexture = textureNoBackground;
-                    }
-                
-                    if (textureWrapped != null && wrap)
-                    {
-                        resultTexture = textureWrapped;
-                    }
-
+                        (true, texture),
+                        (textureVariant, textureVariant),
+                        (removeBackground && textureNoBackground, textureNoBackground),
+                        (extendBounds && textureExtended, textureExtended),
+                        (wrap && textureWrapped, textureWrapped),
+                    }.Last(tuple => tuple.Item1).Item2;
+                    
                     return resultTexture;
                 }
             }
@@ -167,14 +200,19 @@
                 {
                     string textureName = prompt;
 
-                    if (textureNoBackground != null && removeBackground)
+                    if (textureNoBackground && removeBackground)
                     {
                         textureName += "_alpha";
                     }
                 
-                    if (textureWrapped != null && wrap)
+                    if (textureWrapped && wrap)
                     {
                         textureName += "_wrapped";
+                    }
+
+                    if (textureVariant)
+                    {
+                        textureName += "_variant";
                     }
 
                     return textureName;
@@ -184,7 +222,7 @@
             
             public void ReplaceInScene()
             {
-                if (replace)
+                if (replace && Texture)
                 {
                     Texture2D newTexture = Texture;
 
@@ -245,10 +283,16 @@
             
             public void RemoveBackground()
             {
-                if (texture)
+                Texture2D textureToModify = new []
+                {
+                    (true, texture),
+                    (textureVariant, textureVariant),
+                }.Last(tuple => tuple.Item1).Item2;
+                
+                if (textureToModify)
                 {
                     textureNoBackground = AiUtils.Image.RemoveBackground(
-                        texture,
+                        textureToModify,
                         (int)(colorSensitivity / 100f * 255f),
                         featherSize,
                         featherAmount,
@@ -260,20 +304,54 @@
                     {
                         textureNoBackground = SaveTemp("alpha", textureNoBackground);
                     }
+                }
+            }
+            
+            public void ExtendBounds()
+            {
+                if (extendBounds)
+                {
+                    Texture2D textureToModify = new []
+                    {
+                        (true, texture),
+                        (textureVariant, textureVariant),
+                        (removeBackground, textureNoBackground)
+                    }.Last(tuple => tuple.Item1).Item2;
                     
+                    Color backgroundColor = Color.white;
 
-                    ReplaceInScene();
+                    if (removeBackground && samplePoints.points.Length > 0)
+                    {
+                        backgroundColor = samplePoints.points[0].color;
+                    }
+                    
+                    textureExtended = AiUtils.Image.ExtendTexture(
+                        textureToModify,
+                        (int)(extended / 100f * textureToModify.width),
+                        backgroundColor
+                    );
+
+                    if (IsPrefab())
+                    {
+                        textureExtended = SaveTemp("extended", textureExtended);
+                    }
                 }
             }
 
             public void WrapTexture()
             {
-                Texture2D textureToWrap = removeBackground ? textureNoBackground : texture;
+                Texture2D textureToModify = new []
+                {
+                    (true, texture),
+                    (textureVariant, textureVariant),
+                    (removeBackground, textureNoBackground),
+                    (extendBounds, textureExtended),
+                }.Last(tuple => tuple.Item1).Item2;
 
-                if (textureToWrap)
+                if (textureToModify)
                 {
                     textureWrapped = AiUtils.Image.WrapTexture(
-                        textureToWrap,
+                        textureToModify,
                         wrapSize
                     );
 
@@ -283,8 +361,10 @@
                     }
 
                     newTextureSize = textureWrapped.width + "x" + textureWrapped.height;
-
-                    ReplaceInScene();
+                }
+                else
+                {
+                    textureWrapped = null;
                 }
             }
 

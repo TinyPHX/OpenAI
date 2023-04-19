@@ -1,7 +1,6 @@
 ﻿using System.Threading.Tasks;
 using MyBox;
 using OpenAI.AiModels;
-using UnityEditor;
 using UnityEngine;
 
 namespace OpenAi

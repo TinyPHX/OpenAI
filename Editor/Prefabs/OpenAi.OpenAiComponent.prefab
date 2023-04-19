@@ -261,3 +261,17 @@ MonoBehaviour:
         private void Update() \n    {\n        _timePassed = Time.time - _previousTime;\n       
         Debug.LogWarning(\"Time Passed: \" + _timePassed);\n        _previousTime
         = Time.time;\n    }\n}"
+    - script: "using OpenAiMonoBehaviour = OpenAi.OpenAiMonoBehaviour;\nusing UnityEngine;\n\npublic
+        class HelloWorld : OpenAiMonoBehaviour\n{\n    private float _ellapsed =
+        0;\n    private float _previousTime = 0;\n\n    void Start()\n    {\n       
+        Debug.LogWarning(\"Hello World!\");\n    }\n\n    private void Update() \n   
+        {\n        _ellapsed = Time.time - _previousTime;\n        Debug.LogWarning(\"Time
+        Passed: \" + _ellapsed);\n        _previousTime = Time.time;\n    }\n}"
+      editPrompt: 'Update the time passed variable to be named ellapsed. '
+      editedScript: "using OpenAiMonoBehaviour = OpenAi.OpenAiMonoBehaviour;\nusing
+        UnityEngine;\n\npublic class HelloWorld : OpenAiMonoBehaviour\n{\n    private
+        float _ellapsed = 0;\n    private float _previousTime = 0;\n\n    void Start()\n   
+        {\n        Debug.LogWarning(\"Hello World!\");\n    }\n\n    private void
+        Update() \n    {\n        _ellapsed = Time.time - _previousTime;\n       
+        Debug.LogWarning(\"Time Passed: \" + _ellapsed);\n        _previousTime =
+        Time.time;\n    }\n}"

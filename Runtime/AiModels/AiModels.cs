@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Networking;
 using OpenAi;
+using OpenAi.AiUtils;
 using Image = OpenAi.AiUtils.Image;
 
 namespace OpenAI.AiModels
@@ -431,6 +432,8 @@ namespace OpenAI.AiModels
         public override WWWForm ToForm()
         {
             WWWForm form = new WWWForm();
+            AiAssets.MakeTextureReadable(image);
+            AiAssets.MakeTextureReadable(mask);
             byte[] imageData = ImageConversion.EncodeToPNG(image);
             byte[] maskData = ImageConversion.EncodeToPNG(mask);
             form.AddBinaryData(nameof(image), imageData, "AiImageEditRequest-" + nameof(image) + ".png");
@@ -457,6 +460,7 @@ namespace OpenAI.AiModels
         public override WWWForm ToForm()
         {
             WWWForm form = new WWWForm();
+            AiAssets.MakeTextureReadable(image);
             byte[] imageData = ImageConversion.EncodeToPNG(image);
             form.AddBinaryData(nameof(image), imageData);
             form.AddField(nameof(size), AiModelJson.ImageSizeToString[size]);
@@ -504,6 +508,8 @@ namespace OpenAI.AiModels
         public Choice[] choices = new Choice[] {};
         public Usage usage;
 
+        private int responseCallbackCount = 0;
+
         public override AiText AppendStreamResult(AiText streamResult)
         {
             for (var i = 0; i < streamResult.choices.Length; i++)
@@ -526,9 +532,14 @@ namespace OpenAI.AiModels
         {
             for (int i = 0; i < choices.Length; i++)
             {
-                choices[i].text = choices[i].text.Trim(); //Trim the response because it often has whitespace.
+                if (responseCallbackCount == 0 || string.IsNullOrWhiteSpace(choices[i].text))
+                {
+                    choices[i].text = choices[i].text.TrimStart(); //Trim the response because it often has whitespace.
+                }
             }
-            
+
+            responseCallbackCount++;
+
             return base.ResponseCallback(request);
         }
     }
@@ -604,11 +615,26 @@ namespace OpenAI.AiModels
 
             if (response_format == ImageResponseFormat.B64_JSON)
             {
-                foreach (ImageData dataElement in data)
+                for (var i = 0; i < data.Length; i++)
                 {
+                    var dataElement = data[i];
                     byte[] imageDate = Convert.FromBase64String(dataElement.b64_json);
-                    dataElement.texture = new Texture2D(1,1);
+                    dataElement.texture = new Texture2D(1, 1);
                     dataElement.texture.LoadImage(imageDate);
+
+                    Texture2D texture = dataElement.texture;
+                    if (Configuration.SaveTempImages)
+                    {
+                        string num = (i + 1).ToString();
+                        if (name != "")
+                        {
+                            num = i == 0 ? "" : "_" + num;
+                        }
+
+                        texture = Image.SaveTempImageToFile(name + num, texture, false);
+                    }
+
+                    dataElement.texture = texture;
                 }
             }
             else if (response_format == ImageResponseFormat.URL)
@@ -617,7 +643,6 @@ namespace OpenAI.AiModels
                 for (int i = 0; i < textures.Length; i++)
                 {
                     ImageData dataElement = data[i];
-
                     Texture2D texture = textures[i];
                     if (Configuration.SaveTempImages)
                     {
@@ -627,7 +652,7 @@ namespace OpenAI.AiModels
                             num = i == 0 ? "" : "_" + num;
                         }
 
-                        Image.SaveTempImageToFile(name + num, texture, false);
+                        texture = Image.SaveTempImageToFile(name + num, texture, false);
                     }
 
                     dataElement.texture = texture;
