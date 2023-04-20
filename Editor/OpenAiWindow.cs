@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
@@ -18,6 +19,9 @@ namespace OpenAi
          private int previousActiveTab = -1;
          private static int spacing = 20;
          private static Scene activeScene;
+         private static float saveFrequency = 1;
+         private static HashSet<Type> toSave = new HashSet<Type>();
+         private static Coroutine saveCoroutine = null;
 
          private OpenAiCredentialsWindow credsWindow;
 
@@ -67,8 +71,24 @@ namespace OpenAi
                  editor.OnInspectorGUI();
              }, () =>
              {
-                 SavePrefab<P>();
+                 if (toSave.Add(typeof(P)) && saveCoroutine == null)
+                 {
+                     saveCoroutine = OpenAiApi.Runner.StartCoroutine(Save(saveFrequency));
+                 }
              });
+         }
+
+         static IEnumerator Save(float delay)
+         {
+             yield return new WaitForSeconds(delay);
+             
+             foreach (Type type in toSave)
+             {
+                 PrefabUtility.SavePrefabAsset(Prefabs[type]);
+             }
+
+             toSave.Clear();
+             saveCoroutine = null;
          }
          
          private static T GetTargetEditor<T>() where T : Editor
@@ -183,20 +203,20 @@ namespace OpenAi
          {
              DrawUi();
          }
-
+         
          void DrawUi()
          {
-             scroll = EditorGUILayout.BeginScrollView(scroll, GUILayout.Width(Screen.width));
+             scroll = EditorGUILayout.BeginScrollView(scroll, GUILayout.Width(AiEditorUtils.ScaledWidth));
              EditorGUILayout.BeginHorizontal();
              GUILayout.Space(spacing);
              EditorGUILayout.BeginVertical();
              GUILayout.Space(spacing);
 
-             string[] names = (Screen.width < 550 ? shortTabNames.Values : tabNames.Values).ToArray();
+             string[] names = (AiEditorUtils.ScaledWidth < 550 ? shortTabNames.Values : tabNames.Values).ToArray();
 
              ActiveTab = ActiveTab != -1 ? ActiveTab : previousActiveTab;
              previousActiveTab = ActiveTab;
-             ActiveTab = GUILayout.Toolbar(ActiveTab, names, GUILayout.Width(Screen.width - spacing * 2 - 5));
+             ActiveTab = GUILayout.Toolbar(ActiveTab, names, GUILayout.Width(AiEditorUtils.ScaledWidth - spacing * 2 - 5));
              bool tabChanged = previousActiveTab != ActiveTab;
 
              GUILayout.Space(spacing);

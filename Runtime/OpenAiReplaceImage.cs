@@ -38,8 +38,9 @@
             [ConditionalField(nameof(extendBounds)), Range(0, 100)] public int extended = 25;
             [ConditionalField(nameof(extendBounds)), ReadOnly] public ImageSize extendedSize = ImageSize.MEDIUM;
             
-            [Separator("Edit")] 
-            [OverrideLabel("")] public bool edit;
+            // TODO: add image painting/editing.
+            // [Separator("Edit")] 
+            // [OverrideLabel("")] public bool edit;
 
             [Separator("Replace In Scene")] 
             [ConditionalField(nameof(isEditorWindow)), ReadOnly]

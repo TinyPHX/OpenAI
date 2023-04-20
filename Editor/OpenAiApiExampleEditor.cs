@@ -10,6 +10,11 @@ namespace OpenAi
     {
         private OpenAiApiExample example;
         private float activeWidth = 0;
+        private float lastRefresh = 0;
+        private float refreshInterval = 10;
+        private string fullCode = "";
+
+        private bool needsRefresh => EditorApplication.timeSinceStartup - lastRefresh > refreshInterval;
         
         public override void OnInspectorGUI()
         {
@@ -19,7 +24,7 @@ namespace OpenAi
 
             EditorStyles.textField.wordWrap = true;
             
-            if (Screen.width < 500)
+            if (AiEditorUtils.ScaledWidth < 500)
             {
                 NarrowLayout();
             }
@@ -27,11 +32,16 @@ namespace OpenAi
             {
                 WideLayout();   
             }
+
+            if (needsRefresh)
+            {
+                lastRefresh = (float)EditorApplication.timeSinceStartup;
+            }
         }
         
         void NarrowLayout()
         {
-            activeWidth = Screen.width - 25;
+            activeWidth = AiEditorUtils.ScaledWidth - 25;
             AiEditorUtils.DrawDefaultWithEdits(serializedObject, new []
             {
                 new AiEditorUtils.DrawEdit(nameof(example.configuration), AiEditorUtils.DrawEdit.DrawType.AFTER, () =>
@@ -74,7 +84,7 @@ namespace OpenAi
 
         void WideLayout()
         {
-            activeWidth = Screen.width / 2f - 35;
+            activeWidth = AiEditorUtils.ScaledWidth / 2f - 35;
             AiEditorUtils.Horizontal(() =>
             {
                 AiEditorUtils.Vertical(() =>
@@ -196,12 +206,21 @@ namespace OpenAi
         
         public string GetFullCode()
         {
-            return GetConfigurationCode() + "\n\n" +
-                   GetAiTextRequestCode() + "\n\n" + 
-                   GetAiChatRequestCode() + "\n\n" + 
-                   GetAiImageRequestCode() + "\n\n" + 
-                   GetAiImageEditRequestCode() + "\n\n" + 
-                   GetAiImageVariantRequestCode();
+            return "";
+            
+            if (needsRefresh)
+            {
+                Debug.Log("Refreshing");
+                
+                fullCode = GetConfigurationCode() + "\n\n" +
+                           GetAiTextRequestCode() + "\n\n" + 
+                           GetAiChatRequestCode() + "\n\n" + 
+                           GetAiImageRequestCode() + "\n\n" + 
+                           GetAiImageEditRequestCode() + "\n\n" + 
+                           GetAiImageVariantRequestCode();
+            }
+
+            return fullCode;
         }
 
         public string GetConfigurationCode()

@@ -48,7 +48,7 @@ MonoBehaviour:
     organization: 
   aiTextRequest:
     model: 2147482647
-    prompt: 'How much wood can a wood chuck chuck? '
+    prompt: How much wood can a wood chuck chuck?
     n: 1
     max_tokens: 400
     temperature: 1

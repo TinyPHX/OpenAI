@@ -510,7 +510,7 @@ namespace OpenAi
                 Debug.LogError(
                     "Method: " + request.method + "\n" + 
                     "URL: " + request.uri + ": \n" +
-                    "body: " + body.Substring(0, 1000) + "..." + ": \n\n" +
+                    "body: " + body.Substring(0, Mathf.Min(body.Length, 1000)) + "..." + ": \n\n" +
                     "result: " + request.result + ": \n\n" +
                     "response: " + request.downloadHandler.text);
             }

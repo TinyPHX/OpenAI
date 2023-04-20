@@ -35,7 +35,7 @@ namespace OpenAi
             openAiReplaceImage.isEditorWindow = isEditorWindow;
             openAiReplaceImage.replace &= !isEditorWindow;
             
-            if (Screen.width < 600)
+            if (AiEditorUtils.ScaledWidth < 600)
             {
                 NarrowLayout();
             }
@@ -63,7 +63,7 @@ namespace OpenAi
 
         void NarrowLayout()
         {
-            activeWidth = Screen.width - 25;
+            activeWidth = AiEditorUtils.ScaledWidth - 25;
             DrawGroup1();
             GUILayout.Space(20);
             DrawGroup2();
@@ -71,8 +71,8 @@ namespace OpenAi
 
         void WideLayout()
         {
-            activeWidth = Screen.width / 2f - 35;
-            EditorGUIUtility.labelWidth = Screen.width / 5;
+            activeWidth = AiEditorUtils.ScaledWidth / 2f - 35;
+            EditorGUIUtility.labelWidth = AiEditorUtils.ScaledWidth / 5;
             AiEditorUtils.Horizontal(() => {
                 AiEditorUtils.Vertical(() => {
                     DrawGroup1();

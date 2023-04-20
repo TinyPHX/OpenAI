@@ -28,7 +28,7 @@ namespace OpenAi
         {
             openAiComponent = target as OpenAiComponent;
 
-            if (Screen.width < 500 || !IsPrefab(openAiComponent))
+            if (AiEditorUtils.ScaledWidth < 500 || !IsPrefab(openAiComponent))
             {
                 NarrowLayout();
             }
@@ -40,14 +40,14 @@ namespace OpenAi
         
         void NarrowLayout()
         {
-            activeWidth = Screen.width - 25;
+            activeWidth = AiEditorUtils.ScaledWidth - 25;
             DrawGroup1();
         }
 
         void WideLayout()
         {
-            activeWidth = Screen.width / 2f - 35;
-            EditorGUIUtility.labelWidth = Screen.width / 5;
+            activeWidth = AiEditorUtils.ScaledWidth / 2f - 35;
+            EditorGUIUtility.labelWidth = AiEditorUtils.ScaledWidth / 5;
             AiEditorUtils.Horizontal(() => {
                 AiEditorUtils.Vertical(() => {
                     DrawGroup1();

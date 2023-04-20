@@ -34,6 +34,8 @@ namespace OpenAi
         
         public delegate void Callback();
 
+        public static float ScaledWidth => 1 / (Screen.dpi / 96.0f) * Screen.width;
+
         public static Rect Horizontal(Callback callback)
         {
             return Horizontal(callback, new GUILayoutOption[] {});
