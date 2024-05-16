@@ -158,10 +158,10 @@ MonoBehaviour:
         height: 15
       absoluteFieldRect:
         serializedVersion: 2
-        x: 99999
-        y: 99999
-        width: 0
-        height: 0
+        x: 397
+        y: 213
+        width: 122
+        height: 15
       index: 410
       length: 17
     - name: OpenAI (9118835)
@@ -176,7 +176,7 @@ MonoBehaviour:
       absoluteFieldRect:
         serializedVersion: 2
         x: 40
-        y: 97
+        y: 277
         width: 120
         height: 15
       index: 476
@@ -193,7 +193,7 @@ MonoBehaviour:
       absoluteFieldRect:
         serializedVersion: 2
         x: 52
-        y: 112
+        y: 292
         width: 121
         height: 15
       index: 520
@@ -210,7 +210,7 @@ MonoBehaviour:
       absoluteFieldRect:
         serializedVersion: 2
         x: 52
-        y: 127
+        y: 307
         width: 124
         height: 15
       index: 566
@@ -227,7 +227,7 @@ MonoBehaviour:
       absoluteFieldRect:
         serializedVersion: 2
         x: 64
-        y: 142
+        y: 322
         width: 121
         height: 15
       index: 597
@@ -244,7 +244,7 @@ MonoBehaviour:
       absoluteFieldRect:
         serializedVersion: 2
         x: 64
-        y: 157
+        y: 337
         width: 124
         height: 15
       index: 685
@@ -261,7 +261,7 @@ MonoBehaviour:
       absoluteFieldRect:
         serializedVersion: 2
         x: 64
-        y: 172
+        y: 352
         width: 124
         height: 15
       index: 765
@@ -278,7 +278,7 @@ MonoBehaviour:
       absoluteFieldRect:
         serializedVersion: 2
         x: 64
-        y: 187
+        y: 367
         width: 125
         height: 15
       index: 830
@@ -295,7 +295,7 @@ MonoBehaviour:
       absoluteFieldRect:
         serializedVersion: 2
         x: 64
-        y: 202
+        y: 382
         width: 121
         height: 15
       index: 905
@@ -312,7 +312,7 @@ MonoBehaviour:
       absoluteFieldRect:
         serializedVersion: 2
         x: 64
-        y: 217
+        y: 397
         width: 123
         height: 15
       index: 972
@@ -329,7 +329,7 @@ MonoBehaviour:
       absoluteFieldRect:
         serializedVersion: 2
         x: 64
-        y: 232
+        y: 412
         width: 123
         height: 15
       index: 1038
@@ -346,7 +346,7 @@ MonoBehaviour:
       absoluteFieldRect:
         serializedVersion: 2
         x: 52
-        y: 247
+        y: 427
         width: 122
         height: 15
       index: 1115
@@ -363,7 +363,7 @@ MonoBehaviour:
       absoluteFieldRect:
         serializedVersion: 2
         x: 64
-        y: 262
+        y: 442
         width: 121
         height: 15
       index: 1146
@@ -380,9 +380,9 @@ MonoBehaviour:
       absoluteFieldRect:
         serializedVersion: 2
         x: 64
-        y: 277
+        y: 457
         width: 124
-        height: 15
+        height: 10
       index: 1244
       length: 17
     - name: Runtime (9547157)
@@ -396,10 +396,10 @@ MonoBehaviour:
         height: 15
       absoluteFieldRect:
         serializedVersion: 2
-        x: 52
-        y: 292
-        width: 121
-        height: 15
+        x: 99999
+        y: 99999
+        width: 0
+        height: 0
       index: 1348
       length: 17
     - name: AiModels (2161797)
@@ -413,10 +413,10 @@ MonoBehaviour:
         height: 15
       absoluteFieldRect:
         serializedVersion: 2
-        x: 64
-        y: 307
-        width: 119
-        height: 15
+        x: 99999
+        y: 99999
+        width: 0
+        height: 0
       index: 1378
       length: 17
     - name: AiModels (9202079)
@@ -430,10 +430,10 @@ MonoBehaviour:
         height: 15
       absoluteFieldRect:
         serializedVersion: 2
-        x: 76
-        y: 322
-        width: 123
-        height: 15
+        x: 99999
+        y: 99999
+        width: 0
+        height: 0
       index: 1412
       length: 17
     - name: CoroutineRunner (5322711)
@@ -447,10 +447,10 @@ MonoBehaviour:
         height: 15
       absoluteFieldRect:
         serializedVersion: 2
-        x: 64
-        y: 337
-        width: 120
-        height: 15
+        x: 99999
+        y: 99999
+        width: 0
+        height: 0
       index: 1501
       length: 17
     - name: OpenAiApi (9019339)
@@ -464,10 +464,10 @@ MonoBehaviour:
         height: 15
       absoluteFieldRect:
         serializedVersion: 2
-        x: 64
-        y: 352
-        width: 123
-        height: 15
+        x: 99999
+        y: 99999
+        width: 0
+        height: 0
       index: 1590
       length: 17
     - name: OpenAiApiExample (4465826)
@@ -481,10 +481,10 @@ MonoBehaviour:
         height: 15
       absoluteFieldRect:
         serializedVersion: 2
-        x: 64
-        y: 367
-        width: 123
-        height: 15
+        x: 99999
+        y: 99999
+        width: 0
+        height: 0
       index: 1693
       length: 17
     - name: OpenAiReplaceImage (1300272)
@@ -498,10 +498,10 @@ MonoBehaviour:
         height: 15
       absoluteFieldRect:
         serializedVersion: 2
-        x: 64
-        y: 382
-        width: 123
-        height: 15
+        x: 99999
+        y: 99999
+        width: 0
+        height: 0
       index: 1787
       length: 17
     - name: OpenAiReplaceText (6512732)
@@ -515,10 +515,10 @@ MonoBehaviour:
         height: 15
       absoluteFieldRect:
         serializedVersion: 2
-        x: 64
-        y: 397
-        width: 121
-        height: 15
+        x: 99999
+        y: 99999
+        width: 0
+        height: 0
       index: 1883
       length: 17
     - name: AiUtils (5159916)
@@ -532,10 +532,10 @@ MonoBehaviour:
         height: 15
       absoluteFieldRect:
         serializedVersion: 2
-        x: 64
-        y: 412
-        width: 119
-        height: 15
+        x: 99999
+        y: 99999
+        width: 0
+        height: 0
       index: 1987
       length: 17
     - name: Samples (2564670)
@@ -549,10 +549,10 @@ MonoBehaviour:
         height: 15
       absoluteFieldRect:
         serializedVersion: 2
-        x: 52
-        y: 427
-        width: 123
-        height: 15
+        x: 99999
+        y: 99999
+        width: 0
+        height: 0
       index: 2050
       length: 17
     - name: Readme (4042200)

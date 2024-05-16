@@ -48,22 +48,23 @@ MonoBehaviour:
     organization: 
   aiTextRequest:
     model: 2147482647
-    prompt: How much wood can a wood chuck chuck?
+    prompt: How much wood can a wood chuck chuck? dwadwadwa this is what I think  
+      whtaw th
     n: 1
     max_tokens: 400
     temperature: 1
     stream: 1
   aiText:
-    id: cmpl-74JuyWPKzobVlyekjv73fnbGgaegk
+    id: cmpl-7BvtT5aEXEUTMSxI19reTYglhrez8
     obj: 
-    created: 1681264232
+    created: 1683078507
     model: 0
     choices:
-    - text: A woodchuck can usually chuck anywhere from 35 to 70 pounds of wood in
-        an hour, which is about equivalent to one cubic foot of wood.
+    - text: A woodchuck (also known as a groundhog) can typically chuck between 70
+        and 100 pounds of wood in a day.
       index: 0
       logprobs: 
-      finish_reason: 
+      finish_reason: stop
     usage:
       prompt_tokens: 0
       completion_tokens: 0

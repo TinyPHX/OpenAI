@@ -143,7 +143,8 @@ namespace OpenAi
         
         public Task<AiChat> Send(AiChatRequest request, Callback<AiChat> callback=null)
         {
-            return Post(request, callback);
+            return ChatCompletion(request, callback);
+            // return Post(request, callback);
         }
 
         public Task<AiImage> Send(AiImageRequest request, Callback<AiImage> callback=null)
@@ -173,7 +174,7 @@ namespace OpenAi
             return Post(new AiTextRequest{prompt=prompt}, callback);
         }
         
-        public Task<AiText> TextCompletion(string prompt, Models.Text model=Models.Text.GPT_3, int n=1, float temperature=.8f, int max_tokens=100, bool stream=false, Callback<AiText> callback=null)
+        public Task<AiText> TextCompletion(string prompt, Models.Text model=Models.Text.GPT_3, int n=1, float temperature=.8f, int max_tokens=2000, bool stream=false, Callback<AiText> callback=null)
         {
             return TextCompletion(new AiTextRequest
             {
@@ -201,7 +202,7 @@ namespace OpenAi
             return Post(new AiChatRequest{messages=messages, model=model}, callback);
         }
         
-        public Task<AiChat> ChatCompletion(Message[] messages, Models.Chat model=Models.Chat.GPT_4, int n=1, float temperature=.8f, int max_tokens=100, bool stream=false, Callback<AiChat> callback=null)
+        public Task<AiChat> ChatCompletion(Message[] messages, Models.Chat model=Models.Chat.GPT_4, int n=1, float temperature=.8f, int max_tokens=2000, bool stream=false, Callback<AiChat> callback=null)
         {
             return ChatCompletion(new AiChatRequest
             {
@@ -406,6 +407,7 @@ namespace OpenAi
 
             if (stream)
             {
+                response.Result = UnityWebRequest.Result.Success;
                 completionCallback(response);
             }
             else

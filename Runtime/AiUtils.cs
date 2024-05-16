@@ -94,7 +94,7 @@ namespace OpenAi.AiUtils
             #endif
         }
         
-        public static void MakeTextureReadable(Texture2D texture)
+        public static void MakeTextureReadable(Texture2D texture, bool alpha=true)
         {
             #if UNITY_EDITOR
                 if (texture != null)
@@ -109,6 +109,7 @@ namespace OpenAi.AiUtils
                         {
                             textureImporter.textureType = TextureImporterType.Default;
                             textureImporter.isReadable = true;
+                            textureImporter.alphaIsTransparency = alpha;
                             textureImporter.textureCompression = TextureImporterCompression.Uncompressed;
                             textureImporter.SaveAndReimport();
                             AssetDatabase.ImportAsset(assetPath);
@@ -198,8 +199,9 @@ namespace OpenAi.AiUtils
 
     public static class Image
     {
-        static (int, int) IndexToCoords(int index, int size) => (index % size, index / size);
-        static int CoordsToIndex(int x, int y, int size) => size * y + x;
+        public static (int, int) IndexToCoords(int index, int width, int height) => (index % width, index / height);
+        public static (int, int) IndexToCoords(int index, int size) => (index % size, index / size);
+        public static int CoordsToIndex(int x, int y, int size) => size * y + x;
         static float ColorDiff(Color a, Color b) => 
             (
                 Math.Abs(a.r - b.r) + 
@@ -508,7 +510,7 @@ namespace OpenAi.AiUtils
                     Color color = colors[i];
                     float alphaSum = averageOfColors.a + color.a;
                     if (alphaSum != 0)
-                    {
+                    {   
                         float lerp = ((color.a - averageOfColors.a) / 2 + .5f) / alphaSum;
                         lerp /= i;
 
@@ -542,6 +544,14 @@ namespace OpenAi.AiUtils
             return modifiedTexture;
         }
 
+        public static Texture2D CopyTexture(Texture2D textureToCopy)
+        {
+            Texture2D copy = new Texture2D(textureToCopy.width, textureToCopy.height);
+            copy.SetPixels(textureToCopy.GetPixels());
+            copy.Apply();
+            return copy;
+        }
+
         public static Texture2D ExtendTexture(Texture2D image, int extend, Color backgroundColor)
         {
             int oldSize = image.width;
@@ -566,6 +576,11 @@ namespace OpenAi.AiUtils
             modifiedTexture.Apply();
 
             return modifiedTexture;
+        }
+
+        public static Texture2D Paint()
+        {
+            return default;
         }
         
         private static string lastImageSaveFileLocation = "";

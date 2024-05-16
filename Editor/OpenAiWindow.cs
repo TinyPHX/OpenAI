@@ -6,6 +6,8 @@ using UnityEditor;
 using System.IO;
 using System.Linq;
 using TP;
+using TP.Util._Editor;
+using UnityEditor.SceneManagement;
 using UnityEngine.SceneManagement;
 using Object = UnityEngine.Object;
 
@@ -19,9 +21,8 @@ namespace OpenAi
          private int previousActiveTab = -1;
          private static int spacing = 20;
          private static Scene activeScene;
-         private static float saveFrequency = 1;
          private static HashSet<Type> toSave = new HashSet<Type>();
-         private static Coroutine saveCoroutine = null;
+         // private static Scene openAiWindowScene;
 
          private OpenAiCredentialsWindow credsWindow;
 
@@ -63,32 +64,55 @@ namespace OpenAi
              where T : EditorWidowOrInspector<T>
              where P : MonoBehaviour
          {
+             // MonoScript monoScript = MonoScript.FromScriptableObject(this);
+             // string path = Path.GetDirectoryName(AssetDatabase.GetAssetPath(monoScript));
+             // Scene openAiWindowScene = EditorSceneManager.GetSceneByName("OpenAiWindow");
+             // if (openAiWindowScene == null || !openAiWindowScene.isLoaded)
+             // {
+             //     EditorSceneManager.OpenScene("OpenAiWindow", OpenSceneMode.Additive);
+             // }
+
              var editor = GetTargetEditor<T>();
              editor.InternalTarget = GetTarget<P>();
 
-             AiEditorUtils.ChangeCheck(() =>
-             {
-                 editor.OnInspectorGUI();
-             }, () =>
-             {
-                 if (toSave.Add(typeof(P)) && saveCoroutine == null)
-                 {
-                     saveCoroutine = OpenAiApi.Runner.StartCoroutine(Save(saveFrequency));
-                 }
-             });
+             editor.OnInspectorGUI();
+             
+             // AiEditorUtils.ChangeCheck(() =>
+             // {
+             //     editor.OnInspectorGUI();
+             // }, () =>
+             // {
+             //     if (toSave.Add(typeof(P)) && saveDelayStartTime == 0)
+             //     {
+             //         EditorApplication.update += SaveDelayed;
+             //     }
+             // });
          }
 
-         static IEnumerator Save(float delay)
+         private static double saveDelayStartTime = 0;
+         private static float saveFrequency = 2;
+         static void SaveDelayed()
          {
-             yield return new WaitForSeconds(delay);
-             
-             foreach (Type type in toSave)
+             if (saveDelayStartTime == 0)
              {
-                 PrefabUtility.SavePrefabAsset(Prefabs[type]);
+                 saveDelayStartTime = EditorApplication.timeSinceStartup;
              }
 
-             toSave.Clear();
-             saveCoroutine = null;
+             if (EditorApplication.timeSinceStartup - saveDelayStartTime > saveFrequency)
+             {
+                 foreach (Type type in toSave)
+                 {
+                     Save(type);
+                 }
+                 
+                 EditorApplication.update -= SaveDelayed;
+                 saveDelayStartTime = 0;
+             }
+         }
+
+         static void Save(Type type)
+         {
+             PrefabUtility.SavePrefabAsset(Prefabs[type]);
          }
          
          private static T GetTargetEditor<T>() where T : Editor
@@ -105,22 +129,32 @@ namespace OpenAi
 
          private static T GetTarget<T>() where T : MonoBehaviour
          {
-             Scene previousScene = activeScene;
-             activeScene = SceneManager.GetActiveScene();
-             if (activeScene != previousScene)
-             {
-                 // TODO create hidden instance :(
-                 // Doing this will allow for "Replace in Scene" to work in EditorWindow.
-             }
+             // Scene previousScene = activeScene;
+             // activeScene = SceneManager.GetActiveScene();
+             // if (activeScene != previousScene)
+             // {
+             //     // TODO create hidden instance :(
+             //     // Doing this will allow for "Replace in Scene" to work in EditorWindow.
+             // }
+             
+             // if (!Targets.ContainsKey(typeof(T)) || Targets[typeof(T)] == null)
+             // {
+             //     GameObject defaultGameObject = new GameObject(typeof(T).ToString());
+             //     defaultGameObject.AddComponent<T>();
+             //     T newTarget = defaultGameObject.GetComponent<T>();
+             //     Targets[typeof(T)] = newTarget;
+             // }
+             //
+             // return Targets[typeof(T)] as T;
              
              if (!Targets.ContainsKey(typeof(T)) || Targets[typeof(T)] == null)
              {
                  var findAssetResults = AssetDatabase.FindAssets ( $"t:Script {nameof(OpenAiWindow)}" );
                  var assetPath = Path.GetDirectoryName(AssetDatabase.GUIDToAssetPath(findAssetResults[0]));
-
+             
                  string defaultPrefabPath = "/Prefabs/prefab.prefab";
                  string newPrefabPath = $"/Prefabs/{typeof(T)}.prefab";
-
+             
                  GameObject prefab;
                  if (File.Exists(Application.dataPath + assetPath.Substring("Assets".Length) + newPrefabPath))
                  {
@@ -141,12 +175,12 @@ namespace OpenAi
                  }
                  
                  Prefabs[typeof(T)] = prefab;
-
+             
                  T newTarget = prefab.GetComponent<T>();
-
+             
                  Targets[typeof(T)] = newTarget;
              }
-
+             
              return Targets[typeof(T)] as T;
          }
 
@@ -201,7 +235,28 @@ namespace OpenAi
          
          void OnGUI()
          {
+             DoubleImageEditsOpenFix();
              DrawUi();
+
+         }
+
+         void DoubleImageEditsOpenFix()
+         {
+             GameObject inspectedGameObject = Selection.activeGameObject;
+             
+             if (inspectedGameObject && 
+                 inspectedGameObject.GetComponent<OpenAiReplaceImage>() && 
+                 ActiveTab == (int)Tabs.image)
+             {
+                 if (previousActiveTab != (int)Tabs.image)
+                 {
+                     Selection.activeGameObject = null;
+                 }
+                 else
+                 {
+                     ActiveTab = (int)Tabs.help;
+                 }
+             }
          }
          
          void DrawUi()

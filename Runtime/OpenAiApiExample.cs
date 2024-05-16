@@ -29,11 +29,14 @@ namespace OpenAi
         public AiImageVariationRequest aiImageVariationRequest;
         public AiImage aiImageVariationResponse;
 
-        private Configuration ConfigOrNull => (configuration.ApiKey != "" || configuration.Organization != "") ? configuration : null;
+        private Configuration ConfigOrNull => configuration.ApiKey.IsNullOrEmpty() ? null : configuration;
 
         public async Task SendAiTextRequest()
         {
-            OpenAiApi openai = new OpenAiApi(ConfigOrNull);
+            OpenAi.Configuration.GlobalConfig = new Configuration("some-api-key", "some-org");
+            // OpenAiApi openai = new OpenAiApi(ConfigOrNull);
+            Configuration config = new Configuration("some-api-key", "some-org");
+            OpenAiApi openai = new OpenAiApi(config);
             aiText = await openai.Send(aiTextRequest, callback: streamResult =>
             {
                 aiText = streamResult;
@@ -47,7 +50,10 @@ namespace OpenAi
             aiChat = await openai.Send(aiChatRequest, callback: streamResult =>
             {
                 aiChat = streamResult;
+                Debug.Log("finish_reason: " + aiChat.choices[0].finish_reason);
             });
+            Debug.Log("content: " + aiChat.choices[0].message.content);
+            Debug.Log("finish_reason: " + aiChat.choices[0].finish_reason);
         }
 
         public async Task SendAiImageRequest()

@@ -94,35 +94,40 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   prompt: 'high quality pixel art of a pickle man super hero with a cool apple swords. '
-  size: 2147482648
-  texture: {fileID: 2800000, guid: 32ea2b70dec9d1041af2ff9e551fda4c, type: 3}
+  size: 2147482647
+  texture: {fileID: 2800000, guid: 6937de7b23017fc47a19af4fb6200289, type: 3}
   textureVariant: {fileID: 0}
   removeBackground: 0
-  textureNoBackground: {fileID: 2800000, guid: 3c7306ba11d35fb4a8232fad7cdf63ed, type: 3}
+  textureNoBackground: {fileID: 0}
   samplePoints:
     points:
-    - color: {r: 0.9647059, g: 0.96862745, b: 0.9647059, a: 1}
-      position: {x: 51.2, y: 51.2}
-      similarity: 0.5833333
-    - color: {r: 0.9647059, g: 0.9647059, b: 0.9607843, a: 1}
-      position: {x: 51.2, y: 460.8}
-      similarity: 0.5833333
-    - color: {r: 0.96862745, g: 0.9647059, b: 0.9647059, a: 1}
-      position: {x: 460.8, y: 51.2}
-      similarity: 0.5833333
-  colorSensitivity: 3
+    - color: {r: 0.99607843, g: 1, b: 1, a: 1}
+      position: {x: 25.6, y: 230.4}
+      similarity: 45
+    - color: {r: 1, g: 1, b: 1, a: 1}
+      position: {x: 25.6, y: 25.6}
+      similarity: 45.166664
+    - color: {r: 0.8666667, g: 0.81960785, b: 0.7607843, a: 1}
+      position: {x: 230.4, y: 25.6}
+      similarity: 50.666664
+  colorSensitivity: 42
   continuous: 1
   featherSize: 1
   featherAmount: 80
   wrap: 0
-  textureWrapped: {fileID: 2800000, guid: 3b77cb68a562ad74d8b54779008eb253, type: 3}
+  textureWrapped: {fileID: 2800000, guid: 3b3900797c471b14391d7aed58268fae, type: 3}
   wrapSize: 86
   previewGrid: 3
-  newTextureSize: 256x256
+  newTextureSize: 128x128
   extendBounds: 0
-  textureExtended: {fileID: 2800000, guid: a5462f4912f674e41998d379d76e9200, type: 3}
+  textureExtended: {fileID: 2800000, guid: 80b3c2f3a053ed949a13f24089ac28b2, type: 3}
   extended: 100
   extendedSize: 2147482648
+  paint: 1
+  texturePainted: {fileID: 2800000, guid: 6937de7b23017fc47a19af4fb6200289, type: 3}
+  brushSize: 26
+  brushHardness: 100
+  paintPrompt: 
   WARNING: ONLY WORKS AS COMPONENT
   replace: 0
   sprite:

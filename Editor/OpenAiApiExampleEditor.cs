@@ -1,5 +1,6 @@
 ﻿using MyBox;
 using OpenAI.AiModels;
+using TP.Util._Editor;
 using UnityEditor;
 using UnityEngine;
 
@@ -10,12 +11,8 @@ namespace OpenAi
     {
         private OpenAiApiExample example;
         private float activeWidth = 0;
-        private float lastRefresh = 0;
-        private float refreshInterval = 10;
         private string fullCode = "";
 
-        private bool needsRefresh => EditorApplication.timeSinceStartup - lastRefresh > refreshInterval;
-        
         public override void OnInspectorGUI()
         {
             example = target as OpenAiApiExample;
@@ -31,11 +28,6 @@ namespace OpenAi
             else
             {
                 WideLayout();   
-            }
-
-            if (needsRefresh)
-            {
-                lastRefresh = (float)EditorApplication.timeSinceStartup;
             }
         }
         
@@ -206,19 +198,12 @@ namespace OpenAi
         
         public string GetFullCode()
         {
-            return "";
-            
-            if (needsRefresh)
-            {
-                Debug.Log("Refreshing");
-                
-                fullCode = GetConfigurationCode() + "\n\n" +
-                           GetAiTextRequestCode() + "\n\n" + 
-                           GetAiChatRequestCode() + "\n\n" + 
-                           GetAiImageRequestCode() + "\n\n" + 
-                           GetAiImageEditRequestCode() + "\n\n" + 
-                           GetAiImageVariantRequestCode();
-            }
+            fullCode = GetConfigurationCode() + "\n\n" +
+                       GetAiTextRequestCode() + "\n\n" + 
+                       GetAiChatRequestCode() + "\n\n" + 
+                       GetAiImageRequestCode() + "\n\n" + 
+                       GetAiImageEditRequestCode() + "\n\n" + 
+                       GetAiImageVariantRequestCode();
 
             return fullCode;
         }

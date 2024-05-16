@@ -1,6 +1,7 @@
 ﻿    using System;
     using System.Collections;
     using System.Linq;
+    using System.Threading;
     using MyBox;
     using OpenAI.AiModels;
     using UnityEngine;
@@ -9,11 +10,12 @@
 
     namespace OpenAi
     {
+        [ExecuteInEditMode]
         public class OpenAiReplaceImage : MonoBehaviour
         {
             [TextArea(1,20)] public string prompt;
             public ImageSize size = ImageSize.SMALL;
-            [ReadOnly] public Texture2D texture;
+            public Texture2D texture;
             [ReadOnly] public Texture2D textureVariant;
             
             [Separator("Remove Background")] 
@@ -38,6 +40,17 @@
             [ConditionalField(nameof(extendBounds)), Range(0, 100)] public int extended = 25;
             [ConditionalField(nameof(extendBounds)), ReadOnly] public ImageSize extendedSize = ImageSize.MEDIUM;
             
+            [Separator("Paint Edit")]
+            [OverrideLabel("")] public bool paint;
+            [ConditionalField(nameof(paint)), ReadOnly] public Texture2D texturePainted;
+            [ConditionalField(nameof(paint)), Range(1, 100)] public int brushSize = 25;
+            [ConditionalField(nameof(paint)), Range(0, 100)] public int brushHardness = 100;
+            // [ConditionalField(nameof(paint)), ReadOnly] public Texture2D brushTexture;
+            [ConditionalField(nameof(paint)), TextArea(1,20)] public string paintPrompt = "";
+            private Color[] brushPixels = new Color[] { };
+
+            public int RelativeBrushSize => !Texture ? 0 : Texture.width / 256 * brushSize;
+
             // TODO: add image painting/editing.
             // [Separator("Edit")] 
             // [OverrideLabel("")] public bool edit;
@@ -65,6 +78,11 @@
             }
             
             public delegate void Callback();
+            
+            public void Start()
+            {
+                ReplaceInScene();
+            }
             
             public void Update()
             {
@@ -95,7 +113,8 @@
             public enum ReplaceType
             {
                 CREATE,
-                EDIT,
+                EXTEND,
+                PAINT,
                 VARIANT
             }
             
@@ -113,10 +132,17 @@
                     texture = aiAiImage.Texture;
                     textureVariant = null;
                 }
-                else if (type == ReplaceType.EDIT)
+                else if (type == ReplaceType.EXTEND)
                 {
                     size = extendedSize;
                     aiAiImage = await openai.CreateImageEdit(textureExtended, textureExtended, prompt + " extend the bounds", size);
+                    texture = aiAiImage.Texture;
+                    textureVariant = null;
+                }
+                else if (type == ReplaceType.PAINT)
+                {
+                    string paintEditPrompt = paintPrompt != "" ? paintPrompt : prompt;
+                    aiAiImage = await openai.CreateImageEdit(texturePainted, texturePainted, paintEditPrompt, size);
                     texture = aiAiImage.Texture;
                     textureVariant = null;
                 }
@@ -138,6 +164,8 @@
                     {
                         WrapTexture();
                     }
+
+                    UpdatePaintTexture();
 
                     extendBounds = false;
 
@@ -188,6 +216,7 @@
                         (textureVariant, textureVariant),
                         (removeBackground && textureNoBackground, textureNoBackground),
                         (extendBounds && textureExtended, textureExtended),
+                        (paint && texturePainted, texturePainted),
                         (wrap && textureWrapped, textureWrapped),
                     }.Last(tuple => tuple.Item1).Item2;
                     
@@ -249,7 +278,7 @@
 
             private void ReplaceMeshTexture(MeshRenderer mesh, Texture2D texture)
             {
-                if (mesh)
+                if (mesh && mesh.sharedMaterial.mainTexture.imageContentsHash != texture.imageContentsHash)
                 {
                     if (Application.isPlaying)
                     {
@@ -284,16 +313,16 @@
             
             public void RemoveBackground()
             {
-                Texture2D textureToModify = new []
+                textureNoBackground = new []
                 {
                     (true, texture),
                     (textureVariant, textureVariant),
                 }.Last(tuple => tuple.Item1).Item2;
                 
-                if (textureToModify)
+                if (textureNoBackground)
                 {
                     textureNoBackground = AiUtils.Image.RemoveBackground(
-                        textureToModify,
+                        textureNoBackground,
                         (int)(colorSensitivity / 100f * 255f),
                         featherSize,
                         featherAmount,
@@ -319,22 +348,138 @@
                         (removeBackground, textureNoBackground)
                     }.Last(tuple => tuple.Item1).Item2;
                     
-                    Color backgroundColor = Color.white;
-
-                    if (removeBackground && samplePoints.points.Length > 0)
+                    if (textureToModify)
                     {
-                        backgroundColor = samplePoints.points[0].color;
-                    }
-                    
-                    textureExtended = AiUtils.Image.ExtendTexture(
-                        textureToModify,
-                        (int)(extended / 100f * textureToModify.width),
-                        backgroundColor
-                    );
+                        Color backgroundColor = Color.white;
 
+                        if (removeBackground && samplePoints.points.Length > 0)
+                        {
+                            backgroundColor = samplePoints.points[0].color;
+                        }
+
+                        textureExtended = AiUtils.Image.ExtendTexture(
+                            textureToModify,
+                            (int)(extended / 100f * textureToModify.width),
+                            backgroundColor
+                        );
+
+                        if (IsPrefab())
+                        {
+                            textureExtended = SaveTemp("extended", textureExtended);
+                        }
+                    }
+                }
+            }
+
+            public void UpdatePaintTexture()
+            {
+                
+                texturePainted = new []
+                {
+                    (true, texture),
+                    (textureVariant, textureVariant),
+                    (removeBackground, textureNoBackground),
+                    (extendBounds, textureExtended),
+                }.Last(tuple => tuple.Item1).Item2;
+
+                if (texturePainted)
+                {
+                    // texturePainted = AiUtils.Image.CopyTexture(textureToModify);
+                
+                    // texturePainted = AiUtils.Image.CopyTexture(new []
+                    // {
+                    //     (true, texture),
+                    //     (textureVariant, textureVariant),
+                    //     (removeBackground, textureNoBackground),
+                    //     (extendBounds, textureExtended),
+                    // }.Last(tuple => tuple.Item1).Item2);
+
+                    // texturePainted = AiUtils.Image.CopyTexture(texture);
+                
                     if (IsPrefab())
                     {
-                        textureExtended = SaveTemp("extended", textureExtended);
+                        texturePainted = SaveTemp("paintedit", texturePainted);
+                    }
+
+                    UpdateBrushPixels();
+                }
+            }
+            
+            public void UpdateBrushPixels()
+            {
+                if (brushSize > 0)
+                {
+                    int relativeBrushSize = RelativeBrushSize;
+                    
+                    brushPixels = Enumerable.Repeat(new Color(0, 0, 0, 1), relativeBrushSize * relativeBrushSize).ToArray();
+
+                    float center = relativeBrushSize / 2f;
+                    for (int i = 0; i < brushPixels.Length; i++)
+                    {
+                        (int x, int y) = AiUtils.Image.IndexToCoords(i, relativeBrushSize);
+                        float distance = Mathf.Sqrt(Mathf.Pow((center - x - .5f), 2) + Mathf.Pow((center - y - .5f), 2));
+                        float hardnessRatio = brushHardness / 100f;
+                        float fadeStart = hardnessRatio * relativeBrushSize / 2f;
+                        float fadeLength = relativeBrushSize / 2f - fadeStart;
+                        float brushValue = 1;
+                        if (distance < fadeStart)
+                        {
+                            brushValue = 0;
+                        }
+                        else if (distance > fadeStart + fadeLength)
+                        {
+                            brushValue = 1;
+                        }
+                        else
+                        {
+                            brushValue = (distance - fadeStart) / fadeLength;
+                        }
+                        brushPixels[i] = new Color(brushValue, brushValue, brushValue, 1);
+                    }
+                }
+            }
+            
+            public void PaintEdit(Vector2 positionToPaint)
+            {
+                AiUtils.AiAssets.MakeTextureReadable(texturePainted);
+                if (brushPixels.Length == 0)
+                {
+                    UpdateBrushPixels();
+                }
+                
+                int relativeBrushSize = RelativeBrushSize;
+                
+                Vector2 offset = positionToPaint - new Vector2(relativeBrushSize / 2f, relativeBrushSize / 2f);
+                Rect textureRect = new Rect(0, 0, texturePainted.width, texturePainted.height);
+                bool texturePaintedChanged = false;
+                for (int i = 0; i < brushPixels.Length; i++)
+                {
+                    Color brushColor = brushPixels[i];
+                    float alpha = 1 - brushColor.r;
+                    (int x, int y) = AiUtils.Image.IndexToCoords(i, relativeBrushSize);
+                    Vector2 brushPixelPosition = offset + new Vector2(x, y);
+                    if (textureRect.Contains(brushPixelPosition))
+                    {
+                        Color textureColor = texturePainted.GetPixel(Mathf.RoundToInt(brushPixelPosition.x), Mathf.RoundToInt(brushPixelPosition.y));
+                        // textureColor = new Color(alpha, alpha, alpha, alpha);
+                        textureColor.a = Mathf.Max(0, textureColor.a - alpha);
+                        // textureColor.a = .5f;
+                        // textureColor = new Color(textureColor.r, textureColor.g, textureColor.b, .5f);
+                        texturePainted.SetPixel(Mathf.RoundToInt(brushPixelPosition.x), Mathf.RoundToInt(brushPixelPosition.y), textureColor);
+                        texturePaintedChanged = true;
+                    }
+                }
+
+                if (texturePaintedChanged)
+                {
+                    texturePainted.Apply();
+                    if (IsPrefab())
+                    {
+                        // Texture2D modifiedTexture = new Texture2D(texturePainted.width, texturePainted.height);
+                        // modifiedTexture.SetPixels(texturePainted.GetPixels());
+                        // modifiedTexture.Apply();
+                        
+                        texturePainted = SaveTemp("paintEdit", texturePainted);
                     }
                 }
             }
@@ -347,6 +492,7 @@
                     (textureVariant, textureVariant),
                     (removeBackground, textureNoBackground),
                     (extendBounds, textureExtended),
+                    (paint, texturePainted),
                 }.Last(tuple => tuple.Item1).Item2;
 
                 if (textureToModify)
